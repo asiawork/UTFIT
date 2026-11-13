@@ -57,7 +57,7 @@
   .badge{white-space:nowrap;background:#e8edff;color:#2f56ff;border-radius:11px;padding:6px 14px;font-weight:700}
   html[data-theme=dark] .badge{background:#16214a;color:#9cc6ff}
   .tw{overflow-x:auto;margin-top:16px}
-  table{width:100%;border-collapse:collapse;min-width:820px}
+  table{width:100%;border-collapse:collapse;min-width:980px}
   th{font-size:13px;font-weight:500;color:var(--mute);text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
   th[data-k]{cursor:pointer;user-select:none}
   th[data-k]:hover{color:var(--ink)}
@@ -77,6 +77,15 @@
   td.n{font-variant-numeric:tabular-nums;font-weight:600}
   .pos{color:var(--ok)} .neg{color:var(--red)} .na{color:var(--mute);font-weight:400}
   td.mcol{white-space:nowrap;color:var(--ink-2);font-size:14px}
+  .fsl{font-size:11.5px;font-weight:600;color:#2f56ff;text-decoration:none;border:1px solid #d5ddff;border-radius:6px;padding:0 6px;margin-left:4px;vertical-align:2px}
+  .fsl:hover{background:#eef1ff}
+  tr.focus td{background:#fff8e1}
+  tr.grp th{border:0;padding-bottom:0}
+  th.gh{text-align:center;color:var(--ink-2);font-weight:600;border-bottom:1px solid var(--line)}
+  td.fee{font-weight:500;color:var(--ink-2)}
+  .st{font-size:12px;font-weight:500;border-radius:6px;padding:2px 8px;white-space:nowrap;cursor:help}
+  .st.pending{background:#eef3ff;color:#2f56ff}
+  .st.tax,.st.nodata{background:var(--p-50);color:var(--mute)}
   td.ck{width:34px} td.ck input{width:16px;height:16px;cursor:pointer}
   .rf{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:16px;color:var(--mute);font-size:13.5px;flex-wrap:wrap}
   .btn-p{font:inherit;font-weight:600;font-size:14.5px;border:0;border-radius:12px;padding:10px 18px;background:var(--p);color:#fff;cursor:pointer;text-decoration:none}
@@ -100,7 +109,7 @@
     <div class="box" id="box">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
       <span id="toks"></span>
-      <input id="q" autocomplete="off" placeholder="ชื่อ master fund ชื่อกองไทย ดัชนี หรือประเทศ" role="combobox" aria-expanded="false" aria-controls="dd">
+      <input id="q" autocomplete="off" placeholder="ชื่อกองไทย master fund ดัชนี หรือประเทศ" role="combobox" aria-expanded="false" aria-controls="dd">
     </div>
     <div class="dd" id="dd" role="listbox" hidden></div>
   </div>
@@ -164,7 +173,9 @@ async function load() {
     fetch(BASE + "master_tags.csv", {cache: "no-cache"}).then(r => r.ok ? r.text() : "").catch(() => ""),
     fetch(SUMMARY_URL, {cache: "no-cache"}).then(r => r.ok ? r.json() : null).catch(() => null),
   ]);
-  SUM = sum || {funds: {}};
+  SUM = sum || {funds: {}, classes: {}, pending: []};
+  const PEND = new Set(SUM.pending || []);
+  const ckey = (pid, c) => { c = String(c || "").trim(); return pid + "|" + (["", "main", "none", "nan"].includes(c.toLowerCase()) ? "" : c.toUpperCase().replace(/[^A-Z0-9ก-๙]/g, "")); };
   const AMC = new Map(csvParse(amcT).map(r => [norm(r.name_th), r.abbr]));
   const amcOf = n => AMC.get(norm(n)) || AMC.get(norm(n) + " จำกัด") || norm(n).replace(/^บริษัทหลักทรัพย์จัดการกองทุน(รวม)?\s*/, "").replace(/\s*จำกัด.*$/, "");
   const TAGS = new Map(csvParse(tagT).map(r => [r.master_fund, r]));
@@ -178,16 +189,20 @@ async function load() {
   FUNDS = [];
   for (const cls of byProj.values()) {
     const names = cls.map(c => c.Search_Name || c.proj_abbr_name);
-    const main = names.find(n => SUM.funds[n]) || names[0];
+    const main = names.find(n => SUM.funds[n] && SUM.funds[n][0] != null) || names.find(n => SUM.funds[n]) || names[0];
     const r0 = cls.find(c => (c.Search_Name || c.proj_abbr_name) === main) || cls[0];
-    const s = SUM.funds[main] || [null, null];
+    // [r1y, ขาย, รับซื้อคืน, การจัดการ, รวม, factsheet] จากกองในรายชื่อ ไม่งั้นใช้ค่าธรรมเนียมราย class (เช่นกองภาษี)
+    let s = SUM.funds[main];
+    if (!s) { const c = cls.map(c => (SUM.classes || {})[ckey(c.proj_id, c.fund_class_name)]).find(Boolean); s = c ? [null, ...c] : [null, null, null, null, null, null]; }
+    const status = s[0] != null ? "ok" : PEND.has(main) ? "pending" : SUM.funds[main] ? "nodata" : "tax";
     const tag = TAGS.get(r0.Master_Fund_Search) || {};
     const mg = {AN: "Active", AM: "Active", PN: "Passive", PM: "Passive"}[r0.management_style] || tag.mgmt || "";
     FUNDS.push({
       name: main, abbr: r0.proj_abbr_name, th: r0.proj_name_th, amc: amcOf(r0.comp_name_th),
       master: r0.Master_Fund_Search, mgmt: mg, fx: fxKind(r0.exchange_rate_protection_policy), fxFull: r0.exchange_rate_protection_policy || "",
       ncls: cls.length, ssf: cls.some(c => /SSF/.test(c.fund_class_tax_incentive_type || "")) || /RMF|SSF|ESG/.test(names.join(" ")),
-      r1y: s[0], ter: s[1], asset: tag.asset || "",
+      r1y: s[0], fe: s[1], be: s[2], mg: s[3], ter: s[4], status, pid: r0.proj_id,
+      fs: s[5] || `https://secdocumentstorage.blob.core.windows.net/fundfactsheet/${r0.proj_id}.pdf`, asset: tag.asset || "",
     });
   }
   MASTERS = new Map();
@@ -195,7 +210,7 @@ async function load() {
     if (!MASTERS.has(f.master)) MASTERS.set(f.master, {name: f.master, tags: TAGS.get(f.master) || {}, funds: []});
     MASTERS.get(f.master).funds.push(f);
   }
-  $("asof").textContent = SUM.nav_to ? `ผลตอบแทนและค่าใช้จ่าย ณ ${UI.thDate(SUM.nav_to)}` : "";
+  $("asof").textContent = SUM.nav_to ? `ผลตอบแทน ณ ${UI.thDate(SUM.nav_to)}` + (PEND.size ? ` (กำลังดึงข้อมูลเพิ่มอีก ${PEND.size.toLocaleString()} กอง)` : "") : "";
 }
 
 /* ---------- สถานะ ---------- */
@@ -226,11 +241,11 @@ function suggest(q) {
   }
   const pick = (map, kind) => [...map].filter(([v]) => has(v) || has(kind === "country" ? TH_COUNTRY[v] : "")).sort((a, b) => b[1] - a[1]).slice(0, 4).map(([v, c]) => ({kind, v, c}));
   const add = (g, arr) => { if (arr.length) groups.push([g, arr]); };
+  add("กองทุนไทย", FUNDS.filter(f => has(f.name) || has(f.abbr) || has(f.th)).slice(0, 6).map(f => ({kind: "master", v: f.master, c: null, fund: f.name})));
   add("ดัชนี", pick(idx, "index"));
   add("ประเทศ", pick(ctry, "country"));
   add("ธีม", pick(thm, "theme"));
   add("Master fund", [...MASTERS.values()].filter(m => has(m.name)).sort((a, b) => b.funds.length - a.funds.length).slice(0, 6).map(m => ({kind: "master", v: m.name, c: m.funds.length})));
-  add("กองทุนไทย", FUNDS.filter(f => has(f.name) || has(f.abbr) || has(f.th)).slice(0, 6).map(f => ({kind: "master", v: f.master, c: null, fund: f.name})));
   return groups;
 }
 function hl(s, q) { const i = s.toLowerCase().indexOf(q.toLowerCase()); return i < 0 || !q ? esc(s) : esc(s.slice(0, i)) + "<mark>" + esc(s.slice(i, i + q.length)) + "</mark>" + esc(s.slice(i + q.length)); }
@@ -247,8 +262,10 @@ function renderDD() {
   dd.hidden = false; $("q").setAttribute("aria-expanded", "true");
 }
 function addTok(t) {
+  S.focus = t.fund || null;
   if (!S.toks.some(x => x.kind === t.kind && x.v === t.v)) S.toks.push({kind: t.kind, v: t.v, label: t.label});
-  $("q").value = ""; $("dd").hidden = true; S.show = 30; render();
+  $("q").value = ""; $("dd").hidden = true; S.show = 200; render();
+  if (S.focus) setTimeout(() => document.querySelector("tr.focus")?.scrollIntoView({block: "center", behavior: "smooth"}), 50);
 }
 $("q").addEventListener("input", renderDD);
 $("q").addEventListener("keydown", e => {
@@ -279,9 +296,11 @@ function renderQuick() {
 }
 $("quick").addEventListener("click", e => { const b = e.target.closest("button[data-i]"); if (b) addTok(QUICK[+b.dataset.i]); });
 
+const NO_R = {pending: ["กำลังดึงข้อมูล", "ระบบกำลังทยอยดึง NAV ย้อนหลังของกองนี้"], tax: ["ไม่มีข้อมูล", "กองภาษี (RMF/SSF/ThaiESG) ระบบยังไม่ได้เก็บ NAV"], nodata: ["ไม่มีข้อมูล", "ยังมี NAV ไม่ถึง 1 ปี หรือ SEC ไม่มีข้อมูล"]};
 const cell = {
-  r1y: f => f.r1y == null ? `<td class="n na">–</td>` : `<td class="n ${f.r1y >= 0 ? "pos" : "neg"}">${pct(f.r1y)}</td>`,
-  ter: f => f.ter == null ? `<td class="n na">–</td>` : `<td class="n">${f.ter.toFixed(2)}%</td>`,
+  r1y: f => f.r1y != null ? `<td class="n ${f.r1y >= 0 ? "pos" : "neg"}">${pct(f.r1y)}</td>`
+    : `<td class="n"><span class="st ${f.status}" title="${NO_R[f.status][1]}">${NO_R[f.status][0]}</span></td>`,
+  fee: v => v == null ? `<td class="n na">–</td>` : `<td class="n fee">${(+v).toFixed(2)}</td>`,
 };
 function sortFunds(arr) {
   const {k, asc} = S.sort, dir = asc ? 1 : -1;
@@ -299,19 +318,19 @@ function renderResults() {
   const funds = sortFunds(ms.flatMap(m => m.funds).filter(passFilters));
   const title = S.toks.map(t => (t.kind === "master" ? "" : KIND_TH[t.kind] + " ") + label(t)).join(" + ");
   const short = n => { n = n.replace(/\s+(UCITS\s+)?(ETF|Fund|Trust|Portfolio)(\s+Trust)?$/i, ""); return n.length > 24 ? n.slice(0, 22) + "…" : n; };
-  const rows = funds.slice(0, S.show).map(f => `<tr>
-    <td class="ck"><input type="checkbox" data-n="${esc(f.name)}" ${S.picked.has(f.name) ? "checked" : ""} ${SUM.funds[f.name] ? "" : "disabled title=\"ยังไม่มีข้อมูล NAV ในหน้า ATF vs รายกอง\""}></td>
-    <td><div class="nm">${esc(f.name)}</div><div class="th" title="${esc(f.th)}">${esc(f.th)}</div>
+  const rows = funds.slice(0, S.show).map(f => `<tr${S.focus === f.name ? ' class="focus"' : ""}>
+    <td class="ck"><input type="checkbox" data-n="${esc(f.name)}" ${S.picked.has(f.name) ? "checked" : ""} ${f.status === "ok" ? "" : "disabled title=\"ยังไม่มีข้อมูล NAV ในหน้า Auto Top Funds vs รายกอง\""}></td>
+    <td><div class="nm">${esc(f.name)} <a class="fsl" href="${esc(f.fs)}" target="_blank" rel="noopener" title="Fund factsheet">Factsheet</a></div><div class="th" title="${esc(f.th)}">${esc(f.th)}</div>
       ${f.ncls > 1 || f.ssf ? `<div class="tags">${f.ncls > 1 ? `<span class="tg">+${f.ncls - 1} class</span>` : ""}${f.ssf ? `<span class="tg">มีกองภาษี</span>` : ""}</div>` : ""}</td>
     ${ms.length > 1 ? `<td class="mcol" title="${esc(f.master)}">${esc(short(f.master))}</td>` : ""}
     <td>${esc(f.amc)}</td>
     <td>${f.mgmt ? `<span class="pill">${f.mgmt}</span>` : "–"}</td>
     <td><span class="pill ${FX_CLS[f.fx] || ""}" title="${esc(f.fxFull)}">${FX_LABEL[f.fx]}</span></td>
-    ${cell.r1y(f)}${cell.ter(f)}</tr>`).join("");
+    ${cell.r1y(f)}${cell.fee(f.fe)}${cell.fee(f.be)}${cell.fee(f.mg)}${cell.fee(f.ter)}</tr>`).join("");
   $("res").innerHTML = `<div class="rh"><div><h2>${esc(title)}</h2>
       <div class="ms">${ms.slice(0, 8).map(m => `<span>${esc(m.name)}</span>`).join("")}${ms.length > 8 ? `<span>อีก ${ms.length - 8}</span>` : ""}</div></div>
       <span class="badge">${funds.length} กองไทย</span></div>
-    ${funds.length ? `<div class="tw"><table><thead><tr><th></th>${th("name", "กองทุน")}${ms.length > 1 ? th("master", "Master") : ""}${th("amc", "บลจ.")}${th("mgmt", "กลยุทธ์")}${th("fx", "ป้องกันค่าเงิน")}${th("r1y", "ผลตอบแทน 1Y", 1)}${th("ter", "ค่าใช้จ่ายรวม", 1)}</tr></thead>
+    ${funds.length ? `<div class="tw"><table><thead><tr class="grp"><th colspan="${ms.length > 1 ? 7 : 6}"></th><th colspan="4" class="gh">ค่าธรรมเนียม (% ต่อปีของ NAV)</th></tr><tr><th></th>${th("name", "กองทุน")}${ms.length > 1 ? th("master", "Master") : ""}${th("amc", "บลจ.")}${th("mgmt", "กลยุทธ์")}${th("fx", "ป้องกันค่าเงิน")}${th("r1y", "ผลตอบแทน 1Y", 1)}${th("fe", "ขาย", 1)}${th("be", "รับซื้อคืน", 1)}${th("mg", "จัดการ", 1)}${th("ter", "รวม", 1)}</tr></thead>
       <tbody>${rows}</tbody></table></div>` : `<div class="empty">ไม่มีกองที่ตรงกับตัวกรอง</div>`}
     <div class="rf"><span>${funds.length > S.show ? `<button class="more" id="more">แสดงเพิ่ม</button> ` : ""}แสดง ${Math.min(S.show, funds.length)} จาก ${funds.length} กอง</span>
       <a class="btn-p" id="cmp" aria-disabled="${S.picked.size ? "false" : "true"}">เทียบกองที่เลือก${S.picked.size ? ` (${S.picked.size})` : ""}</a></div>`;
@@ -350,7 +369,7 @@ $("res").addEventListener("change", e => {
 });
 function render() {
   $("toks").innerHTML = S.toks.map((t, i) => `<span class="tok">${t.kind === "master" ? "" : `<small>${KIND_TH[t.kind]}</small>`}${esc(label(t))}<button type="button" data-i="${i}" aria-label="เอาออก">✕</button></span>`).join("");
-  $("q").placeholder = S.toks.length ? "เพิ่ม master fund ดัชนี หรือประเทศ" : "ชื่อ master fund ชื่อกองไทย ดัชนี หรือประเทศ";
+  $("q").placeholder = S.toks.length ? "เพิ่ม master fund ดัชนี หรือประเทศ" : "ชื่อกองไทย master fund ดัชนี หรือประเทศ";
   seg("fAsset", ASSET, "asset"); seg("fMgmt", MGMT, "mgmt"); seg("fFx", FX, "fx");
   renderQuick();
   if (S.toks.length) renderResults(); else renderMasterList();

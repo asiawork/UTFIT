@@ -139,11 +139,11 @@ def load_extras(fetch_urls=True):
         ex[key]["stat_date"] = str(row.get("start_date") or "")[:10]
 
     def put_fee(row):
-        # เก็บเฉพาะค่าธรรมเนียมที่ตารางใช้: ค่าธรรมเนียมขาย (front-end) และค่าใช้จ่ายรวม / ค่าธรรมเนียมการจัดการ
+        # เก็บเฉพาะค่าธรรมเนียมที่ใช้: ขาย (front-end), รับซื้อคืน (back-end), การจัดการ และค่าใช้จ่ายรวม
         desc = str(row.get("fee_type_desc") or "").strip()
-        if not re.search(r"front|การขาย|รวม|total|การจัดการ|management", desc, re.I):
+        if not re.search(r"front|การขาย|รับซื้อคืน|back|รวม|total|การจัดการ|management", desc, re.I):
             return
-        if re.search(r"ขายคืน|รับซื้อคืน|back|สับเปลี่ยน|switch", desc, re.I) and not re.search(r"front", desc, re.I):
+        if re.search(r"สับเปลี่ยน|switch", desc, re.I):
             return
         # ค่าธรรมเนียมแต่ละประเภทใช้แถวที่ใหม่สุดของประเภทนั้น
         key = ckey(row.get("proj_id"), row.get("fund_class_name"))
@@ -326,6 +326,29 @@ def save_fetched():
 
 
 SUMMARY = {}
+EXTRAS_ALL_PATH = DATA / "extras_all.json"
+
+
+def fee_num(fees, test):
+    for k, v in (fees or {}).items():
+        if test(k) and isinstance(v, dict):
+            a = v.get("actual") if v.get("actual") not in (None, "") else v.get("rate")
+            try:
+                return round(float(a), 4)
+            except (TypeError, ValueError):
+                return None
+    return None
+
+
+def fee_row(x):
+    """[ขาย, รับซื้อคืน, การจัดการ, ค่าใช้จ่ายรวม, ลิงก์ factsheet]"""
+    fees = (x or {}).get("fees") or {}
+    fs = (x or {}).get("fs") or [None]
+    return [fee_num(fees, lambda k: re.search(r"ขาย|front", k, re.I) and not re.search(r"ขายคืน|รับซื้อคืน|back", k, re.I)),
+            fee_num(fees, lambda k: re.search(r"รับซื้อคืน|back", k, re.I)),
+            fee_num(fees, lambda k: re.search(r"การจัดการ|management", k, re.I) and not re.search(r"รวม|total", k, re.I)),
+            fee_num(fees, lambda k: re.search(r"รวม|total", k, re.I)),
+            fs[0]]
 
 
 def summarize(packed, x):
@@ -345,6 +368,23 @@ def summarize(packed, x):
         if "Total" in k and isinstance(v, dict):
             ter = v.get("actual") if v.get("actual") is not None else v.get("rate")
     return [r1y, ter]
+
+
+def write_summary(funds, pending, nav_to):
+    """atf/compare/data/summary.json: ผลตอบแทน 1 ปี + ค่าธรรมเนียม + factsheet
+    funds: ชื่อกอง -> [r1y, ขาย, รับซื้อคืน, การจัดการ, รวม, factsheet] (กองในรายชื่อ)
+    classes: proj_id|class -> [ขาย, รับซื้อคืน, การจัดการ, รวม, factsheet] (class ที่ไม่อยู่ในรายชื่อ เช่นกองภาษี)
+    pending: กองที่ยังดึง NAV ย้อนหลังไม่ครบ"""
+    out = {}
+    for f in funds:
+        out[f["name"]] = [SUMMARY.get(f["name"])] + fee_row(f.get("x"))
+    classes = json.loads(EXTRAS_ALL_PATH.read_text()) if EXTRAS_ALL_PATH.exists() else {}
+    for f in funds:                                   # กองในรายชื่อหาจากชื่อได้แล้ว ไม่ต้องซ้ำ
+        i = f["info"]
+        classes.pop(ckey(i["proj_id"], i["fund_class_name"]), None)
+    (OUT / "summary.json").write_text(json.dumps({
+        "nav_to": nav_to, "cols": ["r1y", "fe", "be", "mg", "ter", "fs"], "funds": out,
+        "classes": classes, "pending": sorted(pending)}, ensure_ascii=False, separators=(",", ":")))
 
 
 def save_backfill(names):
@@ -470,6 +510,9 @@ def build_universe(today, prev):
     prev_x = {ckey(f["info"]["proj_id"], f["info"]["fund_class_name"]): f.get("x") or {} for f in (prev or {}).get("funds", [])}
     need_urls = today.day <= 7 or os.getenv("FUNDS_URLS") == "1" or not prev_x or (prev or {}).get("v") != UNI_V
     extras = load_extras(fetch_urls=need_urls)
+    # ค่าธรรมเนียม + ลิงก์ factsheet ของทุก class (รวมกองภาษีที่ไม่อยู่ในรายชื่อกอง) ให้หน้า "ค้นหาด้วย Master Fund" ใช้
+    EXTRAS_ALL_PATH.write_text(json.dumps({k: fee_row(v) for k, v in extras.items() if v.get("fees") or v.get("fs")},
+                                          ensure_ascii=False, separators=(",", ":")))
     for f in funds:
         i = f["info"]
         k = ckey(i["proj_id"], i["fund_class_name"])
@@ -542,7 +585,7 @@ def main():
         if k in AUM:
             x["aum"] = AUM[k]
         f["_s"], f["_e"] = packed["s"], days[-1].isoformat() if days else None
-        SUMMARY[f["name"]] = summarize(packed, x)
+        SUMMARY[f["name"]] = summarize(packed, x)[0]
         (FUND_OUT / f"{fn.slug(f['name'])}.json").write_text(json.dumps(
             {"name": f["name"], "group": f["group"], "risk": f.get("risk"), "info": info, "sec": f.get("sec") or {},
              "x": x, "warning": warn, **packed}, ensure_ascii=False, separators=(",", ":")))
@@ -572,8 +615,7 @@ def main():
              "funds": rows, "missing": uni.get("missing") or {}}
     (OUT / "index.json").write_text(json.dumps(index, ensure_ascii=False, separators=(",", ":")))
     # สรุปต่อกอง (ผลตอบแทน 1 ปี, ค่าใช้จ่ายรวมจริง) ให้หน้า "ค้นหาด้วย Master Fund" ใช้ ไม่ต้องโหลด NAV ทั้งก้อน
-    (OUT / "summary.json").write_text(json.dumps({"nav_to": index["nav_to"], "cols": ["r1y", "ter"],
-        "funds": {k: v for k, v in SUMMARY.items() if k in {f["name"] for f in funds}}}, ensure_ascii=False, separators=(",", ":")))
+    write_summary(funds, pending, index["nav_to"])
     # ลบไฟล์ของกองที่ไม่อยู่ในรายชื่อแล้ว
     keep = {fn.slug(f["name"]) for f in funds}
     for p in FUND_OUT.glob("*.json"):
