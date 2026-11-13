@@ -148,6 +148,7 @@ const SUMMARY_URL = "../../atf/compare/data/summary.json";
 let MASTERS = new Map();   // name -> {name, tags, rows:[fund rows]}
 let FUNDS = [];            // แถวละกอง (รวม class)
 let SUM = {funds: {}};
+let BE_READY = true;
 const ASSET = [["", "ทุกประเภท"], ["Equity", "หุ้น"], ["Fixed Income", "ตราสารหนี้"], ["Commodity", "ทองคำ/สินค้าโภคภัณฑ์"], ["Multi-Asset", "ผสม"], ["Real Estate", "อสังหาฯ"], ["Alternative", "ทางเลือก"]];
 const MGMT = [["", "ทุกกลยุทธ์"], ["Active", "Active"], ["Passive", "Passive"]];
 const FX = [["", "ทุกแบบ"], ["hedged", "ป้องกันทั้งหมด"], ["dynamic", "ดุลยพินิจ"], ["none", "ไม่ป้องกัน"]];
@@ -188,6 +189,8 @@ async function load() {
   ]);
   SUM = sum || {funds: {}, classes: {}, pending: []};
   const PEND = new Set(SUM.pending || []);
+  // ค่าธรรมเนียมรับซื้อคืนเริ่มเก็บทีหลัง ถ้ายังไม่มีกองไหนมีค่าเลย แปลว่ายังดึงไม่ถึงรอบ
+  BE_READY = Object.values(SUM.funds || {}).some(v => v[2] != null) || Object.values(SUM.classes || {}).some(v => v[1] != null);
   const ckey = (pid, c) => { c = String(c || "").trim(); return pid + "|" + (["", "main", "none", "nan"].includes(c.toLowerCase()) ? "" : c.toUpperCase().replace(/[^A-Z0-9ก-๙]/g, "")); };
   const AMC = new Map(csvParse(amcT).map(r => [norm(r.name_th), r.abbr]));
   const amcOf = n => AMC.get(norm(n)) || AMC.get(norm(n) + " จำกัด") || norm(n).replace(/^บริษัทหลักทรัพย์จัดการกองทุน(รวม)?\s*/, "").replace(/\s*จำกัด.*$/, "");
@@ -337,7 +340,7 @@ function renderResults() {
       <div class="sub2">${esc(f.amc)}${f.mgmt ? `<span>${f.mgmt}</span>` : ""}</div></td>
     ${ms.length > 1 ? `<td class="mcol"><button type="button" class="mlink" data-master="${esc(f.master)}" title="${esc(f.master)}">${esc(short(f.master))}</button></td>` : ""}
     <td><span class="pill ${FX_CLS[f.fx] || ""}" title="${esc(f.fxFull)}">${FX_LABEL[f.fx]}</span></td>
-    ${cell.r1y(f)}${cell.fee(f.fe)}${cell.fee(f.be)}${cell.fee(f.ter, "last ter")}
+    ${cell.r1y(f)}${cell.fee(f.fe)}${f.be == null && !BE_READY ? `<td class="n"><span class="st pending" title="ระบบจะดึงค่าธรรมเนียมรับซื้อคืนในรอบดึงข้อมูลแบบเต็มครั้งถัดไป">กำลังดึงข้อมูล</span></td>` : cell.fee(f.be)}${cell.fee(f.ter, "last ter")}
     <td class="fsc"><a class="fsl" href="${esc(f.fs)}" target="_blank" rel="noopener" title="เปิด Fund factsheet (PDF)" aria-label="Factsheet ${esc(f.name)}"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8l-5-5Z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/></svg></a></td></tr>`).join("");
   $("res").innerHTML = `<div class="rh"><div><h2>${esc(title)}</h2>
       <div class="ms">${ms.slice(0, 8).map(m => `<span>${esc(m.name)}</span>`).join("")}${ms.length > 8 ? `<span>อีก ${ms.length - 8}</span>` : ""}</div></div>
