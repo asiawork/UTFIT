@@ -123,3 +123,9 @@ h1,h2,h3{font-family:var(--head);font-weight:700;margin:0;letter-spacing:-.015em
 .linkbtn:hover{color:var(--red)}
 
 footer.foot{margin:80px 0 32px;color:var(--mute);font-size:13px}
+
+/* ป้าย "กำลังดึงข้อมูล" (มีจุดกะพริบ) */
+.u-loading{display:inline-flex;align-items:center;gap:7px;margin-left:6px;padding:3px 11px 3px 9px;border-radius:99px;background:#eef3ff;color:#2f56ff;font-weight:600;font-size:13px;opacity:1;white-space:nowrap;vertical-align:1px}
+.u-loading i{width:8px;height:8px;border-radius:50%;background:#2f56ff;box-shadow:0 0 0 0 rgba(47,86,255,.5);animation:u-pulse 1.6s infinite}
+@keyframes u-pulse{0%{box-shadow:0 0 0 0 rgba(47,86,255,.45)}70%{box-shadow:0 0 0 7px rgba(47,86,255,0)}100%{box-shadow:0 0 0 0 rgba(47,86,255,0)}}
+@media (prefers-reduced-motion:reduce){.u-loading i{animation:none}}

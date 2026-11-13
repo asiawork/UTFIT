@@ -62,3 +62,9 @@ html[data-tool=compare] .utfit-nav .in{max-width:1240px}
 html[data-tool=wealthplan] .wrap{max-width:1400px}
 html[data-tool=wealthplan] .utfit-nav .in{max-width:1400px}
 html[data-tool=masterfund] .utfit-nav .in{max-width:1100px;padding:0 24px}
+
+/* ป้าย "กำลังดึงข้อมูล" (มีจุดกะพริบ) */
+.u-loading{display:inline-flex;align-items:center;gap:7px;margin-left:6px;padding:3px 11px 3px 9px;border-radius:99px;background:#eef3ff;color:#2f56ff;font-weight:600;font-size:13px;opacity:1;white-space:nowrap;vertical-align:1px}
+.u-loading i{width:8px;height:8px;border-radius:50%;background:#2f56ff;box-shadow:0 0 0 0 rgba(47,86,255,.5);animation:u-pulse 1.6s infinite}
+@keyframes u-pulse{0%{box-shadow:0 0 0 0 rgba(47,86,255,.45)}70%{box-shadow:0 0 0 7px rgba(47,86,255,0)}100%{box-shadow:0 0 0 0 rgba(47,86,255,0)}}
+@media (prefers-reduced-motion:reduce){.u-loading i{animation:none}}

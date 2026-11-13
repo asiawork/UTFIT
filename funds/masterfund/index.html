@@ -14,7 +14,7 @@
   .wrap,.utfit-nav .in{max-width:1280px}
   .mf-h{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;padding:52px 0 0}
   .mf-h h1{font-size:44px;line-height:1.1;letter-spacing:-.03em}
-  .mf-h .asof{font-size:13.5px;color:var(--mute);white-space:nowrap}
+  .mf-h .asof{font-size:13.5px;color:var(--mute);white-space:nowrap;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 
   /* ช่องค้นหาแบบชิป */
   .search{position:relative;margin-top:24px}
@@ -233,7 +233,7 @@ async function load() {
     if (!MASTERS.has(f.master)) MASTERS.set(f.master, {name: f.master, tags: TAGS.get(f.master) || {}, funds: []});
     MASTERS.get(f.master).funds.push(f);
   }
-  $("asof").textContent = SUM.nav_to ? `ผลตอบแทน ณ ${UI.thDate(SUM.nav_to)}` + (PEND.size ? ` (กำลังดึงข้อมูลเพิ่มอีก ${PEND.size.toLocaleString()} กอง)` : "") : "";
+  $("asof").innerHTML = SUM.nav_to ? esc(`ผลตอบแทน ณ ${UI.thDate(SUM.nav_to)}`) + (PEND.size ? ` <span class="u-loading" title="ระบบกำลังทยอยดึง NAV ย้อนหลัง กองที่ดึงเสร็จจะมีผลตอบแทนขึ้นเอง"><i></i>กำลังดึงข้อมูลเพิ่มอีก ${PEND.size.toLocaleString()} กอง</span>` : "") : "";
 }
 
 /* ---------- สถานะ ---------- */

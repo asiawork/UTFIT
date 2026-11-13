@@ -1985,8 +1985,8 @@ function update() {
     }
     DATA = { funds: [], missing: INDEX.missing || {}, start: INDEX.start, nav_to: INDEX.nav_to, updated: INDEX.updated };
     const from = DATA.start ? (DATA.start.slice(0, 4) === "2021" ? "ม.ค. 65" : thDate(DATA.start)) : null;
-    $("asof").textContent = `NAV กองทุนรวม ${STUBS.size.toLocaleString()} กอง ${from ? `ตั้งแต่ ${from} – ` : "ถึง "}${thDate(DATA.nav_to || DATA.updated)}` +
-      (INDEX.pending ? ` · กำลังทยอยดึงอีก ${INDEX.pending.toLocaleString()} กอง` : "");
+    $("asof").innerHTML = esc(`NAV กองทุนรวม ${STUBS.size.toLocaleString()} กอง ${from ? `ตั้งแต่ ${from} – ` : "ถึง "}${thDate(DATA.nav_to || DATA.updated)}`) +
+      (INDEX.pending ? ` <span class="u-loading" title="ระบบกำลังทยอยดึง NAV ย้อนหลังของกองที่เหลือ กองที่ดึงเสร็จจะค้นหาได้ทันที"><i></i>กำลังดึงข้อมูลเพิ่มอีก ${INDEX.pending.toLocaleString()} กอง</span>` : "");
   } catch (e) {
     $("asof").textContent = "ยังไม่มีข้อมูล";
     $("notice").hidden = false;
