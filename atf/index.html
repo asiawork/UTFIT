@@ -106,7 +106,10 @@ function show(o, err) {
     <div class="row"><span>ไฟล์</span><span>${esc(o.name)}</span></div>
     ${to ? `<div class="row"><span>ข้อมูลถึง</span><span>${thDate(to)}</span></div>` : ""}
     <div class="row"><span>อัปโหลดเมื่อ</span><span>${at}</span></div>`;
-  mc.innerHTML = models ? [...models.keys()].map(m => `<span>${esc(m)}</span>`).join("") : "";
+  // เรียงตามกลุ่ม: ตราสารหนี้ → Asset Allocation → หุ้นโลก (เหมือนใน Wealth Solution Plan) โมเดลอื่นต่อท้าย
+  const ORDER = ["FIXEDSP", "FIXEDTDP", "FIXEDDP", "CAA", "MAA", "AAA", "DAA", "TCT"];
+  const rank = m => { const i = ORDER.indexOf(m); return i < 0 ? 99 : i; };
+  mc.innerHTML = models ? [...models.keys()].sort((a, b) => rank(a) - rank(b) || a.localeCompare(b)).map(m => `<span>${esc(m)}</span>`).join("") : "";
   $("dropT").textContent = "อัปโหลดไฟล์ใหม่";
 }
 
