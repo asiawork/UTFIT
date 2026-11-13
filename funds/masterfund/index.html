@@ -96,6 +96,7 @@
   th.gh{text-align:center;color:var(--ink-2);font-weight:600;border-bottom:1px solid var(--line)}
   td.fee{font-weight:500;color:var(--ink-2)}
   td.ter{font-weight:600;color:var(--ink)}
+  td.taxspan{text-align:center;font-size:13px;color:var(--mute);background:repeating-linear-gradient(135deg,var(--p-50) 0 8px,transparent 8px 16px);border-radius:0}
   .st{font-size:12px;font-weight:500;border-radius:6px;padding:2px 8px;white-space:nowrap;cursor:help}
   .st.pending{background:#eef3ff;color:#2f56ff}
   .st.tax,.st.nodata{background:var(--p-50);color:var(--mute)}
@@ -340,7 +341,7 @@ function renderResults() {
       <div class="sub2">${esc(f.amc)}${f.mgmt ? `<span>${f.mgmt}</span>` : ""}</div></td>
     ${ms.length > 1 ? `<td class="mcol"><button type="button" class="mlink" data-master="${esc(f.master)}" title="${esc(f.master)}">${esc(short(f.master))}</button></td>` : ""}
     <td><span class="pill ${FX_CLS[f.fx] || ""}" title="${esc(f.fxFull)}">${FX_LABEL[f.fx]}</span></td>
-    ${cell.r1y(f)}${cell.fee(f.fe)}${f.be == null && !BE_READY ? `<td class="n"><span class="st pending" title="ระบบจะดึงค่าธรรมเนียมรับซื้อคืนในรอบดึงข้อมูลแบบเต็มครั้งถัดไป">กำลังดึงข้อมูล</span></td>` : cell.fee(f.be)}${cell.fee(f.ter, "last ter")}
+    ${f.status === "tax" && f.fe == null && f.be == null && f.ter == null ? `<td colspan="4" class="taxspan">ระบบยังไม่ได้ดึงข้อมูลส่วนนี้ของกองภาษี</td>` : `${cell.r1y(f)}${cell.fee(f.fe)}${f.be == null && !BE_READY ? `<td class="n"><span class="st pending" title="ระบบจะดึงค่าธรรมเนียมรับซื้อคืนในรอบดึงข้อมูลแบบเต็มครั้งถัดไป">กำลังดึงข้อมูล</span></td>` : cell.fee(f.be)}${cell.fee(f.ter, "last ter")}`}
     <td class="fsc"><a class="fsl" href="${esc(f.fs)}" target="_blank" rel="noopener" title="เปิด Fund factsheet (PDF)" aria-label="Factsheet ${esc(f.name)}"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8l-5-5Z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/></svg></a></td></tr>`).join("");
   $("res").innerHTML = `<div class="rh"><div><h2>${esc(title)}</h2>
       <div class="ms">${ms.slice(0, 8).map(m => `<span>${esc(m.name)}</span>`).join("")}${ms.length > 8 ? `<span>อีก ${ms.length - 8}</span>` : ""}</div></div>
