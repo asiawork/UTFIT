@@ -36,7 +36,7 @@
   @media print{.utfit-nav{display:none}}`;
   document.head.appendChild(st);
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-  const parts = [`<a class="logo" href="${root}"><span class="mark">U</span>UTFIT</a>`];
+  const parts = [`<a class="logo" href="${root}" title="หน้าแรก"><span class="mark"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 10.5 12 3.5l8.5 7"/><path d="M5.5 9v10.5h4.5v-6h4v6h4.5V9"/></svg></span>UTFIT</a>`];
   if (sec && title) parts.push(`<span class="sep">/</span><a class="crumb" href="${root}${sec[1]}">${esc(sec[0])}</a>`);
   if (title) parts.push(`<span class="sep">/</span><span class="cur">${esc(title)}</span>`);
   const ICON = { light: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 13A9 9 0 1 1 11 3a7 7 0 0 0 10 10Z"/></svg>', dark: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>' };
@@ -51,6 +51,11 @@
     applyTheme(theme); tb.innerHTML = ICON[theme];
     try { localStorage.setItem(THEME_KEY, theme); } catch (e) {}
   };
+  if (!document.querySelector('link[rel="icon"]')) {
+    const ic = document.createElement("link"); ic.rel = "icon"; ic.type = "image/svg+xml";
+    ic.href = "data:image/svg+xml," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="9" fill="#0f1a3c"/><g fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 15 16 7.5l9 7.5"/><path d="M9.5 13.5V25h5v-6.5h3V25h5V13.5"/></g></svg>');
+    document.head.appendChild(ic);
+  }
   const put = () => document.body.prepend(bar);
   document.body ? put() : document.addEventListener("DOMContentLoaded", put);
 })();
