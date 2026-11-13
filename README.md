@@ -28,7 +28,7 @@
 |---|---|---|---|---|
 | **ATF compare data** | เปรียบเทียบ ATF กับกองทุน | จ.–ศ. 06:40 + ทยอยดึงย้อนหลังทุก 2 ชม. จนครบ | `pipelines/atf-compare/` | `atf/compare/data/` |
 | **Weekly charts** | กราฟ Weekly | จันทร์ 06:15 และทุกครั้งที่แก้ `funds.csv` | `pipelines/weekly/` | `funds/weekly/data.json`, `charts/` |
-| **Master fund data** | ค้นหาด้วย Master Fund | กด Run workflow เอง | `pipelines/masterfund/` | `funds/masterfund/` |
+| **Master fund data** | ค้นหาด้วย Master Fund | วันที่ 5 ของทุกเดือน 06:37 (กดรันเองได้) | `pipelines/masterfund/` | `funds/masterfund/` |
 
 - เปลี่ยนกองที่แนะนำในกราฟ Weekly: แก้ `pipelines/weekly/funds.csv` (คอลัมน์ `fund`, `recommend_date`, `compare_with`)
 - เพิ่มกองที่ไม่อยู่ในเกณฑ์ของหน้าเปรียบเทียบ: ใส่ชื่อใน `pipelines/atf-compare/extra_funds.csv` แล้วรัน **ATF compare data** แบบ `full`
