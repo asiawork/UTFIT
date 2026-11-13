@@ -1757,7 +1757,7 @@ function renderInfo(){
       <button class="upbtn done" id="upBtn" aria-expanded="false" aria-controls="upPanel" title="อัปโหลดไฟล์ใหม่"><span aria-hidden="true">⤒</span> Auto Top Funds ถึง ${thShort(lastDate())}</button>
       <div class="uppanel" id="upPanel" hidden>
         <h3>อัปโหลดข้อมูล Auto Top Funds</h3>
-        <p>หน้าเว็บนี้เป็น Public จึงไม่ได้เก็บข้อมูลโมเดล Auto Top Funds ไว้ ดาวน์โหลดไฟล์จาก Tableau แล้วนำมาใส่ที่นี่</p>
+        <p>ถ้าอัปโหลดไว้ในหน้า Auto Top Funds แล้ว ไฟล์จะขึ้นที่นี่เอง ไม่ต้องอัปโหลดซ้ำ</p>
         ${uploadSteps()}
         <button class="btn" id="upPick">เลือกไฟล์</button>
         <p class="upnote">หมายเหตุ: ${UP_NOTE}</p>
@@ -1776,7 +1776,7 @@ function renderUpload(err){
   app.innerHTML = `
     <div class="drop" id="drop">
       <h2>อัปโหลดข้อมูล Auto Top Funds</h2>
-      <p class="uplead">หน้าเว็บนี้เป็น Public จึงไม่ได้เก็บข้อมูลโมเดล Auto Top Funds ไว้ ดาวน์โหลดไฟล์จาก Tableau แล้วนำมาใส่ที่นี่</p>
+      <p class="uplead">ถ้าอัปโหลดไว้ในหน้า Auto Top Funds แล้ว ไฟล์จะขึ้นที่นี่เอง ไม่ต้องอัปโหลดซ้ำ</p>
       <div>${uploadSteps()}</div>
       <div><button class="btn big" id="pick">เลือกไฟล์</button></div>
       <div class="hint">หรือลากไฟล์มาวางในกรอบนี้</div>

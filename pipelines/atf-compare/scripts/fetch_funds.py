@@ -325,6 +325,28 @@ def save_fetched():
     FETCHED_PATH.write_text(json.dumps(FETCHED, ensure_ascii=False, indent=0, sort_keys=True))
 
 
+SUMMARY = {}
+
+
+def summarize(packed, x):
+    """[ผลตอบแทนย้อนหลัง 1 ปี (%), ค่าใช้จ่ายรวมจริงตาม factsheet (%)]"""
+    r1y = None
+    if packed.get("s") and packed.get("v"):
+        d = date.fromisoformat(packed["s"]); days = [d]
+        for g in packed["dd"]:
+            d = d + timedelta(days=g); days.append(d)
+        target = days[-1] - timedelta(days=365)
+        if days[0] <= target:
+            i = max(k for k, dd in enumerate(days) if dd <= target)
+            if packed["v"][i]:
+                r1y = round((packed["v"][-1] / packed["v"][i] - 1) * 100, 2)
+    ter = None
+    for k, v in ((x or {}).get("fees") or {}).items():
+        if "Total" in k and isinstance(v, dict):
+            ter = v.get("actual") if v.get("actual") is not None else v.get("rate")
+    return [r1y, ter]
+
+
 def save_backfill(names):
     keep = {k: v for k, v in BACKFILL.items() if k in names}
     BACKFILL_PATH.write_text(json.dumps(keep, ensure_ascii=False, indent=0, sort_keys=True))
@@ -520,6 +542,7 @@ def main():
         if k in AUM:
             x["aum"] = AUM[k]
         f["_s"], f["_e"] = packed["s"], days[-1].isoformat() if days else None
+        SUMMARY[f["name"]] = summarize(packed, x)
         (FUND_OUT / f"{fn.slug(f['name'])}.json").write_text(json.dumps(
             {"name": f["name"], "group": f["group"], "risk": f.get("risk"), "info": info, "sec": f.get("sec") or {},
              "x": x, "warning": warn, **packed}, ensure_ascii=False, separators=(",", ":")))
@@ -548,6 +571,9 @@ def main():
              "cols": ["name", "group", "risk", "file", "proj_name_th", "comp_name_th", "abbr", "ipo"],
              "funds": rows, "missing": uni.get("missing") or {}}
     (OUT / "index.json").write_text(json.dumps(index, ensure_ascii=False, separators=(",", ":")))
+    # สรุปต่อกอง (ผลตอบแทน 1 ปี, ค่าใช้จ่ายรวมจริง) ให้หน้า "ค้นหาด้วย Master Fund" ใช้ ไม่ต้องโหลด NAV ทั้งก้อน
+    (OUT / "summary.json").write_text(json.dumps({"nav_to": index["nav_to"], "cols": ["r1y", "ter"],
+        "funds": {k: v for k, v in SUMMARY.items() if k in {f["name"] for f in funds}}}, ensure_ascii=False, separators=(",", ":")))
     # ลบไฟล์ของกองที่ไม่อยู่ในรายชื่อแล้ว
     keep = {fn.slug(f["name"]) for f in funds}
     for p in FUND_OUT.glob("*.json"):

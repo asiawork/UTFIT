@@ -109,6 +109,8 @@ h1,h2,h3{font-family:var(--head);font-weight:700;margin:0;letter-spacing:-.015em
 .dot.ok{background:var(--ok)} .dot.warn{background:var(--warn)}
 .models{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
 .models span{font-size:12.5px;font-weight:600;padding:2px 10px;border-radius:99px;background:var(--p-50);color:var(--chip-tx)}
+.how{margin:12px 0 0;padding-left:22px;color:var(--ink-2);font-size:14.5px;line-height:1.9}
+.how b{color:var(--ink)}
 .linkbtn{font:inherit;font-size:13.5px;background:none;border:0;padding:0;color:var(--mute);text-decoration:underline;cursor:pointer;margin-top:10px}
 .linkbtn:hover{color:var(--red)}
 

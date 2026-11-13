@@ -43,6 +43,7 @@
 
 <script>
 const $ = id => document.getElementById(id);
+const TABLEAU = "https://tableau.sawasdee.brk1/#/views/All_model_performance/ModelPerformance?:iid=1";
 document.querySelectorAll("[data-i]").forEach(e => e.innerHTML = UI.icon(e.dataset.i, "ico", !e.closest(".drop")));
 document.querySelectorAll("[data-g]").forEach(e => e.innerHTML = UI.icon(e.dataset.g));
 document.querySelectorAll("[data-art]").forEach(e => e.outerHTML = UI.art(e.dataset.art));
@@ -96,7 +97,13 @@ function show(o, err) {
   document.querySelectorAll("[data-need]").forEach(a => a.classList.toggle("dim", !o));
   if (err) { st.innerHTML = `<span class="err">อ่านไฟล์ไม่ได้: ${esc(err)}</span>`; mc.innerHTML = ""; return; }
   if (!o) {
-    st.innerHTML = `<div class="row"><span>สถานะ</span><span><i class="dot warn"></i>ยังไม่มีไฟล์ในเครื่องนี้</span></div>`;
+    st.innerHTML = `<div class="row"><span>สถานะ</span><span><i class="dot warn"></i>ยังไม่มีไฟล์ในเครื่องนี้</span></div>
+      <ol class="how">
+        <li>เปิด <a href="${TABLEAU}" target="_blank" rel="noopener">Tableau Model Performance</a></li>
+        <li>เลือกทุกโมเดล</li>
+        <li>กด Download แล้วเลือก <b>Data</b> ได้ไฟล์ CSV</li>
+        <li>นำไฟล์มาวางในช่องอัปโหลด</li>
+      </ol>`;
     mc.innerHTML = ""; $("dropT").textContent = "อัปโหลดไฟล์ Model Performance"; return;
   }
   let models = null; try { models = summarize(o.text); } catch (e) {}
