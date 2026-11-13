@@ -13,7 +13,7 @@
   const st = document.createElement("style");
   st.textContent = `
   .utfit-nav{--n-bg:#ffffff;--n-ln:#e7e9f2;--n-tx:#0f1a3c;--n-tx2:#4a5272;--n-mu:#868ca6;--n-hov:#eef1f8;--n-on:#0f1a3c;--n-ontx:#fff;--n-mark:#0f1a3c}
-  html[data-theme=dark] .utfit-nav{--n-bg:#080e22;--n-ln:#1f2a50;--n-tx:#eef1ff;--n-tx2:#c2c9e6;--n-mu:#8a94b8;--n-hov:#16214a;--n-on:#1d2a5c;--n-ontx:#fff;--n-mark:#4c6bff}
+  html[data-theme=dark] .utfit-nav{--n-bg:#070d1f;--n-ln:#1b2b4f;--n-tx:#eef3ff;--n-tx2:#c2cce6;--n-mu:#8a97b8;--n-hov:#122347;--n-on:#182c58;--n-ontx:#fff;--n-mark:#2f7bff}
   .utfit-nav{position:sticky;top:0;z-index:60;background:var(--n-bg);border-bottom:1px solid var(--n-ln);
     font:500 14.5px/1 "BLS Text","Anuphan","IBM Plex Sans Thai",system-ui,sans-serif;color:var(--n-tx)}
   .utfit-nav .in{max-width:1120px;margin:0 auto;padding:0 24px;height:60px;display:flex;align-items:center;gap:10px;white-space:nowrap}

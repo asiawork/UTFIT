@@ -19,16 +19,16 @@
   --body:"UBody","Anuphan","IBM Plex Sans Thai",system-ui,sans-serif;
 }
 html[data-theme=dark]{
-  --p:#4c6bff; --p-dk:#3a57f0; --p-50:#16214a; --p-100:#1d2a5c; --p-200:#3a4c99;
-  --mint:#2fd39a; --link:#8fa3ff;
-  --ink:#eef1ff; --ink-2:#c2c9e6; --mute:#8a94b8; --line:#1f2a50; --bg:#080e22; --card:#0f1833;
+  --p:#2f7bff; --p-dk:#1f66e8; --p-50:#122347; --p-100:#182c58; --p-200:#2f4f8f;
+  --mint:#2fd39a; --link:#7db4ff;
+  --ink:#eef1ff; --ink-2:#c2c9e6; --mute:#8a94b8; --line:#1b2b4f; --bg:#070d1f; --card:#0d1730;
   --ok:#2fd39a; --warn:#ffb547; --red:#ff6b7d;
-  --shadow:0 12px 32px rgba(0,0,0,.28); --shadow-h:0 18px 40px rgba(0,0,0,.35); --hover-ln:#4c6bff;
-  --page-bg:radial-gradient(900px 620px at 92% -8%,#1b2a6e 0%,rgba(27,42,110,0) 62%),radial-gradient(700px 500px at -10% 40%,rgba(76,107,255,.10) 0%,rgba(76,107,255,0) 60%),#080e22;
-  --title-grad:linear-gradient(90deg,#7f97ff,#8b6cff); --kicker:#8fa3ff; --check-img:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237f97ff' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 12 4 4 8-8'/%3E%3C/svg%3E");
-  --drop-bg:#121c40; --drop-hov:#1a2656; --chip-tx:#aab8ff;
-  --g1:#5c78ff; --g2:#8b6cff; --g3:#3ec6f2; --g4:#b4a6ff;
-  --c1:#2a3c9c; --c2:#121a44; --panel:#111b3d; --panel-ln:#2a3870; --k1:#4c6bff; --k2:#8b6cff; --bar:#4c6bff;
+  --shadow:0 12px 32px rgba(0,0,0,.28); --shadow-h:0 18px 40px rgba(0,0,0,.35); --hover-ln:#2f7bff;
+  --page-bg:radial-gradient(900px 620px at 92% -8%,#12306b 0%,rgba(18,48,107,0) 62%),radial-gradient(700px 500px at -10% 40%,rgba(47,123,255,.08) 0%,rgba(47,123,255,0) 60%),#070d1f;
+  --title-grad:linear-gradient(90deg,#5b9bff,#3ec6f2); --kicker:#6fb2ff; --check-img:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237db4ff' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 12 4 4 8-8'/%3E%3C/svg%3E");
+  --drop-bg:#0f1d3d; --drop-hov:#16284f; --chip-tx:#9cc6ff;
+  --g1:#2f7bff; --g2:#4f9dff; --g3:#3ec6f2; --g4:#8fc2ff;
+  --c1:#1d3f86; --c2:#0d1a3a; --panel:#0f1c3a; --panel-ln:#22396b; --k1:#2f7bff; --k2:#21a8e8; --bar:#2f7bff;
   --sh:#000; --sho:.45;
 }
 *{box-sizing:border-box}
