@@ -7,20 +7,20 @@
   const secKey = me.dataset.section, sec = SECT[secKey], title = me.dataset.title;
   const st = document.createElement("style");
   st.textContent = `
-  .utfit-nav{position:sticky;top:0;z-index:60;background:rgba(251,251,255,.9);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid #e8e9f5;
-    font:500 14.5px/1 "BLS Text","Anuphan","IBM Plex Sans Thai",system-ui,sans-serif;color:#151a3d}
+  .utfit-nav{position:sticky;top:0;z-index:60;background:#080e22;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid #1f2a50;
+    font:500 14.5px/1 "BLS Text","Anuphan","IBM Plex Sans Thai",system-ui,sans-serif;color:#eef1ff}
   .utfit-nav .in{max-width:1120px;margin:0 auto;padding:0 24px;height:60px;display:flex;align-items:center;gap:10px;white-space:nowrap}
   .utfit-nav a{color:inherit;text-decoration:none}
   .utfit-nav .logo{display:flex;align-items:center;gap:9px;font:700 18px/1 "BLS Bold","Anuphan",sans-serif;letter-spacing:.01em}
-  .utfit-nav .mark{width:28px;height:28px;border-radius:9px;background:#5a5ff5;color:#fff;display:grid;place-items:center;font-size:14px}
-  .utfit-nav .sep{color:#c9ccff}
-  .utfit-nav .crumb{color:#868ba8;overflow:hidden;text-overflow:ellipsis}
-  .utfit-nav a.crumb:hover{color:#5a5ff5}
-  .utfit-nav .cur{color:#151a3d;font-weight:600;overflow:hidden;text-overflow:ellipsis}
+  .utfit-nav .mark{width:28px;height:28px;border-radius:9px;background:#4c6bff;color:#fff;display:grid;place-items:center;font-size:14px}
+  .utfit-nav .sep{color:#3a4778}
+  .utfit-nav .crumb{color:#8a94b8;overflow:hidden;text-overflow:ellipsis}
+  .utfit-nav a.crumb:hover{color:#fff}
+  .utfit-nav .cur{color:#eef1ff;font-weight:600;overflow:hidden;text-overflow:ellipsis}
   .utfit-nav .links{margin-left:auto;display:flex;gap:4px}
-  .utfit-nav .links a{padding:9px 14px;border-radius:99px;color:#4a5075;transition:background .15s,color .15s}
-  .utfit-nav .links a:hover{background:#f0f1ff;color:#5a5ff5}
-  .utfit-nav .links a.on{color:#5a5ff5;font-weight:600;background:#f0f1ff}
+  .utfit-nav .links a{padding:9px 14px;border-radius:99px;color:#c2c9e6;transition:background .15s,color .15s}
+  .utfit-nav .links a:hover{background:#16214a;color:#fff}
+  .utfit-nav .links a.on{color:#fff;font-weight:600;background:#1d2a5c}
   @media (max-width:720px){.utfit-nav .links{display:none}}
   @media print{.utfit-nav{display:none}}`;
   document.head.appendChild(st);
