@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Auto Top Funds · UTFIT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/utfit.css">
+<script src="../shared/nav.js" data-section="atf"></script>
+<script src="../shared/atf-store.js"></script>
+</head>
+<body>
+<main class="page">
+  <h1>Auto Top Funds</h1>
+  <p class="lead">อัปโหลดไฟล์ Model Performance ครั้งเดียว แล้วใช้ได้ทุกเครื่องมือในหมวดนี้</p>
+
+  <section class="upload">
+    <div class="card">
+      <h3>ไฟล์ Model Performance</h3>
+      <ol class="steps">
+        <li>เปิด <a href="https://tableau.sawasdee.brk1/#/views/All_model_performance/ModelPerformance?:iid=1" target="_blank" rel="noopener">Tableau · Model Performance</a> แล้วเลือกทุกโมเดล</li>
+        <li>กด Download → <b>Data</b> แล้วดาวน์โหลดเป็น CSV</li>
+        <li>ลากไฟล์มาวางในกรอบด้านขวา หรือกดเพื่อเลือกไฟล์</li>
+      </ol>
+      <div class="status" id="status"><span class="k">ยังไม่มีไฟล์ในเครื่องนี้</span></div>
+      <div class="chips" id="models"></div>
+      <div style="margin-top:14px"><button class="btn danger" id="clear" hidden>ล้างไฟล์ออกจากเครื่องนี้</button></div>
+    </div>
+    <div>
+      <label class="drop" id="drop" tabindex="0">
+        <input type="file" id="file" accept=".csv,.txt,text/csv" hidden>
+        <b id="dropT">เลือกไฟล์ หรือลากไฟล์มาวางที่นี่</b>
+        <div class="s">ไฟล์ .csv ที่ดาวน์โหลดจาก Tableau</div>
+      </label>
+      <p class="note">ไฟล์อยู่ในเบราว์เซอร์เครื่องนี้เท่านั้น ไม่ถูกส่งขึ้นเว็บหรือเก็บใน GitHub · จำไว้จนกว่าจะอัปโหลดไฟล์ใหม่หรือกดล้าง</p>
+    </div>
+  </section>
+
+  <h2 class="sec">เครื่องมือ</h2>
+  <div class="tiles two" style="margin-top:14px">
+    <a class="tile sm" href="wealthplan/" data-need>
+      <span class="t">Wealth Solution Plan</span>
+      <span class="d">สถิติแผนจัดพอร์ต 1–5 และพอร์ต DIY: ผลตอบแทน, drawdown, ระยะฟื้นตัว, 1Y rolling</span>
+    </a>
+    <a class="tile sm" href="compare/" data-need>
+      <span class="t">เปรียบเทียบ Auto Top Funds กับกองทุน</span>
+      <span class="d">เทียบโมเดล Auto Top Funds กับกองทุนรวมทุกประเภท · พอร์ตจำลอง · PowerPoint/PDF (FIXEDSP)</span>
+    </a>
+  </div>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const TH_MON = ["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
+const thDate = iso => { const [y, m, d] = iso.split("-"); return `${+d} ${TH_MON[+m - 1]} ${(+y + 543) % 100}`; };
+const MON_EN = ["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"];
+const pad = n => String(n).padStart(2, "0");
+
+/* อ่านแบบย่อเพื่อแสดงสรุป (เครื่องมือแต่ละตัวอ่านไฟล์เต็มเอง) */
+function splitLine(line, delim) {
+  const out = []; let cur = "", q = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (q) { if (ch === '"') { if (line[i + 1] === '"') { cur += '"'; i++; } else q = false; } else cur += ch; }
+    else if (ch === '"') q = true; else if (ch === delim) { out.push(cur); cur = ""; } else cur += ch;
+  }
+  out.push(cur); return out.map(s => s.trim());
+}
+function toISO(s) {
+  let x;
+  if ((x = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/))) return `${x[1]}-${pad(x[2])}-${pad(x[3])}`;
+  if ((x = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/))) return `${x[3]}-${pad(x[1])}-${pad(x[2])}`;   // Tableau: m/d/yyyy
+  if ((x = s.match(/^([A-Za-z]{3})[A-Za-z]*\.?\s+(\d{1,2}),?\s+(\d{4})/))) { const m = MON_EN.indexOf(x[1].toLowerCase()) + 1; if (m) return `${x[3]}-${pad(m)}-${pad(x[2])}`; }
+  return null;
+}
+function summarize(text) {
+  text = text.replace(/^﻿/, "");
+  const lines = text.split(/\r?\n/).filter(l => l.trim());
+  if (lines.length < 3) throw new Error("ไฟล์มีข้อมูลน้อยเกินไป");
+  const delim = [",", ";", "\t"].sort((a, b) => lines[0].split(b).length - lines[0].split(a).length)[0];
+  const head = splitLine(lines[0], delim).map(h => h.toLowerCase());
+  const iM = head.indexOf("model name");
+  let iD = head.indexOf("date"); if (iD < 0) iD = head.indexOf("day of date");
+  if (iM < 0 || iD < 0) throw new Error("ไม่พบคอลัมน์ Model Name / date — ใช่ไฟล์ Model Performance จาก Tableau หรือเปล่า");
+  const models = new Map();
+  for (let k = 1; k < lines.length; k++) {
+    const c = splitLine(lines[k], delim), m = c[iM], d = toISO(c[iD] || "");
+    if (!m || !d) continue;
+    const o = models.get(m) || { from: d, to: d };
+    if (d < o.from) o.from = d; if (d > o.to) o.to = d;
+    models.set(m, o);
+  }
+  if (!models.size) throw new Error("อ่านข้อมูลในไฟล์ไม่ได้");
+  return models;
+}
+
+function show(o, err) {
+  const st = $("status"), mc = $("models");
+  $("clear").hidden = !o;
+  document.querySelectorAll("[data-need]").forEach(a => a.classList.toggle("dim", !o));
+  if (err) { st.innerHTML = `<span class="err">อ่านไฟล์ไม่ได้: ${esc(err)}</span>`; mc.innerHTML = ""; return; }
+  if (!o) { st.innerHTML = `<span class="k">ยังไม่มีไฟล์ในเครื่องนี้</span>`; mc.innerHTML = ""; $("dropT").textContent = "เลือกไฟล์ หรือลากไฟล์มาวางที่นี่"; return; }
+  let models = null; try { models = summarize(o.text); } catch (e) {}
+  const to = models ? [...models.values()].reduce((a, b) => b.to > a ? b.to : a, "") : null;
+  const at = new Date(o.savedAt);
+  st.innerHTML = `<span class="ok">✓ พร้อมใช้</span> <span class="k">·</span> ${esc(o.name)}` +
+    (to ? `<br><span class="k">ข้อมูลถึง</span> ${thDate(to)}` : "") +
+    `<br><span class="k">อัปโหลดเมื่อ</span> ${at.toLocaleString("th-TH", { dateStyle: "medium", timeStyle: "short" })}`;
+  mc.innerHTML = models ? [...models.keys()].map(m => `<span class="chip">${esc(m)}</span>`).join("") : "";
+  $("dropT").textContent = "อัปโหลดไฟล์ใหม่แทน";
+}
+
+async function take(file) {
+  if (!file) return;
+  const text = await file.text();
+  try { summarize(text); } catch (e) { show(await UTFIT_ATF.get(), e.message); return; }
+  show(await UTFIT_ATF.set(text, file.name));
+}
+$("file").onchange = e => { take(e.target.files[0]); e.target.value = ""; };
+$("drop").onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); $("file").click(); } };
+["dragenter", "dragover"].forEach(t => $("drop").addEventListener(t, e => { e.preventDefault(); $("drop").classList.add("over"); }));
+["dragleave", "drop"].forEach(t => $("drop").addEventListener(t, e => { e.preventDefault(); $("drop").classList.remove("over"); }));
+$("drop").addEventListener("drop", e => take(e.dataTransfer.files[0]));
+$("clear").onclick = async () => {
+  if (!confirm("ล้างไฟล์ Model Performance ออกจากเบราว์เซอร์เครื่องนี้?")) return;
+  await UTFIT_ATF.clear();
+  try { localStorage.removeItem("wealthplan.csv.v2"); localStorage.removeItem("atf-models-v1"); } catch (e) {}
+  show(null);
+};
+UTFIT_ATF.get().then(o => show(o));
+</script>
+</body>
+</html>

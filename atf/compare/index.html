@@ -1,0 +1,2006 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Auto Top Funds vs Fund</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  @font-face { font-family: "BLSHead"; src: local("BLS Bold"), local("BLS-Bold"), local("BLSBold"), local("BLS Text Bold"), local("BLSText-Bold"); }
+  @font-face { font-family: "BLSBody"; src: local("BLS Text"), local("BLS-Text"), local("BLSText"), local("BLS Text Regular"), local("BLSText-Regular"); }
+  :root {
+    --font-text: "BLSBody", "BLS Text", "IBM Plex Sans Thai", system-ui, sans-serif;
+    --font-head: "BLSHead", "BLS Bold", "IBM Plex Sans Thai", system-ui, sans-serif;
+    --navy: #1b3560; --navy-2: #24467d; --red: #d0273e;
+    --bg: #f4f6f9; --card: #ffffff; --ink: #1f2937; --muted: #6b7280; --line: #e5e7eb;
+    --pos: #0f8a4b; --neg: #c62828;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font-family: var(--font-text); font-size: 15px; }
+  /* ฟอนต์บริษัท (ต้องติดตั้งในเครื่อง) — เครื่องที่ไม่มีจะใช้ IBM Plex Sans Thai แทน */
+  h1, h2, h3, h4, th, .tabs a, .btn, .grp-name, .sec-title, .docbtn, .tag { font-family: var(--font-head); font-weight: 700; }
+  header { background: var(--navy); color: #fff; padding: 22px 16px 26px; }
+  /* แท็บสลับหน้า */
+  header.has-tabs { padding-bottom: 0; }
+  header .wrap.tabs { display: flex; justify-content: flex-start; align-items: end; gap: 4px; margin-top: 18px; overflow-x: auto; flex-wrap: nowrap; }
+  .tabs a { color: #fff; opacity: .8; text-decoration: none; font-size: 15px; font-weight: 600; padding: 10px 18px;
+            border-radius: 10px 10px 0 0; white-space: nowrap; }
+  .tabs a:hover { opacity: 1; background: rgba(255,255,255,.1); }
+  .tabs a[aria-current="page"] { opacity: 1; background: var(--bg); color: var(--navy); }
+
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 0 16px; }
+  header .wrap { padding: 0; display: flex; justify-content: space-between; align-items: end; gap: 16px; flex-wrap: wrap; }
+  header h1 { margin: 0; font-size: 24px; font-weight: 700; }
+  header p { margin: 4px 0 0; opacity: .8; font-size: 14px; }
+  header a { color: #fff; opacity: .85; font-size: 13px; }
+  header .asof { margin-top: 6px; font-size: 12.5px; opacity: .65; }
+  .hdr-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: flex-end; max-width: 620px; }
+  /* ดาวน์โหลด: หัวข้อด้านบน แล้วแต่ละเวอร์ชันเป็นแถวกว้างเท่ากัน ชื่อชิดซ้าย ปุ่มชิดขวา */
+  .dlbox { flex-basis: 100%; display: grid; grid-template-columns: max-content; justify-content: end; gap: 6px; }
+  .dlhead { color: #fff; font-family: var(--font-head); font-weight: 700; font-size: 14px; opacity: .85; padding-left: 2px; }
+  .dlbtns { display: flex; gap: 8px; flex-wrap: wrap; }
+  .dlgrp { display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,.08); border-radius: 12px; padding: 4px 4px 4px 12px; }
+  .dlgrp .dlname { margin-right: auto; padding-right: 10px; }
+  .dlname { color: #fff; font-size: 13.5px; font-weight: 600; white-space: nowrap; }
+  .dlname small { font-weight: 400; opacity: .75; font-size: 12px; }
+  .hdrbtn.sm { padding: 6px 10px; font-size: 13px; }
+  .hdrbtn small { font-family: var(--font-text); font-weight: 400; font-size: 12px; opacity: .8; }
+  .fx-wrap { position: relative; }
+  .hdrbtn { display: inline-flex; align-items: center; gap: 7px; font-family: var(--font-head); font-weight: 700; font-size: 14px;
+            background: #fff; color: var(--navy); border: 0; border-radius: 9px; padding: 8px 14px; cursor: pointer; }
+  .hdrbtn:hover { background: #eef2f8; }
+  .hdrbtn svg { width: 17px; height: 17px; }
+  .hdrbtn.has { background: #e7f5ee; color: #0b6b3a; }
+  .upload.pop { position: absolute; right: 0; top: calc(100% + 8px); z-index: 30; width: 340px; margin: 0; border: 0; padding: 16px;
+                background: #fff; color: var(--ink); border-radius: 12px; box-shadow: 0 12px 32px rgba(16,24,40,.22); }
+  .upload.pop h2 { margin: 0 0 6px; font-size: 16px; color: var(--navy); }
+  @media (max-width: 720px) { .upload.pop { right: auto; left: 0; width: min(340px, 92vw); } }
+
+  .layout { display: grid; grid-template-columns: 280px 1fr; gap: 16px; margin-top: 20px; align-items: start; }
+  .card { background: var(--card); border-radius: 14px; box-shadow: 0 1px 2px rgba(16,24,40,.06), 0 1px 3px rgba(16,24,40,.08); padding: 16px; }
+
+  /* เลือกกอง */
+  .side h2 { margin: 0 0 10px; font-size: 16px; color: var(--navy); }
+  .side-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 10px; }
+  .side-head h2 { margin: 0; }
+  .sel-tools { font-size: 12.5px; color: var(--muted); white-space: nowrap; }
+  .sel-tools .reset { margin-left: 8px; }
+  .searchbox { position: relative; }
+  .searchbox svg { position: absolute; left: 12px; top: 50%; width: 18px; height: 18px; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+  .searchbox input { width: 100%; font: inherit; font-size: 16px; padding: 11px 38px 11px 40px; border: 1.5px solid var(--line); border-radius: 11px; background: #fff; -webkit-appearance: none; appearance: none; }
+  .searchbox input::-webkit-search-cancel-button { display: none; }
+  .searchbox input:focus { outline: none; border-color: var(--navy-2); box-shadow: 0 0 0 3px rgba(36,70,125,.15); }
+  .searchbox button { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); border: 0; background: var(--bg); color: var(--muted); width: 26px; height: 26px; border-radius: 50%; font-size: 17px; line-height: 1; cursor: pointer; }
+  .searchbox button:hover { color: var(--ink); }
+  .hint { color: var(--muted); font-size: 12px; margin: 6px 2px 0; }
+  .hint kbd { font: inherit; font-size: 11px; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; background: #fff; }
+  .sec-title { font-size: 12.5px; font-weight: 600; color: var(--navy); margin: 14px 2px 4px; }
+  .sec-title span { color: var(--muted); font-weight: 400; margin-left: 4px; }
+  .opt .meta { display: block; color: var(--muted); font-size: 11.5px; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .opt .nm mark { background: #fff3c4; color: inherit; border-radius: 2px; padding: 0 1px; }
+  .opt.active { background: #e8eef8; box-shadow: inset 2px 0 0 var(--navy); }
+  .pinned { border-bottom: 1px solid var(--line); padding-bottom: 8px; }
+  .grp { margin-top: 12px; }
+  .grp-name { font-size: 12.5px; font-weight: 600; color: var(--navy); margin-bottom: 4px; cursor: pointer; padding: 4px 2px; }
+  .grp-name span { color: var(--muted); font-weight: 400; margin-left: 4px; }
+  #list { max-height: 60vh; overflow-y: auto; margin-right: -6px; padding-right: 6px; }
+  .opt { display: flex; align-items: center; gap: 8px; padding: 5px 6px; border-radius: 8px; cursor: pointer; font-size: 14px; }
+  .opt:hover { background: var(--bg); }
+  .opt input { accent-color: var(--navy); width: 15px; height: 15px; margin: 0; }
+  .opt .sw { width: 10px; height: 10px; border-radius: 3px; flex: none; }
+  .opt input[type=color] { width: 22px; height: 18px; padding: 0; border: 1px solid var(--line); border-radius: 5px; background: none; cursor: pointer; flex: none; }
+  .opt input[type=color]::-webkit-color-swatch-wrapper { padding: 1px; }
+  .opt input[type=color]::-webkit-color-swatch { border: 0; border-radius: 3px; }
+  .side .reset { font: inherit; font-size: 12.5px; color: var(--navy); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; margin-left: 6px; }
+  .align { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer; }
+  .align input { accent-color: var(--navy); width: 15px; height: 15px; margin: 0; }
+  .note { font-size: 12.5px; color: #7a4b00; margin: -4px 0 8px; }
+  .tag { display: inline-block; font-size: 10.5px; font-weight: 700; letter-spacing: .3px; line-height: 1; padding: 3px 6px; border-radius: 5px; background: #fdecd8; color: #a14a00; vertical-align: middle; margin-left: 6px; }
+  thead .tag { background: #fff; color: var(--navy); }
+  .opt .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .opt .x { border: 0; background: none; color: var(--muted); cursor: pointer; font-size: 16px; line-height: 1; padding: 0 4px; }
+  .opt .x:hover { color: var(--neg); }
+  .count { color: var(--muted); font-size: 12.5px; margin-top: 10px; }
+  .upload { margin-top: 16px; border-top: 1px solid var(--line); padding-top: 14px; }
+  .upload p { margin: 0 0 8px; font-size: 12.5px; color: var(--muted); }
+  .upload .steps { margin: 0 0 12px; padding-left: 20px; font-size: 13px; line-height: 1.7; color: var(--ink); }
+  .upload .steps a { color: var(--navy); font-weight: 600; }
+  .upload .kbd { display: inline-flex; align-items: center; gap: 1px; vertical-align: -4px; border: 1px solid var(--line); border-radius: 5px; padding: 1px 3px; background: #fff; color: var(--ink); }
+  .upload .kbd .ico { width: 16px; height: 16px; }
+  .upload .kbd .caret { width: 9px; height: 9px; }
+  .upload .note-sm { margin: 10px 0 0; font-size: 12px; }
+
+  /* กราฟ */
+  .head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+  .head input { font: inherit; font-size: 15px; font-weight: 600; color: var(--navy); border: 1px solid var(--line); border-radius: 9px; padding: 7px 10px; min-width: 0; flex: 1 1 260px; }
+  .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn { font: inherit; font-size: 14px; font-weight: 600; border-radius: 10px; padding: 8px 14px; cursor: pointer; border: 1px solid var(--navy); white-space: nowrap; }
+  .btn.primary { background: var(--navy); color: #fff; }
+  .btn.primary:hover { background: var(--navy-2); }
+  .btn.ghost { background: #fff; color: var(--navy); }
+  .btn.sm { padding: 5px 11px; font-size: 13px; border-radius: 8px; }
+  .btn.done { background: var(--pos); border-color: var(--pos); color: #fff; }
+  .btn:disabled { opacity: .45; cursor: default; }
+
+  .range { display: flex; gap: 10px 16px; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; }
+  .seg button { font: inherit; font-size: 13px; font-weight: 500; border: 0; border-left: 1px solid var(--line); background: #fff; color: var(--ink); padding: 6px 11px; cursor: pointer; }
+  .seg button:first-child { border-left: 0; }
+  .seg button[aria-pressed=true] { background: var(--navy); color: #fff; }
+  .dates { display: flex; gap: 6px; align-items: center; font-size: 13px; color: var(--muted); }
+  .dates input { font: inherit; font-size: 13px; border: 1px solid var(--line); border-radius: 8px; padding: 4px 6px; color: var(--ink); }
+  .dwrap { position: relative; display: inline-block; }
+  .dwrap input { color: transparent; width: 132px; }
+  .dwrap input:focus { color: var(--ink); }
+  .dwrap input:focus + .dth { display: none; }
+  .dth { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--ink); font-size: 13px; white-space: nowrap; }
+
+  .slider { position: relative; height: 26px; margin: 2px 6px 10px; }
+  .slider .track { position: absolute; left: 0; right: 0; top: 11px; height: 4px; border-radius: 2px; background: var(--line); }
+  .slider .fill { position: absolute; top: 11px; height: 4px; border-radius: 2px; background: var(--navy); }
+  .slider input { position: absolute; left: 0; width: 100%; top: 0; height: 26px; margin: 0; background: none; pointer-events: none; -webkit-appearance: none; appearance: none; }
+  .slider input::-webkit-slider-thumb { -webkit-appearance: none; pointer-events: auto; width: 18px; height: 18px; border-radius: 50%; background: #fff; border: 2px solid var(--navy); cursor: grab; }
+  .slider input::-moz-range-thumb { pointer-events: auto; width: 14px; height: 14px; border-radius: 50%; background: #fff; border: 2px solid var(--navy); cursor: grab; }
+  .slider input::-moz-range-track { background: none; }
+
+  .chart { position: relative; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: #fff; }
+  .chart canvas { display: block; width: 100%; height: auto; }
+  .tt { position: absolute; pointer-events: none; background: rgba(31,41,55,.94); color: #fff; border-radius: 8px; padding: 7px 10px; font-size: 12.5px; white-space: nowrap; display: none; z-index: 2; }
+  .tt b { font-weight: 600; }
+  .tt .r { display: flex; gap: 8px; align-items: center; font-variant-numeric: tabular-nums; }
+  .tt .r i { width: 8px; height: 8px; border-radius: 2px; display: inline-block; }
+  .empty { padding: 60px 16px; text-align: center; color: var(--muted); }
+  .tip { margin-top: 10px; font-size: 13px; color: var(--muted); }
+  .tip b { color: var(--ink); }
+
+  h3 { margin: 22px 0 10px; font-size: 17px; color: var(--navy); display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+  h3 small { font-size: 12.5px; font-weight: 400; color: var(--muted); }
+  .tbl-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; background: #fff; font-variant-numeric: tabular-nums; }
+  th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--line); font-size: 13.5px; vertical-align: top; }
+  thead th { background: var(--navy); color: #fff; font-weight: 600; font-size: 13px; white-space: nowrap; }
+  thead th i { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 6px; vertical-align: middle; border: 1.5px solid #fff; }
+  tbody th { font-weight: 700; color: #fff; background: var(--navy); text-align: center; white-space: nowrap; width: 1%; border-bottom: 1px solid #fff; line-height: 1.35; }
+  thead th:first-child { text-align: center; }
+  td { text-align: center; }
+  tr.perf th, tr.perf td { border-top: 3px solid var(--line); }
+  td.num { white-space: nowrap; }
+  .pos { color: var(--pos); } .neg { color: var(--neg); }
+  .head { align-items: flex-start; }
+  .titlebox { display: flex; flex-direction: column; gap: 8px; flex: 1 1 320px; min-width: 0; }
+  .titlebox input { flex: none; width: 100%; }
+  .titleopts { display: flex; align-items: center; gap: 8px 14px; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
+  .optlabel { white-space: nowrap; margin-left: 6px; }
+  .seg.sm button { padding: 4px 12px; font-size: 12.5px; }
+  .chk { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; white-space: nowrap; color: var(--ink); }
+  .chk input { accent-color: var(--navy); width: 15px; height: 15px; margin: 0; }
+  .barcard { margin-top: 16px; }
+  .peerlbl { color: var(--ink); }
+  .peerbox { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; font-size: 13.5px; }
+  .peerin { display: inline-flex; align-items: center; gap: 6px; color: var(--ink); }
+  .peerin input { font: inherit; padding: 4px 8px; border: 1px solid var(--line); border-radius: 8px; }
+  .peerin { white-space: nowrap; flex-wrap: nowrap; }
+  .peerin input { flex: none; }
+  .peerin input[type=number] { width: 84px !important; }
+  .peerin input[type=date] { width: auto; }
+  .peerin[aria-disabled=true] { opacity: .45; }
+  .cardtitle { margin: 0 0 6px !important; font-size: 17px; }
+  .src { color: var(--muted); font-size: 12px; text-align: right; margin-top: 6px; }
+  .dt tbody td { min-width: 150px; }
+  .dt thead th { text-align: center; }
+  .dt tbody td { color: var(--navy); }
+  .infos { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; align-items: start; }
+  .info { background: var(--card); border-radius: 12px; box-shadow: 0 1px 2px rgba(16,24,40,.06), 0 1px 3px rgba(16,24,40,.08); padding: 14px 16px; border-top: 4px solid var(--c, var(--navy)); }
+  .info h4 { margin: 0; font-size: 17px; color: var(--navy); }
+  .info-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .docbtn { display: inline-flex; align-items: center; gap: 6px; flex: none; background: #f1f3f5; color: var(--ink); text-decoration: none;
+            font-size: 13px; font-weight: 600; padding: 6px 12px 6px 10px; border-radius: 999px; transition: background .15s; }
+  .docbtn:hover { background: #e4e8ee; }
+  .docbtn svg { width: 16px; height: 16px; color: var(--navy); }
+  .info .sub { color: var(--muted); font-size: 12.5px; margin-top: 2px; line-height: 1.45; }
+  .info dl { margin: 10px 0 0; display: grid; grid-template-columns: 148px 1fr; gap: 6px 10px; font-size: 13px; }
+  .info dt { color: var(--muted); } .info dd { margin: 0; }
+  .info .pol { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; cursor: pointer; }
+  .info .pol.open { display: block; }
+  .info .more { color: var(--navy); font-size: 12px; cursor: pointer; text-decoration: underline; }
+  .perf-t td, .perf-t th { text-align: right; }
+  .perf-t th:first-child, .perf-t td:first-child { text-align: left; }
+  .perf-t i { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 6px; vertical-align: middle; }
+  details { margin-top: 10px; font-size: 13px; }
+  details summary { cursor: pointer; color: var(--navy); font-weight: 500; }
+  details .raw { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 10px; margin-top: 8px; }
+  details .raw div { border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; }
+  details .raw b { color: var(--navy); }
+  details .raw dl { margin: 6px 0 0; display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; }
+  details .raw dt { color: var(--muted); } details .raw dd { margin: 0; word-break: break-word; }
+
+  .notice { margin-top: 16px; border-radius: 10px; padding: 10px 12px; font-size: 13px; background: #fff7e6; color: #7a4b00; border: 1px solid #f3d9a4; }
+  .notice ul { margin: 4px 0 0; padding-left: 18px; }
+  footer { color: var(--muted); font-size: 12px; padding: 28px 0 40px; }
+
+  /* พอร์ตจำลอง */
+  .simbtn { width: 100%; margin-top: 8px; }
+  .opt .ed { border: 0; background: none; color: var(--muted); cursor: pointer; font-size: 13px; padding: 0 4px; }
+  .opt .ed:hover { color: var(--navy); }
+  .opt .nm .meta.sim { white-space: normal; }
+  .modal.sim { max-width: 560px; max-height: calc(100vh - 32px); overflow: auto; }
+  .modal .fld { display: block; font-size: 13.5px; color: var(--ink); margin: 10px 0; }
+  .modal .fld > input { display: block; width: 100%; margin-top: 4px; font: inherit; font-size: 15px; padding: 8px 10px; border: 1.5px solid var(--line); border-radius: 9px; box-sizing: border-box; }
+  .modal .fld .seg { display: flex; margin-top: 4px; width: fit-content; max-width: 100%; flex-wrap: wrap; }
+  .simrow { display: grid; grid-template-columns: 1fr 86px 26px; gap: 6px; align-items: center; margin: 6px 0; }
+  .simrow input { font: inherit; font-size: 14px; padding: 7px 9px; border: 1.5px solid var(--line); border-radius: 8px; width: 100%; box-sizing: border-box; }
+  .simrow input.bad { border-color: var(--red); }
+  .simrow .w { text-align: right; }
+  .simrow .wrap-w { position: relative; } .simrow .wrap-w::after { content: "%"; position: absolute; right: 9px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 13px; }
+  .simrow .wrap-w input { padding-right: 24px; }
+  .simrow button { border: 0; background: none; color: var(--muted); font-size: 18px; cursor: pointer; }
+  .simrow button:hover { color: var(--red); }
+  .simhead { display: grid; grid-template-columns: 1fr 86px 26px; gap: 6px; font-size: 12.5px; color: var(--muted); margin-top: 12px; }
+  .simfoot { display: flex; align-items: center; gap: 10px; margin: 8px 0 12px; font-size: 13.5px; }
+  .simfoot #simSum { margin-left: auto; font-weight: 600; }
+  .simfoot #simSum.bad { color: var(--red); }
+  .modal .reset { font: inherit; font-size: 12.5px; color: var(--navy); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; }
+  .modal .note-sm { font-size: 12px; }
+  .simac { position: fixed; z-index: 80; background: #fff; border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 12px 30px rgba(15,23,42,.18); max-height: 280px; overflow: auto; padding: 4px; }
+  .simac[hidden] { display: none; }
+  .simac div { padding: 6px 9px; border-radius: 7px; cursor: pointer; font-size: 14px; line-height: 1.3; }
+  .simac div small { display: block; color: var(--muted); font-size: 11.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .simac div.on { background: #e8eef8; }
+  .simac mark { background: #fff3c4; color: inherit; border-radius: 2px; padding: 0 1px; }
+  .simac .none { color: var(--muted); cursor: default; }
+  .modal-bg { position: fixed; inset: 0; background: rgba(15,23,42,.45); display: grid; place-items: center; z-index: 60; padding: 16px; }
+  .modal-bg[hidden] { display: none; }
+  .fxonly[hidden] { display: none !important; }
+  .t1note { margin: 18px 0 -6px; padding: 10px 14px; border-radius: 10px; background: #fff7e6; border: 1px solid #f3d38b; color: #6b4a00; font-size: 13.5px; }
+  .t1note[hidden] { display: none; }
+  .modal { background: #fff; border-radius: 14px; max-width: 460px; width: 100%; padding: 20px 22px; box-shadow: 0 20px 50px rgba(15,23,42,.25); }
+  .modal h2 { margin: 0 0 4px; font-size: 18px; color: var(--navy); }
+  .modal p { margin: 0 0 10px; color: var(--muted); font-size: 14px; }
+  .modal ul { margin: 0 0 16px; padding-left: 20px; line-height: 1.7; }
+  .modal li a { color: var(--navy); cursor: pointer; text-decoration: underline; }
+  .modal-act { display: flex; justify-content: flex-end; gap: 8px; }
+  .flash { outline: 3px solid #f59e0b !important; outline-offset: 2px; border-radius: 6px; }
+  .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(20px); opacity: 0;
+           background: var(--ink); color: #fff; padding: 10px 16px; border-radius: 10px; font-size: 14px; transition: .2s; pointer-events: none; z-index: 5; }
+  .toast.show { opacity: 1; transform: translateX(-50%); }
+
+  #report { display: none; }
+  @media (max-width: 860px) { .layout { grid-template-columns: 1fr; } }
+
+  @media print {
+    /* ขอบกระดาษ 0 = ไม่มีวันที่/ลิงก์ของเบราว์เซอร์ที่หัว-ท้ายหน้า · เว้นขอบเองใน .page */
+    @page { size: A4 landscape; margin: 0; }
+    html, body { background: #fff !important; margin: 0; }
+    header, main, footer, .toast, .notice { display: none !important; }
+    #report { display: block; }
+    #report .page { width: 297mm; height: 210mm; padding: 14mm 16mm; box-sizing: border-box; display: flex; flex-direction: column;
+                    justify-content: center; align-items: center; page-break-after: always; break-after: page; overflow: hidden; }
+    #report .page:last-child { page-break-after: auto; break-after: auto; }
+    #report .page h2 { align-self: stretch; margin: 0 0 6mm; font-family: var(--font-head); font-weight: 700; font-size: 20pt; color: var(--navy); }
+    #report .page img { display: block; max-width: 100%; max-height: 100%; object-fit: contain; }
+    #report .page .foot { align-self: stretch; margin-top: 4mm; color: #8a929e; font-size: 9pt; text-align: right; }
+  }
+  /* หน้าตาเหมือนตารางที่ Copy ไปวางในสไลด์: หัวข้อ 16 · กองอื่น 12 · FIXEDSP 16 ตัวหนา */
+  #t1 { border-collapse: collapse; border: 1px solid #1f2a44; table-layout: fixed; width: 100%; min-width: 640px; }
+  #t1 th, #t1 td { text-align: center !important; vertical-align: middle !important; padding: 9px 12px; }
+  #t1 th:first-child { background: #1b3560 !important; color: #fff !important; font-weight: 700; font-size: 16px; width: 34%;
+    border-bottom: 1px solid #fff; border-right: 1px solid #1f2a44; }
+  #t1 tbody td { min-width: 0; }
+  #t1 thead th:not(:first-child), #t1 td { background: #fff; color: #1b3560; font-weight: 400; font-size: 13px;
+    border-left: 1px solid #1f2a44; border-bottom: 1px solid #e3e6eb; }
+  #t1 thead th:not(:first-child) { border-bottom: 1px solid #1f2a44; }
+  #t1 .fx { background: #dce8fb !important; font-size: 16px !important; font-weight: 700 !important; font-family: var(--font-head); }
+  .card:has(> #t1) { border-radius: 0; overflow: hidden; }
+  .pastehint { font-size: 12.5px; color: var(--muted); font-weight: 400; margin-right: 4px; }
+  @media (max-width: 700px) { .pastehint { display: none; } }
+  #t1 select.pick { font: inherit; color: #1b3560; background: transparent; border: 1px dashed #b8c2d3; border-radius: 6px;
+    padding: 3px 6px; text-align: center; text-align-last: center; cursor: pointer; max-width: 100%; }
+  #t1 select.pick:hover, #t1 select.pick:focus { border-style: solid; border-color: #1b3560; outline: none; }
+  @media print { #t1 select.pick { border: 0; appearance: none; } }
+</style>
+<script src="../../shared/sources.js"></script>
+<script src="../../shared/atf-store.js"></script>
+<script src="../../shared/nav.js" data-section="atf" data-title="เปรียบเทียบ Auto Top Funds กับกองทุน"></script>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div>
+      <h1>Auto Top Funds เทียบกองทุนรวม</h1>
+      <p>เทียบผลตอบแทนโมเดล Auto Top Funds กับกองทุนรวมทุกประเภท</p>
+      <p class="asof" id="asof">กำลังโหลด…</p>
+    </div>
+    <div class="hdr-right">
+      <div class="fx-wrap">
+        <button class="hdrbtn" id="fxOpen" aria-expanded="false" aria-controls="fxPop"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 13V4M6.5 7.5 10 4l3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.5 12.5v3h13v-3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="fxLabel">อัปโหลดข้อมูล Auto Top Funds</span></button>
+      <div class="upload pop" id="fxPop" hidden>
+        <h2>อัปโหลดข้อมูล Auto Top Funds</h2>
+        <p>ถ้าอัปโหลดไว้ในหน้า Auto Top Funds แล้วไม่ต้องอัปโหลดซ้ำ · อัปโหลดที่นี่ก็ใช้ร่วมกับเครื่องมืออื่นได้เหมือนกัน</p>
+        <ol class="steps">
+          <li>เปิด <a href="https://tableau.sawasdee.brk1/#/views/All_model_performance/ModelPerformance?:iid=1" target="_blank" rel="noopener">Tableau · Model Performance</a></li>
+          <li>เลือกโมเดลที่ต้องการ เช่น <b>FIXEDSP</b> หรือเลือกทุกโมเดล</li>
+          <li>กด <span class="kbd"><svg class="ico" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v9M6.5 8.5 10 12l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.5 12.5v3h13v-3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg><svg class="caret" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 3.5 5 6.5 8 3.5z" fill="currentColor"/></svg></span> (Download) → <b>Data</b></li>
+          <li>กดปุ่มด้านล่าง แล้วเลือกไฟล์ที่ดาวน์โหลดมา</li>
+        </ol>
+        <input type="file" id="csvFile" accept=".csv,.txt,text/csv" hidden>
+        <button class="btn primary sm" id="csvBtn">เลือกไฟล์</button>
+        <p class="note-sm">หมายเหตุ: ข้อมูลอยู่ในเบราว์เซอร์เครื่องนี้เท่านั้น ไม่ถูกส่งขึ้นเว็บ ใช้ร่วมกับทุกเครื่องมือในหมวด Auto Top Funds จำไว้จนกว่าจะอัปโหลดไฟล์ใหม่หรือกดล้าง <span id="atfLeft"></span></p>
+        <button class="btn ghost sm" id="atfClear" hidden>ล้างข้อมูล Auto Top Funds ออกจากเครื่องนี้</button>
+      </div>
+      </div>
+      <div class="dlbox fxonly" hidden>
+        <div class="dlhead">ดาวน์โหลด</div>
+        <div class="dlgrp" title="Review Portfolio: ปก · กราฟเส้น · กราฟแท่ง · ตารางเทียบ · รายละเอียด FIXEDSP">
+          <span class="dlname">Ver. เปรียบเทียบกับรายกอง</span>
+          <button class="hdrbtn sm" id="pptx" data-fmt="pptx"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v9M6.5 8.5 10 12l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.5 12.5v3h13v-3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>PowerPoint</span></button>
+          <button class="hdrbtn sm" id="pdf" data-fmt="pdf"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v9M6.5 8.5 10 12l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.5 12.5v3h13v-3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>PDF</span></button>
+        </div>
+        <div class="dlgrp" title="FIXEDSP อย่างเดียว: รายละเอียดพอร์ต · ผลตอบแทนรายปี · กราฟ 3 ปี">
+          <span class="dlname">Ver. SP Only <small>(สำหรับลูกค้า Bank)</small></span>
+          <button class="hdrbtn sm" id="pptxSp" data-fmt="pptx"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v9M6.5 8.5 10 12l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.5 12.5v3h13v-3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>PowerPoint</span></button>
+          <button class="hdrbtn sm" id="pdfSp" data-fmt="pdf"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v9M6.5 8.5 10 12l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.5 12.5v3h13v-3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>PDF</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="layout">
+    <aside class="card side">
+      <div class="side-head"><h2>เลือกกองทุน</h2><div class="sel-tools" id="selTools"></div></div>
+      <div class="searchbox">
+        <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M13 13l4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <input type="search" id="q" placeholder="ค้นหาชื่อกองทุน" autocomplete="off" aria-label="ค้นหากองทุน">
+        <button id="qClear" type="button" title="ล้างคำค้น" hidden>×</button>
+      </div>
+      <button class="btn ghost sm simbtn" id="simNew" title="รวมหลายกอง/โมเดลตามสัดส่วนที่กำหนด แล้วเทียบเป็นอีกเส้น">+ สร้างพอร์ตจำลอง</button>
+      <div id="list"></div>
+      <div class="count" id="count"></div>
+    </aside>
+
+    <section>
+      <div class="card">
+        <div class="head">
+          <div class="titlebox">
+            <input id="title" placeholder="หัวกราฟ (ไม่ใส่ = เปรียบเทียบผลตอบแทน)" aria-label="หัวกราฟ">
+            <div class="titleopts">
+              <label class="chk"><input type="checkbox" id="showTitle" checked> แสดงหัวกราฟ</label>
+              <div class="seg sm" id="lang" style="display:none"><button data-l="th">ไทย</button><button data-l="en">EN</button></div>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn primary" id="copy">Copy รูป</button>
+            <button class="btn ghost" id="download">ดาวน์โหลด PNG</button>
+          </div>
+        </div>
+        <div class="range" id="rangeBox">
+          <div class="seg" id="quick" role="group" aria-label="ช่วงเวลา">
+            <button data-q="1M">1M</button><button data-q="3M">3M</button><button data-q="6M">6M</button><button data-q="YTD">YTD</button><button data-q="1Y">1Y</button><button data-q="3Y">3Y</button><button data-q="ALL">ทั้งหมด</button>
+          </div>
+          <div class="dates"><span class="dwrap"><input type="date" id="dFrom" aria-label="วันเริ่ม"><span class="dth" id="dFromTh"></span></span> ถึง <span class="dwrap"><input type="date" id="dTo" aria-label="วันสิ้นสุด"><span class="dth" id="dToTh"></span></span></div>
+          <label class="align"><input type="checkbox" id="align" checked> ทุกเส้นเริ่มและจบวันเดียวกัน</label>
+        </div>
+        <div class="slider" id="slider"><div class="track"></div><div class="fill" id="fill"></div>
+          <input type="range" id="sA" min="0" max="1" value="0" aria-label="วันเริ่ม">
+          <input type="range" id="sB" min="0" max="1" value="1" aria-label="วันสิ้นสุด"></div>
+        <div class="note" id="alignNote" hidden></div>
+        <div class="chart" id="chartBox"><canvas id="cv" width="1200" height="560"></canvas><div class="tt" id="tt"></div></div>
+        <div class="empty" id="empty" hidden>เลือกกองทุนทางซ้ายอย่างน้อย 1 กอง</div>
+        <div class="tip">ทุกเส้นเริ่มที่ 0% ณ วันแรกของช่วงที่เลือก ถ้าติ๊ก "ทุกเส้นเริ่มและจบวันเดียวกัน" ทุกเส้นจะเทียบช่วงเดียวกัน · คลิกช่องสีหน้าชื่อกองเพื่อเปลี่ยนสี</div>
+      </div>
+
+      <div class="card barcard" id="barCard">
+        <div class="head">
+          <div><h3 class="cardtitle">ผลตอบแทนรายปี</h3>
+            <div class="peerbox fxonly" hidden>
+              <span class="peerlbl">ค่าเฉลี่ยกลุ่ม Short Term General Bond</span><input type="checkbox" id="showPeer" checked hidden>
+              <span class="peerin" id="peerIn">YTD <span id="peerYear">2569</span>
+                <input type="number" id="peerYtd" step="0.01" placeholder="เช่น 0.73" aria-label="ค่าเฉลี่ยกลุ่ม YTD (%)"> %</span>
+            </div></div>
+          <div class="actions">
+            <button class="btn primary" id="copyBar">Copy รูป</button>
+            <button class="btn ghost" id="dlBar">ดาวน์โหลด PNG</button>
+          </div>
+        </div>
+        <div class="chart"><canvas id="cv2" width="1200" height="560"></canvas></div>
+      </div>
+
+      <div class="fxonly" hidden>
+      <p class="t1note" id="t1Note" hidden></p>
+      <h3>เทียบกับ FIXEDSP <span class="actions"><span class="pastehint">วางใน PowerPoint แล้วเลือก <b>Keep Source Formatting</b></span><button class="btn primary sm" id="copyT1" title="วางแล้วแก้ข้อความในตารางได้">Copy ตาราง</button></span></h3>
+      <div class="tbl-wrap card" style="padding:0"><table id="t1" class="dt"></table></div>
+      </div>
+
+      <h3>ข้อมูลกองทุน</h3>
+      <div class="infos" id="infos"></div>
+      <div class="notice" id="notice" hidden></div>
+    </section>
+  </div>
+
+  <footer>ข้อมูล NAV และข้อมูลกองทุนรวมจาก SEC Open API (สำนักงาน ก.ล.ต.) · ผลตอบแทนคำนวณจาก NAV ต่อหน่วย ไม่รวมค่าธรรมเนียมซื้อขาย ผลการดำเนินงานในอดีตไม่ได้เป็นสิ่งยืนยันถึงผลการดำเนินงานในอนาคต · ข้อมูล Auto Top Funds ที่อัปโหลดไม่ถูกส่งขึ้นเว็บ อยู่ในเบราว์เซอร์เครื่องนี้เท่านั้น</footer>
+</main>
+
+<div class="toast" id="toast"></div>
+<div class="modal-bg" id="simBg" hidden>
+  <div class="modal sim" role="dialog" aria-modal="true" aria-labelledby="simTitle">
+    <h2 id="simTitle">สร้างพอร์ตจำลอง</h2>
+    <p>รวมกองทุนหรือโมเดล Auto Top Funds ตามสัดส่วนที่กำหนด แล้วแสดงเป็นอีกเส้นในกราฟ</p>
+    <label class="fld">ชื่อพอร์ต (ขึ้นในกราฟ)<input id="simName" maxlength="40" autocomplete="off"></label>
+    <div class="fld">ปรับสัดส่วนกลับ (rebalance)
+      <div class="seg sm" id="simRb"><button type="button" data-r="none">ไม่ปรับ (ซื้อแล้วถือ)</button><button type="button" data-r="M">รายเดือน</button><button type="button" data-r="Q">รายไตรมาส</button><button type="button" data-r="Y">รายปี</button></div></div>
+    <div class="simhead"><span>กองทุน / โมเดล</span><span style="text-align:right">สัดส่วน</span><span></span></div>
+    <div id="simRows"></div>
+    <div class="simfoot"><button type="button" class="btn ghost sm" id="simAdd">+ เพิ่มกอง</button><button type="button" class="reset" id="simEqual">แบ่งเท่ากัน</button><span id="simSum"></span></div>
+    <p class="note-sm">กราฟเส้นเริ่มซื้อตามสัดส่วนนี้ ณ วันแรกของช่วงที่เลือก · กราฟรายปีนับจากวันแรกที่ทุกกองในพอร์ตมี NAV · ไม่รวมค่าธรรมเนียมซื้อขาย · พอร์ตจำไว้ในเบราว์เซอร์เครื่องนี้ 1 วัน</p>
+    <div class="modal-act"><button type="button" class="btn ghost" id="simDel" hidden style="margin-right:auto;color:var(--red);border-color:var(--red)">ลบพอร์ตนี้</button><button type="button" class="btn ghost" id="simCancel">ยกเลิก</button><button type="button" class="btn primary" id="simSave">บันทึก</button></div>
+  </div>
+</div>
+<div class="simac" id="simAc" role="listbox" hidden></div>
+<div class="modal-bg" id="warnBg" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="warnTitle">
+    <h2 id="warnTitle">ยังไม่ได้ใส่ข้อมูลบางส่วน</h2>
+    <p>ช่องเหล่านี้จะว่างในไฟล์ PowerPoint</p>
+    <ul id="warnList"></ul>
+    <div class="modal-act"><button class="btn ghost" id="warnGo">ดาวน์โหลดเลย</button><button class="btn primary" id="warnBack">กลับไปใส่</button></div>
+  </div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const PALETTE = ["#2f3747", "#5fb3a6", "#d0273e", "#e0a100", "#8e5bb5", "#2f9e5b", "#7a8794", "#c2185b"];
+const HERO_COLOR = "#3478f6";   // FIXEDSP (สีตามสไลด์)
+const MAX_SEL = PALETTE.length;
+const TH_MON = ["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
+const EN_MON = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+/* ภาษาในกราฟ (หัวกราฟ เดือนบนแกน) — ตารางและหน้าเว็บเป็นภาษาไทย */
+let LANG = "th";
+const EN = { "เปรียบเทียบผลตอบแทน": "Cumulative Return" };
+const tr = (t) => LANG === "en" && EN[t] != null ? EN[t] : t;
+const monLabel = (iso) => { const [y, m] = iso.split("-"); return LANG === "en" ? `${EN_MON[+m - 1]} ${y.slice(2)}` : `${TH_MON[+m - 1]} ${(+y + 543) % 100}`; };
+const dayLabel = (iso) => { const [, m, d] = iso.split("-"); return LANG === "en" ? `${+d} ${EN_MON[+m - 1]}` : `${+d} ${TH_MON[+m - 1]}`; };
+const STORE = "compare-custom-v1", COLOR_STORE = "compare-colors-v1";
+let W = 1200, H = 560;   // H เปลี่ยนชั่วคราวได้ตอนทำรูปให้พอดีกรอบสไลด์
+const FONT = '"BLSBody", "BLS Text", "IBM Plex Sans Thai", system-ui, sans-serif';
+const FONT_B = '"BLSHead", "BLS Bold", "IBM Plex Sans Thai", system-ui, sans-serif';
+
+let DATA = { funds: [], missing: {} };
+let CUSTOM = [];          // เส้นจาก CSV
+let selected = [];        // ชื่อกองตามลำดับที่เลือก (ลำดับ = สี)
+let ALLD = [];            // วันที่ทั้งหมด (ISO) เรียงแล้ว
+let range = { s: null, e: null, q: "3Y" };
+let layout = null;        // ไว้ใช้กับ tooltip
+let COLORS = {};          // สีที่เลือกเอง {ชื่อกอง: "#rrggbb"}
+
+/* ---------- utils */
+const thDate = (iso) => { if (!iso) return "–"; const [y, m, d] = iso.split("-"); return `${+d} ${TH_MON[+m - 1]} ${(+y + 543) % 100}`; };
+const pct = (v, dp = 2) => v == null || !isFinite(v) ? "–" : (v > 0 ? "+" : "") + v.toFixed(dp) + "%";
+const cls = (v) => v == null || !isFinite(v) ? "" : v >= 0 ? "pos" : "neg";
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const dnum = (iso) => Date.parse(iso + "T00:00:00Z") / 864e5;
+const isoOf = (n) => new Date(n * 864e5).toISOString().slice(0, 10);
+function toast(msg, ms = 2400) { const t = $("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toast.h); toast.h = setTimeout(() => t.classList.remove("show"), ms); }
+// ข้อมูล Auto Top Funds จำไว้ในเบราว์เซอร์เครื่องนี้ 3 วันนับจากอัปโหลด แล้วลบเอง (ไม่ถูกส่งขึ้นเว็บ)
+const KEEP_DAYS = 3, ATF_STORE = "atf-models-v1";
+const store = {
+  get() {
+    try {
+      const o = JSON.parse(localStorage.getItem(ATF_STORE) || "null");
+      if (!o || !Array.isArray(o.funds) || Date.now() - o.at > KEEP_DAYS * 864e5) { localStorage.removeItem(ATF_STORE); return { funds: [], at: 0 }; }
+      return o;
+    } catch (e) { return { funds: [], at: 0 }; }
+  },
+  set(funds) {
+    try {
+      if (!funds.length) { localStorage.removeItem(ATF_STORE); return; }
+      localStorage.setItem(ATF_STORE, JSON.stringify({ at: Date.now(), funds: funds.map(f => ({ name: f.name, d: f.d, v: f.v, src: f.info?.proj_name_th })) }));
+    } catch (e) { toast("จำข้อมูลในเครื่องไม่ได้ (พื้นที่เบราว์เซอร์เต็ม) ใช้ได้จนปิดหน้านี้"); }
+  },
+};
+let ATF_AT = 0;
+
+let SIMS = [];             // พอร์ตจำลอง (คำนวณจาก NAV ของกองในพอร์ต)
+const allSeries = () => [...CUSTOM, ...SIMS, ...DATA.funds];            // กองที่โหลด NAV แล้ว
+const byName = (n) => allSeries().find(f => f.name === n);
+/* รายชื่อกองทั้งหมดมาจาก data/index.json (ไม่มี NAV) · NAV ของแต่ละกองโหลดตอนเลือก (data/f/<กอง>.json) */
+let INDEX = null;
+const STUBS = new Map();
+const listSeries = () => [...CUSTOM, ...SIMS, ...[...STUBS.values()].map(st => byName(st.name) || st)];
+function decodeFund(f) {
+  if (f.d) return f;
+  const d = [];
+  if (f.s) { let t = dnum(f.s); d.push(f.s); for (const k of f.dd || []) { t += k; d.push(isoOf(t)); } }
+  f.d = d; delete f.dd; return f;
+}
+const pendingLoads = new Map();
+async function loadFund(n) {
+  if (byName(n)) return byName(n);
+  const st = STUBS.get(n); if (!st) return null;
+  if (!pendingLoads.has(n)) pendingLoads.set(n, fetch(UTFIT_SRC.atfCompare + `data/f/${encodeURIComponent(st.file)}.json?v=${INDEX.updated}`)
+    .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(f => { if (!byName(f.name)) DATA.funds.push(decodeFund(f)); return byName(f.name); })
+    .catch(e => { pendingLoads.delete(n); toast(`โหลดข้อมูล ${n} ไม่ได้`); return null; }));
+  return pendingLoads.get(n);
+}
+async function selectFund(n) {
+  if (selected.includes(n)) return;
+  if (selected.length >= MAX_SEL) { toast(`เลือกได้สูงสุด ${MAX_SEL} กอง`); renderList(); return; }
+  selected.push(n); renderList();
+  const f = await loadFund(n);
+  if (!f && !CUSTOM.some(c => c.name === n)) { selected = selected.filter(x => x !== n); renderList(); return; }
+  rebuildDates(); renderList(); update();
+}
+const isIPO = (f) => String(f?.sec?.fund_status || "").toUpperCase() === "IPO";
+const ipoTag = (f) => isIPO(f) ? `<span class="tag" title="กองทุนเปิดขายครั้งแรก (IPO) ยังไม่มี NAV ย้อนหลัง">IPO</span>` : "";
+const isHero = (f) => !!f && /^FIXEDSP$/i.test(f.name);   // FIXEDSP = เส้นหลัก (ฟ้า หนา) · โมเดลอื่นได้สีตามลำดับเหมือนกองทั่วไป
+const ATF_GROUP = "Auto Top Funds";
+const ATF_ORDER = ["FIXEDSP", "FIXEDTDP", "FIXEDDP", "CAA", "MAA", "AAA", "DAA", "TCT"];
+const atfRank = (n) => { const i = ATF_ORDER.indexOf(String(n).toUpperCase()); return i < 0 ? 99 : i; };
+const colorOf = (n) => {
+  if (COLORS[n]) return COLORS[n];
+  if (/^FIXEDSP$/i.test(n)) return HERO_COLOR;
+  const others = selected.filter(x => !/^FIXEDSP$/i.test(x));
+  return PALETTE[Math.max(0, others.indexOf(n)) % PALETTE.length];
+};
+const saveColors = () => { try { localStorage.setItem(COLOR_STORE, JSON.stringify(COLORS)); } catch (e) {} };
+
+/* ---------- CSV */
+const MON_EN = ["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"];
+// order: "dmy" (ค่าเริ่มต้นแบบไทย) หรือ "mdy" (แบบอเมริกัน เช่นไฟล์ที่ export จาก Tableau)
+function parseDateCell(s, order = "dmy") {
+  s = String(s).trim().replace(/^"|"$/g, "");
+  if (!s) return null;
+  if (/^\d{5}(\.\d+)?$/.test(s)) { const n = Math.floor(+s); if (n > 20000 && n < 80000) return isoOf(n - 25569); } // Excel serial
+  let y, m, d, x;
+  if ((x = s.match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/))) { y = +x[1]; m = +x[2]; d = +x[3]; }
+  else if ((x = s.match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{2,4})/))) { [d, m] = order === "mdy" ? [+x[2], +x[1]] : [+x[1], +x[2]]; y = +x[3]; }
+  else if ((x = s.match(/^(\d{1,2})[- ]([A-Za-z]{3})[A-Za-z]*\.?[- ,]+(\d{2,4})/))) { d = +x[1]; m = MON_EN.indexOf(x[2].toLowerCase()) + 1; y = +x[3]; }
+  else if ((x = s.match(/^([A-Za-z]{3})[A-Za-z]*\.?\s+(\d{1,2}),?\s+(\d{2,4})/))) { m = MON_EN.indexOf(x[1].toLowerCase()) + 1; d = +x[2]; y = +x[3]; } // April 1, 2019
+  else return null;
+  if (!m) return null;
+  if (y < 100) { const nowYY = new Date().getFullYear() % 100; y = y > nowYY + 5 ? 2500 + y - 543 : 2000 + y; }
+  if (y > 2400) y -= 543;
+  if (m < 1 || m > 12 || d < 1 || d > 31) return null;
+  return `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+}
+// ดูทั้งคอลัมน์ว่าเป็น วัน/เดือน หรือ เดือน/วัน
+function dateOrder(cells) {
+  let dmy = false, mdy = false;
+  for (const c of cells) {
+    const x = String(c).trim().match(/^(\d{1,2})[-/.](\d{1,2})[-/.]\d{2,4}/); if (!x) continue;
+    if (+x[1] > 12) dmy = true;
+    if (+x[2] > 12) mdy = true;
+  }
+  return mdy && !dmy ? "mdy" : "dmy";
+}
+// แยก CSV แบบรองรับเครื่องหมายคำพูด (เช่น "April 1, 2019")
+function csvSplit(text, delim) {
+  const out = []; let row = [], cur = "", q = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (q) { if (ch === '"' && text[i + 1] === '"') { cur += '"'; i++; } else if (ch === '"') q = false; else cur += ch; }
+    else if (ch === '"') q = true;
+    else if (ch === delim) { row.push(cur.trim()); cur = ""; }
+    else if (ch === "\n" || ch === "\r") { if (ch === "\r" && text[i + 1] === "\n") i++; row.push(cur.trim()); if (row.some(c => c)) out.push(row); row = []; cur = ""; }
+    else cur += ch;
+  }
+  row.push(cur.trim()); if (row.some(c => c)) out.push(row);
+  return out;
+}
+const numCell = (c) => { const t = String(c ?? "").replace(/[,%\s]/g, ""); if (!/^[-+]?\d*\.?\d+(e[-+]?\d+)?$/i.test(t)) return null; const v = +t; return isFinite(v) ? v : null; };
+// คืนรายการเส้น [{name, d, v, mode}] — ถ้าไฟล์มีคอลัมน์ชื่อพอร์ต/โมเดลหลายค่า จะได้หลายเส้น
+function parseCSV(text) {
+  text = text.replace(/^﻿/, "");
+  const first = text.split(/\r?\n/, 1)[0];
+  const delim = [",", ";", "\t"].sort((a, b) => first.split(b).length - first.split(a).length)[0];
+  let rows = csvSplit(text, delim);
+  if (rows.length < 2) throw new Error("ไฟล์มีข้อมูลน้อยเกินไป");
+  let header = null;
+  if (!parseDateCell(rows[0][0], "dmy") && !parseDateCell(rows[0][0], "mdy") && rows[0].some(c => numCell(c) == null)) header = rows.shift();
+  const ncol = Math.max(...rows.slice(0, 50).map(r => r.length));
+  const col = (c) => rows.map(r => r[c] ?? "");
+  // คอลัมน์วันที่ = คอลัมน์ที่อ่านเป็นวันที่ได้และมีวันที่ต่างกันมากที่สุด (ข้ามคอลัมน์อย่าง "Max Date" ที่ค่าเดียวทั้งไฟล์)
+  let dc = -1, best = 1, order = "dmy";
+  for (let c = 0; c < ncol; c++) {
+    const cells = col(c), o = dateOrder(cells), set = new Set();
+    let ok = 0; for (const x of cells) { const d = parseDateCell(x, o); if (d) { ok++; set.add(d); } }
+    if (ok >= rows.length * 0.8 && set.size > best) { best = set.size; dc = c; order = o; }
+  }
+  if (dc < 0) throw new Error("หาคอลัมน์วันที่ไม่เจอ");
+  // คอลัมน์ค่า: หัวคอลัมน์ที่บอกว่าเป็น NAV / % / ผลตอบแทน ก่อน ไม่งั้นใช้คอลัมน์ตัวเลขขวาสุด
+  const numericCol = (c) => c !== dc && col(c).filter(x => numCell(x) != null).length >= rows.length * 0.8;
+  let vc = header ? header.findIndex((h, i) => numericCol(i) && /nav|index|value|ราคา|มูลค่า|%|return|ผลตอบแทน|difference|change/i.test(h)) : -1;
+  if (vc < 0) for (let c = ncol - 1; c >= 0; c--) if (numericCol(c)) { vc = c; break; }
+  if (vc < 0) throw new Error("หาคอลัมน์ตัวเลขไม่เจอ");
+  const hdr = header ? header[vc] : "";
+  const pctFlag = /%|return|ผลตอบแทน|change|difference/i.test(hdr) || col(vc).slice(0, 20).some(x => /%/.test(x));
+  // คอลัมน์ชื่อพอร์ต/โมเดล (ถ้ามี) แยกเป็นหลายเส้น
+  let nc = header ? header.findIndex((h, i) => i !== dc && i !== vc && /model|portfolio|port|name|ชื่อ|กองทุน|fund/i.test(h)) : -1;
+  if (nc >= 0) { const names = new Set(col(nc).filter(Boolean)); if (names.size < 1 || names.size > 20 || [...names].every(n => parseDateCell(n))) nc = -1; }
+  const groups = new Map();
+  for (const r of rows) {
+    const d = parseDateCell(r[dc] ?? "", order), v = numCell(r[vc]);
+    if (!d || v == null) continue;
+    const g = nc >= 0 ? (r[nc] || "").trim() : "";
+    if (!groups.has(g)) groups.set(g, new Map());
+    groups.get(g).set(d, v);
+  }
+  const out = [];
+  for (const [g, pts] of groups) {
+    let d = [...pts.keys()].sort(), v = d.map(k => pts.get(k));
+    const isPct = pctFlag || Math.abs(v[0]) < 1e-9 || v.some(x => x <= 0);
+    if (isPct) v = v.map(x => 100 * (1 + x / 100));          // % สะสม → ดัชนีฐาน 100
+    // ตัดช่วงต้นที่ค่าไม่ขยับ (ก่อนพอร์ตเริ่มลงทุน) เหลือจุดสุดท้ายของช่วงนั้นไว้เป็นฐาน
+    let k = 0; while (k < v.length - 2 && v[k + 1] === v[0]) k++;
+    if (k > 5) { d = d.slice(k); v = v.slice(k); }
+    if (d.length >= 2) out.push({ name: g, d, v, mode: isPct ? "% สะสม" : "NAV/index" });
+  }
+  if (!out.length) throw new Error("อ่านได้น้อยกว่า 2 วัน");
+  return out;
+}
+function ingestATF(text, fname) {
+  const lines = parseCSV(text);
+  const added = [];
+  for (const p of lines) {
+    const name = (p.name || "FIXEDSP").slice(0, 40);
+    CUSTOM = CUSTOM.filter(c => c.name !== name);
+    CUSTOM.push({ name, group: ATF_GROUP, custom: true, d: p.d, v: p.v, info: { proj_name_th: `อัปโหลดจากไฟล์ ${fname}` }, sec: {} });
+    added.push(name);
+  }
+  CUSTOM.sort((a, b) => atfRank(a.name) - atfRank(b.name) || a.name.localeCompare(b.name));
+  store.set(CUSTOM); ATF_AT = Date.now();
+  return added;
+}
+async function onCSV(file) {
+  try {
+    const text = await file.text();
+    const added = ingestATF(text, file.name);
+    UTFIT_ATF.set(text, file.name);   // ใช้ร่วมกับเครื่องมืออื่นในหมวด Auto Top Funds
+    // เลือก FIXEDSP ให้อัตโนมัติ (ไม่มี FIXEDSP ในไฟล์ = เลือกโมเดลแรก) โมเดลอื่นติ๊กเพิ่มเองในกลุ่ม Auto Top Funds
+    const pick = CUSTOM.find(isHero) || CUSTOM.find(c => added.includes(c.name));
+    if (pick && !selected.includes(pick.name)) selected = [pick.name, ...selected].slice(0, MAX_SEL);
+    openGroups.add(ATF_GROUP);
+    await buildSims();
+    rebuildDates(); renderList(); update();
+    toast(added.length > 1 ? `อัปโหลด ${added.length} โมเดล (${CUSTOM.filter(c => added.includes(c.name)).map(c => c.name).join(", ")}) · ติ๊กโมเดลอื่นเพิ่มได้ในกลุ่ม Auto Top Funds` : `อัปโหลด ${added[0]}`, 5000);
+    fxStatus(); fxPop(false);
+  } catch (e) { toast("อ่านไฟล์ไม่ได้: " + e.message); }
+}
+
+/* ---------- เลือกกอง */
+const openGroups = new Set(["Auto Top Funds"]);
+document.addEventListener("toggle", (e) => {
+  const g = e.target.dataset?.g; if (g == null) return;
+  const was = openGroups.has(g);
+  if (e.target.open) openGroups.add(g); else openGroups.delete(g);
+  if (e.target.open && !was && !qnorm($("q").value)) renderList();
+}, true);
+// ค้นหาแบบไม่สนขีด ช่องว่าง จุด วงเล็บ และตัวพิมพ์เล็ก/ใหญ่
+const qnorm = (s) => String(s || "").toLowerCase().replace(/[\s\-._()\/,&]+/g, "");
+function hl(name, qn) {                         // ไฮไลต์ส่วนที่ตรงกับคำค้น บนชื่อเดิม (ข้ามขีด/ช่องว่าง)
+  if (!qn) return esc(name);
+  const map = []; let flat = "";
+  [...name].forEach((ch, i) => { const n = qnorm(ch); if (n) { flat += n; map.push(i); } });
+  const at = flat.indexOf(qn); if (at < 0) return esc(name);
+  const a = map[at], b = map[at + qn.length - 1] + 1, chars = [...name];
+  return esc(chars.slice(0, a).join("")) + "<mark>" + esc(chars.slice(a, b).join("")) + "</mark>" + esc(chars.slice(b).join(""));
+}
+function optItem(f, qn, idx, pinned) {
+  const on = selected.includes(f.name);
+  const meta = f.sim ? (pinned ? "" : simDesc(f.def)) : qn && !f.custom && f.risk ? `ความเสี่ยง ${f.risk}` : "";
+  return `<label class="opt" ${idx != null ? `data-i="${idx}"` : ""} title="${esc(f.info?.proj_name_th || f.name)}"><input type="checkbox" data-n="${esc(f.name)}" ${on ? "checked" : ""}>` +
+    (on ? `<input type="color" data-c="${esc(f.name)}" value="${colorOf(f.name)}" title="เปลี่ยนสีเส้น">` : `<span class="sw"></span>`) +
+    `<span class="nm">${hl(f.name, qn)}${ipoTag(f)}${meta ? `<span class="meta${f.sim ? " sim" : ""}">${esc(meta)}</span>` : ""}</span>` +
+    (f.sim ? `<button class="ed" data-edit="${esc(f.name)}" title="แก้พอร์ตจำลอง">แก้</button>` : "") +
+    (pinned ? `<button class="x" data-unsel="${esc(f.name)}" title="เอาออกจากที่เลือก">×</button>` : "") + `</label>`;   // × = เอาออกจากที่เลือก (ไม่ลบข้อมูล)
+}
+let hits = [], activeIdx = -1;
+function searchScore(f, qn) {
+  const n = qnorm(f.name);
+  if (n.startsWith(qn)) return 4;
+  if (n.includes(qn)) return 3;
+  if (qnorm(f.info?.proj_abbr_name).includes(qn)) return 2;
+  const other = qnorm([f.sec?.proj_name_th, f.info?.proj_name_th, f.sec?.proj_name_en, f.sec?.comp_name_th, f.info?.comp_name_th, amcShort(f.sec?.comp_name_th || f.info?.comp_name_th)].join(" "));
+  return other.includes(qn) ? 1 : 0;
+}
+function renderList() {
+  const raw = $("q").value, qn = qnorm(raw);
+  $("qClear").hidden = !raw;
+  const sel = selected.map(byName).filter(Boolean);
+  let html = sel.length ? `<div class="pinned"><div class="sec-title">ที่เลือกอยู่ <span>${sel.length}</span></div>${sel.map(f => optItem(f, qn, null, true)).join("")}</div>` : "";
+  if (qn) {
+    hits = listSeries().map(f => [searchScore(f, qn), f]).filter(([sc]) => sc > 0)
+      .sort((a, b) => b[0] - a[0] || a[1].name.localeCompare(b[1].name)).map(([, f]) => f);
+    if (activeIdx >= hits.length) activeIdx = hits.length - 1;
+    html += `<div class="sec-title">พบ <span style="margin:0">${hits.length}</span> กอง</div>` +
+      (hits.length ? hits.map((f, i) => optItem(f, qn, i)).join("") : `<div class="count">ไม่พบกองที่ค้นหา</div>`);
+  } else {
+    hits = []; activeIdx = -1;
+    const groups = new Map();
+    for (const f of listSeries()) { if (!groups.has(f.group)) groups.set(f.group, []); groups.get(f.group).push(f); }
+    // กลุ่มที่ปิดอยู่ไม่สร้างรายการข้างใน (บางกลุ่มมีหลายร้อยกอง)
+    html += [...groups].map(([g, fs]) =>
+      `<details class="grp" data-g="${esc(g)}" ${openGroups.has(g) ? "open" : ""}><summary class="grp-name">${esc(g)} <span>${fs.length}</span></summary>` +
+      (openGroups.has(g) ? fs.map(f => optItem(f, "")).join("") : "") + `</details>`).join("");
+  }
+  $("list").innerHTML = html;
+  markActive();
+  $("selTools").innerHTML = `${selected.length} / ${MAX_SEL}` + (selected.length ? `<button class="reset" id="clearSel">ล้างที่เลือก</button>` : "");
+  $("count").innerHTML = Object.keys(COLORS).length ? `<button class="reset" id="resetColors">ใช้สีเริ่มต้น</button>` : "";
+}
+function markActive() {
+  document.querySelectorAll("#list .opt.active").forEach(x => x.classList.remove("active"));
+  if (activeIdx < 0) return;
+  const el = document.querySelector(`#list .opt[data-i="${activeIdx}"]`);
+  if (el) { el.classList.add("active"); el.scrollIntoView({ block: "nearest" }); }
+}
+function toggleFund(n) {
+  if (selected.includes(n)) { selected = selected.filter(x => x !== n); renderList(); update(); }
+  else selectFund(n);
+}
+$("list").addEventListener("change", (e) => {
+  const n = e.target.dataset.n; if (!n) return;
+  if (e.target.checked) selectFund(n);
+  else { selected = selected.filter(x => x !== n); renderList(); update(); }
+});
+$("list").addEventListener("click", (e) => {
+  const ed = e.target.dataset.edit; if (ed) { e.preventDefault(); simOpen(ed); return; }
+  const n = e.target.dataset.unsel; if (!n) return;
+  e.preventDefault();
+  selected = selected.filter(x => x !== n);
+  renderList(); update();
+});
+$("q").addEventListener("input", () => { activeIdx = qnorm($("q").value) ? 0 : -1; renderList(); });
+$("q").addEventListener("keydown", (e) => {
+  if (e.key === "ArrowDown" && hits.length) { e.preventDefault(); activeIdx = Math.min(hits.length - 1, activeIdx + 1); markActive(); }
+  else if (e.key === "ArrowUp" && hits.length) { e.preventDefault(); activeIdx = Math.max(0, activeIdx - 1); markActive(); }
+  else if (e.key === "Enter" && hits[activeIdx]) { e.preventDefault(); toggleFund(hits[activeIdx].name); }
+  else if (e.key === "Escape") { $("q").value = ""; activeIdx = -1; renderList(); }
+});
+$("qClear").onclick = () => { $("q").value = ""; activeIdx = -1; renderList(); $("q").focus(); };
+document.addEventListener("keydown", (e) => {
+  if (e.key === "/" && !/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName || "") && !e.metaKey && !e.ctrlKey) { e.preventDefault(); $("q").focus(); $("q").select(); }
+});
+$("list").addEventListener("input", (e) => {
+  const n = e.target.dataset.c; if (!n) return;
+  COLORS[n] = e.target.value; saveColors(); renderChart(); renderTable(); saveHash();
+});
+$("list").addEventListener("change", (e) => { if (e.target.dataset.c) renderList(); });
+$("selTools").addEventListener("click", (e) => { if (e.target.id === "clearSel") { selected = []; renderList(); update(); } });
+$("count").addEventListener("click", (e) => {
+  if (e.target.id === "resetColors") { COLORS = {}; saveColors(); renderList(); update(); }
+  if (e.target.id === "clearSel") { selected = []; renderList(); update(); }
+});
+$("align").onchange = update;
+$("atfClear").onclick = async () => {
+  const names = new Set(CUSTOM.map(c => c.name));
+  CUSTOM = []; ATF_AT = 0; store.set([]); UTFIT_ATF.clear();
+  selected = selected.filter(n => !names.has(n));
+  await buildSims(); selected = selected.filter(n => byName(n));
+  rebuildDates(); renderList(); update(); fxStatus(); toast("ล้างข้อมูล Auto Top Funds แล้ว");
+};
+$("csvBtn").onclick = () => $("csvFile").click();
+function fxPop(open) { $("fxPop").hidden = !open; $("fxOpen").setAttribute("aria-expanded", open); }
+$("fxOpen").onclick = (e) => { e.stopPropagation(); fxPop($("fxPop").hidden); };
+document.addEventListener("click", (e) => { if (!$("fxPop").hidden && !e.target.closest(".fx-wrap")) fxPop(false); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") fxPop(false); });
+function fxStatus() {
+  const left = ATF_AT ? Math.max(0, ATF_AT + KEEP_DAYS * 864e5 - Date.now()) : 0;
+  $("atfLeft").textContent = "" && left ? `(ข้อมูลนี้จะลบใน ${left > 864e5 ? Math.ceil(left / 864e5) + " วัน" : Math.ceil(left / 36e5) + " ชั่วโมง"})` : "";
+  $("atfClear").hidden = !CUSTOM.length;
+  const f = CUSTOM.find(isHero) || CUSTOM[0];
+  $("fxOpen").classList.toggle("has", !!f);
+  $("fxLabel").textContent = f ? `${CUSTOM.length > 1 ? "Auto Top Funds" : f.name} ถึง ${thDate(f.d.at(-1))}` : "อัปโหลดข้อมูล Auto Top Funds";
+}
+$("csvFile").onchange = (e) => { if (e.target.files[0]) onCSV(e.target.files[0]); e.target.value = ""; };
+
+/* ---------- ช่วงเวลา */
+function rebuildDates() {
+  const set = new Set();
+  for (const f of allSeries()) f.d.forEach(x => set.add(x));
+  ALLD = [...set].sort();
+  $("sA").max = $("sB").max = Math.max(ALLD.length - 1, 1);
+  if (ALLD.length) { $("dFrom").min = $("dTo").min = ALLD[0]; $("dFrom").max = $("dTo").max = ALLD.at(-1); }
+  applyQuick(range.q || null, true);
+}
+function idxOf(iso) { let lo = 0, hi = ALLD.length - 1; while (lo < hi) { const m = (lo + hi) >> 1; if (ALLD[m] < iso) lo = m + 1; else hi = m; } return lo; }
+function applyQuick(q, silent) {
+  if (!ALLD.length) return;
+  const end = ALLD.at(-1);
+  if (q) {
+    const e = new Date(end + "T00:00:00Z"); let s;
+    if (q === "ALL") s = ALLD[0];
+    else if (q === "YTD") s = `${end.slice(0, 4)}-01-01`;
+    else if (!/^\d+[MY]$/.test(q)) s = ALLD[0];
+    else { const n = parseInt(q), u = q.slice(-1); const t = new Date(e); if (u === "M") t.setUTCMonth(t.getUTCMonth() - n); else t.setUTCFullYear(t.getUTCFullYear() - n); s = t.toISOString().slice(0, 10); }
+    range = { s: ALLD[idxOf(s)], e: end, q };
+  } else {
+    range.s = ALLD[idxOf(range.s || ALLD[0])]; range.e = ALLD[Math.min(idxOf(range.e || end), ALLD.length - 1)];
+  }
+  if (!silent) update();
+}
+function syncRangeUI() {
+  if (!ALLD.length) return;
+  const a = idxOf(range.s), b = idxOf(range.e), n = Math.max(ALLD.length - 1, 1);
+  $("sA").value = a; $("sB").value = b;
+  $("fill").style.left = (a / n * 100) + "%"; $("fill").style.width = ((b - a) / n * 100) + "%";
+  $("dFrom").value = range.s; $("dTo").value = range.e;
+  $("dFromTh").textContent = range.s ? thDate(range.s) : ""; $("dToTh").textContent = range.e ? thDate(range.e) : "";
+  document.querySelectorAll("#quick button").forEach(x => x.setAttribute("aria-pressed", x.dataset.q === range.q));
+}
+$("quick").onclick = (e) => { const q = e.target.dataset.q; if (q) applyQuick(q); };
+function fromSlider(which) {
+  let a = +$("sA").value, b = +$("sB").value;
+  if (a > b - 1) { if (which === "a") a = b - 1; else b = a + 1; }
+  a = Math.max(0, a); b = Math.min(ALLD.length - 1, b);
+  range = { s: ALLD[a], e: ALLD[b], q: null }; update();
+}
+$("sA").oninput = () => fromSlider("a"); $("sB").oninput = () => fromSlider("b");
+$("dFrom").onchange = () => { if ($("dFrom").value) { range = { s: $("dFrom").value, e: range.e, q: null }; applyQuick(null); } };
+$("dTo").onchange = () => { if ($("dTo").value) { range = { s: range.s, e: $("dTo").value, q: null }; applyQuick(null); } };
+
+/* ---------- คำนวณ */
+// วันเริ่มนับจริง: ถ้าติ๊ก "เริ่มวันเดียวกัน" = วันที่ทุกกองที่เลือกมี NAV แล้ว
+function startInfo() {
+  const fs = selected.map(byName).filter(f => f && f.d.length);
+  let s = range.s, late = null, e = range.e, early = null;
+  if ($("align").checked) for (const f of fs) {
+    const first = f.d.find(x => x >= range.s); if (first && first > s && first < range.e) { s = first; late = f; }
+    // จบวันเดียวกันด้วย: ถ้ามีเส้นที่ข้อมูลจบก่อน (เช่น ไฟล์ FIXEDSP) ตัดทุกเส้นให้จบวันนั้น จะได้เทียบช่วงเดียวกัน
+    const last = f.d.at(-1); if (last && last < e && last > s) { e = last; early = f; }
+  }
+  return { s, late, e, early };
+}
+function slice(f) {
+  const si = startInfo(), s0 = si.s, e0 = si.e, out = [];
+  if (f.sim) { const r = simulate(f.def, s0, e0); return r ? r.d.map((d, i) => [d, r.v[i]]) : []; }   // ซื้อตามสัดส่วน ณ วันแรกของกราฟ
+  for (let i = 0; i < f.d.length; i++) if (f.d[i] >= s0 && f.d[i] <= e0) out.push([f.d[i], f.v[i]]);
+  return out;
+}
+function stats(pts) {
+  if (pts.length < 2) return null;
+  const b = pts[0][1], last = pts.at(-1)[1], ret = (last / b - 1) * 100;
+  const days = dnum(pts.at(-1)[0]) - dnum(pts[0][0]);
+  const ann = days >= 28 ? (Math.pow(last / b, 365 / days) - 1) * 100 : null;
+  let peak = -Infinity, mdd = 0;
+  for (const [, v] of pts) { peak = Math.max(peak, v); mdd = Math.min(mdd, (v / peak - 1) * 100); }
+  return { ret, ann, mdd, start: pts[0][0], end: pts.at(-1)[0], base: b, last, n: pts.length };
+}
+
+/* ---------- วาดกราฟ */
+function niceStep(span, target) {
+  const raw = span / target, p = Math.pow(10, Math.floor(Math.log10(raw)));
+  return [1, 2, 2.5, 5, 10].map(m => m * p).find(s => s >= raw) || p * 10;
+}
+function draw(ctx, opts = {}) { return drawLine(ctx, opts); }
+/* ---------- กราฟแท่ง: ผลตอบแทนรายปีปฏิทิน ---------- */
+const navOn = (f, iso) => { if (!f.d.length || f.d[0] > iso) return null; let lo = 0, hi = f.d.length - 1; while (lo < hi) { const m = (lo + hi + 1) >> 1; if (f.d[m] <= iso) lo = m; else hi = m - 1; } return f.v[lo]; };
+// ค่าเฉลี่ยกลุ่ม Short Term General Bond (AIMC) ปีที่จบแล้ว ใช้ค่าตามสไลด์ · ปีล่าสุด (YTD) ผู้ใช้กรอกเอง
+const PEER_YEARS = { 2022: 0.55, 2023: 1.53, 2024: 2.11, 2025: 1.93 };
+const peerYtd = () => { const v = $("peerYtd").value.trim(); return v === "" || isNaN(+v) ? null : +v; };
+function annualModel() {
+  const fs = selected.map(byName).filter(f => f && f.d.length);
+  if (!fs.length) return null;
+  // YTD จบวันเดียวกันทุกกอง (วันล่าสุดที่ทุกกองมี NAV) ถ้าติ๊ก "เริ่มและจบวันเดียวกัน"
+  const ends = fs.map(f => f.d.at(-1));
+  const ytdEnd = $("align").checked ? ends.reduce((a, b) => a < b ? a : b) : ends.reduce((a, b) => a > b ? a : b);
+  const lastY = +ytdEnd.slice(0, 4), firstY = Math.max(2022, Math.min(...fs.map(f => +f.d[0].slice(0, 4) + 1)));
+  const years = []; for (let y = firstY; y <= lastY; y++) years.push(y);
+  const ytd = !ytdEnd.endsWith("-12-31") && ytdEnd < `${lastY}-12-28`;
+  const rows = fs.map(f => ({ f, name: f.name, color: colorOf(f.name), hi: isHero(f), vals: years.map(y => {
+    const b = navOn(f, `${y - 1}-12-31`); if (b == null) return null;
+    const endIso = y === lastY ? (($("align").checked ? ytdEnd : f.d.at(-1)) < `${y}-12-31` ? ($("align").checked ? ytdEnd : f.d.at(-1)) : `${y}-12-31`) : `${y}-12-31`;
+    const e = navOn(f, endIso); if (e == null || navOn(f, `${y - 1}-12-31`) === e && endIso === f.d[0]) return null;
+    return (e / b - 1) * 100;
+  }) }));
+  // ค่าเฉลี่ยกลุ่ม (AIMC): ปีที่จบแล้วจากรายงาน · YTD เฉพาะปีเดียวกับรายงาน
+  let peer = null;
+  $("peerYear").textContent = yearLabel(lastY);
+  if ($("showPeer").checked && hasFx()) {
+    const vals = years.map(y => y === lastY && ytd ? peerYtd() : (PEER_YEARS[y] ?? null));
+    if (vals.some(v => v != null)) { peer = { name: LANG === "en" ? "Peer average*" : "ค่าเฉลี่ยกลุ่ม*", color: "#d9dde6", peer: true, vals, ytdOn: ytd && peerYtd() != null }; rows.push(peer); }
+  }
+  return { years, ytd, ytdEnd, rows, peer };
+}
+// ปีในกราฟ: ภาษาไทย = พ.ศ. (ให้ตรงกับเดือนในกราฟเส้น "ม.ค. 67") · อังกฤษ = ค.ศ.
+const yearLabel = (y) => String(LANG === "en" ? y : +y + 543);
+function drawBars(ctx) {
+  const m = annualModel();
+  const INK = "#1f2937", MUTE = "#6b7280", GRID = "#e9ecf1";
+  ctx.save(); ctx.clearRect(0, 0, W, H);   // พื้นหลังโปร่งใส (วางบนสไลด์สีไหนก็ได้)
+  layout = null;
+  const showTitle = false;   // กราฟแท่งไม่มีหัวข้อ (ใช้หัวข้อในสไลด์)
+  if (showTitle && m) {
+    const end = LANG === "en" ? `${+m.ytdEnd.slice(8)} ${EN_MON[+m.ytdEnd.slice(5, 7) - 1]} ${m.ytdEnd.slice(0, 4)}` : thDate(m.ytdEnd);
+    const t0 = $("title").value.trim() || (LANG === "en" ? "Calendar-Year Returns" : "ผลตอบแทนรายปี");
+    const title = m.ytd ? `${t0} (${LANG === "en" ? "YTD to" : "YTD ถึง"} ${end})` : t0;
+    ctx.font = `700 26px ${FONT_B}`; ctx.fillStyle = INK; ctx.textAlign = "left"; ctx.textBaseline = "alphabetic"; ctx.fillText(title, 24, 42);
+  }
+  if (!m) { ctx.restore(); return; }
+  const foot = "";
+  const L = 74, R = 24, T = showTitle ? 80 : 34, legendH = 40, B = 40 + legendH + (foot ? 24 : 0), pw = W - L - R, ph = H - T - B;
+  const all = m.rows.flatMap(r => r.vals).filter(v => v != null);
+  // ขนาดแท่ง/ตัวเลข ปรับตามจำนวนกองที่เลือก: กองน้อย = แท่งผอม เว้นระยะระหว่างปีกว้าง · กองเยอะ = กลุ่มแท่งกว้างขึ้น
+  // ตัวเลขบนแท่งใช้ขนาดใหญ่สุดที่ไม่ล้นช่องแท่ง ถ้าเล็กกว่า 11px ยังไม่พอ ให้หมุนตัวเลขตั้งขึ้น
+  const nG = m.years.length, nS = m.rows.length, gw = pw / nG;
+  const frac = nS <= 3 ? 0.52 : Math.min(0.78, 0.52 + (nS - 3) * 0.07);
+  const bw = Math.min(44, (gw * frac) / nS), gap = Math.min(8, Math.max(2, bw * 0.16)), groupW = nS * bw + (nS - 1) * gap, pitch = bw + gap;
+  const widest = all.reduce((a, v) => (v.toFixed(2) + "%").length > a.length ? v.toFixed(2) + "%" : a, "0.00%");
+  let lab = 15, rot = false;
+  for (; lab >= 11; lab--) { ctx.font = `700 ${lab}px ${FONT_B}`; if (ctx.measureText(widest).width <= pitch - 2) break; }
+  if (lab < 11) { rot = true; lab = Math.min(14, Math.max(11, Math.floor(bw * 0.9))); }
+  ctx.font = `700 ${lab}px ${FONT_B}`;
+  const labPx = (rot ? ctx.measureText(widest).width : lab) + 10;   // ที่ว่างเหนือแท่งสูงสุด
+  let y0 = Math.min(0, ...all), y1 = Math.max(0, ...all, 0.01);
+  const pad = Math.max((y1 - y0) * 0.12, (y1 - y0) * labPx / Math.max(60, ph - labPx)); y1 += pad; if (y0 < 0) y0 -= pad;
+  const step = niceStep(y1 - y0, 6);
+  y1 = Math.ceil(y1 / step - 1e-9) * step; y0 = y0 < 0 ? Math.floor(y0 / step + 1e-9) * step : 0;
+  const Y = (v) => T + (y1 - v) / (y1 - y0) * ph;
+  const dp = Math.max(2, (String(+step.toFixed(6)).split(".")[1] || "").length);
+  ctx.font = `15px ${FONT}`; ctx.textAlign = "right"; ctx.textBaseline = "middle";
+  for (let v = y0; v <= y1 + step / 2; v += step) {
+    const y = Math.round(Y(v)) + 0.5, zero = Math.abs(v) < step / 2;
+    ctx.strokeStyle = zero ? INK : GRID; ctx.lineWidth = zero ? 1.5 : 1;
+    ctx.beginPath(); ctx.moveTo(L, y); ctx.lineTo(L + pw, y); ctx.stroke();
+    ctx.fillStyle = MUTE; ctx.fillText((zero ? 0 : v).toFixed(dp) + "%", L - 10, y);
+  }
+  // แท่ง: กลุ่มละปี
+  // ปีที่บางกองยังไม่มีข้อมูล: แท่งที่มีชิดกันอยู่กลางปี (ไม่เว้นช่องว่าง)
+  m.years.forEach((yr, g) => {
+    const has = m.rows.filter(r => r.vals[g] != null), gW = has.length * bw + Math.max(0, has.length - 1) * gap;
+    const cx = L + gw * g + gw / 2, x0 = cx - gW / 2;
+    has.forEach((r, i) => {
+      const v = r.vals[g];
+      const x = x0 + i * (bw + gap), ya = Y(Math.max(v, 0)), yb = Y(Math.min(v, 0));
+      ctx.fillStyle = r.color; ctx.fillRect(x, ya, bw, Math.max(1, yb - ya));
+      ctx.font = `700 ${lab}px ${FONT_B}`; ctx.fillStyle = "#111827";
+      if (rot) {
+        ctx.save(); ctx.translate(x + bw / 2, v >= 0 ? ya - 5 : yb + 5); ctx.rotate(-Math.PI / 2);
+        ctx.textAlign = v >= 0 ? "left" : "right"; ctx.textBaseline = "middle"; ctx.fillText(v.toFixed(2) + "%", 0, 0.5); ctx.restore();
+      } else {
+        ctx.textAlign = "center"; ctx.textBaseline = v >= 0 ? "bottom" : "top";
+        ctx.fillText(v.toFixed(2) + "%", x + bw / 2, v >= 0 ? ya - 6 : yb + 6);
+      }
+    });
+    ctx.font = `700 16px ${FONT_B}`; ctx.fillStyle = INK; ctx.textAlign = "center"; ctx.textBaseline = "top";
+    ctx.fillText(yr === m.years.at(-1) && m.ytd ? `${yearLabel(yr)} (YTD)` : yearLabel(yr), cx, T + ph + 12);
+  });
+  // legend ด้านล่าง (สี่เหลี่ยมสี + ชื่อ)
+  // ย่อตัวอักษร legend ถ้าเลือกกองเยอะจนยาวเกินความกว้างกราฟ
+  // กองที่ยังไม่มีข้อมูลบางปี: บอกวันจัดตั้ง (วันแรกที่มี NAV ของ class นั้น) ต่อท้ายชื่อ
+  const note = (r) => {
+    if (r.peer || !r.vals.some(v => v == null) || byName(r.name)?.custom) return "";   // โมเดลที่อัปโหลด: วันแรกในไฟล์ไม่ใช่วันจัดตั้ง
+    const f0 = byName(r.name)?.d?.[0]; if (!f0 || (DATA.start && f0 <= DATA.start)) return "";
+    if (byName(r.name)?.sim) return ` (เริ่ม ${thDate(f0)})`;
+    return LANG === "en" ? ` (launched ${+f0.slice(8)} ${EN_MON[+f0.slice(5, 7) - 1]} ${f0.slice(0, 4)})` : ` (จัดตั้ง ${thDate(f0)})`;
+  };
+  let lf = 16, items, sp = 28;
+  for (; lf >= 11; lf--) {
+    sp = lf >= 14 ? 28 : 18;
+    items = m.rows.map(r => { ctx.font = `600 ${lf}px ${FONT}`; const nw = ctx.measureText(r.name).width; ctx.font = `400 ${lf - 2}px ${FONT}`; const n = note(r);
+      return { r, n, nw, w: 14 + 8 + nw + (n ? ctx.measureText(n).width + 2 : 0) + sp }; });
+    if (items.reduce((a, b) => a + b.w, 0) - sp <= W - 32) break;
+  }
+  ctx.textBaseline = "middle"; ctx.textAlign = "left";
+  let x = W / 2 - (items.reduce((a, b) => a + b.w, 0) - sp) / 2; const ly = H - 22 - (foot ? 24 : 0);
+  for (const it of items) {
+    ctx.fillStyle = it.r.color; ctx.fillRect(x, ly - 7, 14, 14);
+    ctx.font = `600 ${lf}px ${FONT}`; ctx.fillStyle = INK; ctx.fillText(it.r.name, x + 22, ly + 0.5);
+    if (it.n) { ctx.font = `400 ${lf - 2}px ${FONT}`; ctx.fillStyle = MUTE; ctx.fillText(it.n, x + 22 + it.nw + 2, ly + 0.5); }
+    x += it.w;
+  }
+  if (foot) { ctx.font = `13px ${FONT}`; ctx.fillStyle = "#8a929e"; ctx.textAlign = "right"; ctx.fillText(foot, W - 24, H - 14); }
+  ctx.restore();
+}
+function drawLine(ctx, opts = {}) {
+  const si = startInfo();
+  const ser = selected.map(n => byName(n)).filter(Boolean).map(f => {
+    const pts = slice(f); const b = pts[0]?.[1];
+    return { name: f.name, color: colorOf(f.name), hi: isHero(f) || !!f.custom, pts: pts.map(([d, v]) => [dnum(d), (v / b - 1) * 100]) };
+  }).filter(s => s.pts.length >= 2);
+  const INK = "#1f2937", MUTE = "#6b7280", GRID = "#e9ecf1";
+
+  ctx.save();
+  ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, W, H);
+  // หัวกราฟ: ชื่อ + ช่วงเดือน (ซ่อนได้)
+  const showTitle = $("showTitle").checked;
+  if (showTitle && si.s && si.e) {
+    // ภาษาอังกฤษใช้ปีเต็มในหัวกราฟ ("Jan 26" อ่านเป็นวันที่ 26 ได้)
+    const ml = (iso) => LANG === "en" ? `${EN_MON[+iso.slice(5, 7) - 1]} ${iso.slice(0, 4)}` : monLabel(iso);
+    const span = ml(si.s) === ml(si.e) ? ml(si.s) : `${ml(si.s)} – ${ml(si.e)}`;
+    const title = `${$("title").value.trim() || tr("เปรียบเทียบผลตอบแทน")}, ${span}`;
+    ctx.font = `700 26px ${FONT_B}`; ctx.fillStyle = INK; ctx.textAlign = "left"; ctx.textBaseline = "alphabetic";
+    ctx.fillText(title, 24, 42);
+  }
+  if (!ser.length) { ctx.restore(); layout = null; return; }
+
+  // ท้ายเส้น = % อย่างเดียว · เผื่อที่ทางขวาให้พอดี
+  ctx.font = `700 17px ${FONT_B}`;
+  const R = Math.max(...ser.map(s => ctx.measureText(pct(s.pts.at(-1)[1], 2)).width)) + 26;
+  const L = 74, T = showTitle ? 76 : 28, B = 40, pw = W - L - R, ph = H - T - B;
+
+  const x0 = dnum(si.s), x1 = Math.max(dnum(si.e), x0 + 1);
+  let y0 = Math.min(0, ...ser.flatMap(s => s.pts.map(p => p[1]))), y1 = Math.max(0, ...ser.flatMap(s => s.pts.map(p => p[1])));
+  if (y1 - y0 < 0.05) { y1 += 0.05; }
+  const pad = (y1 - y0) * 0.06; y1 += pad; if (y0 < 0) y0 -= pad;
+  const step = niceStep(y1 - y0, 6);
+  y1 = Math.ceil(y1 / step - 1e-9) * step; if (y0 < 0 && y0 > -step * 0.6) y0 = y0 - step * 0.15; else y0 = Math.floor(y0 / step + 1e-9) * step;
+  const X = (d) => L + (d - x0) / (x1 - x0) * pw;
+  const Y = (v) => T + (y1 - v) / (y1 - y0) * ph;
+  layout = { X, Y, x0, x1, L, T, pw, ph, ser };
+
+  // แกน Y: เส้นกริดแนวนอนจาง ๆ · เส้น 0% สีเข้ม
+  const dp = (String(+step.toFixed(6)).split(".")[1] || "").length;
+  ctx.font = `15px ${FONT}`; ctx.textAlign = "right"; ctx.textBaseline = "middle";
+  for (let v = Math.ceil(y0 / step - 1e-9) * step; v <= y1 + step / 2; v += step) {
+    const y = Math.round(Y(v)) + 0.5, zero = Math.abs(v) < step / 2;
+    if (!zero) { ctx.strokeStyle = GRID; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(L, y); ctx.lineTo(L + pw, y); ctx.stroke(); }
+    ctx.fillStyle = MUTE; ctx.fillText((zero ? 0 : v).toFixed(dp) + "%", L - 10, y);
+  }
+  const yz = Math.round(Y(Math.max(y0, Math.min(0, y1)))) + 0.5;
+  ctx.strokeStyle = INK; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(L, yz); ctx.lineTo(L + pw, yz); ctx.stroke();
+
+  // แกน X: ขีดสั้นที่เส้นล่าง ไม่มีกริดแนวตั้ง
+  const months = (x1 - x0) / 30.44;
+  const every = [1, 2, 3, 6, 12].find(k => months / k <= 10) || 12;
+  const sd = new Date(x0 * 864e5), ticks = [];
+  let t = new Date(Date.UTC(sd.getUTCFullYear(), sd.getUTCMonth() + 1, 1));
+  while (dnum(t.toISOString().slice(0, 10)) <= x1) { if (t.getUTCMonth() % every === 0 || every === 1) ticks.push(t.toISOString().slice(0, 10)); t = new Date(Date.UTC(t.getUTCFullYear(), t.getUTCMonth() + 1, 1)); }
+  if (months < 1.5) { ticks.length = 0; for (let d = Math.ceil(x0); d <= x1; d += 7) ticks.push(isoOf(d)); }
+  const base = T + ph;
+  if (Math.abs(yz - base) > 1) { ctx.strokeStyle = "#c7ccd4"; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(L, base + .5); ctx.lineTo(L + pw, base + .5); ctx.stroke(); }
+  ctx.textAlign = "center"; ctx.textBaseline = "top"; ctx.font = `15px ${FONT}`;
+  for (const iso of ticks) {
+    const x = Math.round(X(dnum(iso))) + 0.5;
+    ctx.strokeStyle = "#9aa3af"; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x, base); ctx.lineTo(x, base + 5); ctx.stroke();
+    const [yy, mm, dd] = iso.split("-");
+    ctx.fillStyle = MUTE; ctx.fillText(months < 1.5 ? dayLabel(iso) : every >= 12 ? (LANG === "en" ? yy : `${+yy + 543}`) : monLabel(iso), x, base + 9);
+  }
+
+  // เส้น (FIXEDSP อยู่บนสุด)
+  ctx.save(); ctx.beginPath(); ctx.rect(L, T - 6, pw + 2, ph + 12); ctx.clip();
+  ctx.lineJoin = "round"; ctx.lineCap = "round";
+  const hasHero = ser.some(s => s.hi);
+  for (const s of [...ser].sort((a, b) => (a.hi - b.hi) || (ser.indexOf(b) - ser.indexOf(a)))) {
+    ctx.strokeStyle = s.color; ctx.lineWidth = s.hi ? 4.5 : hasHero ? 2.4 : 3;
+    ctx.beginPath(); s.pts.forEach(([d, v], i) => i ? ctx.lineTo(X(d), Y(v)) : ctx.moveTo(X(d), Y(v))); ctx.stroke();
+  }
+  ctx.restore();
+
+  // ชื่อกองมุมบนซ้ายในกราฟ (ตัวหนาสีเดียวกับเส้น)
+  ctx.textAlign = "left"; ctx.textBaseline = "middle";
+  const leg = [...ser].sort((a, b) => b.pts.at(-1)[1] - a.pts.at(-1)[1]);   // เรียงตามผลตอบแทนท้ายเส้น (สูง → ต่ำ)
+  leg.forEach((s, i) => {
+    const y = T + 14 + i * 26;
+    ctx.strokeStyle = s.color; ctx.lineWidth = s.hi ? 4.5 : 3; ctx.lineCap = "round";        // เส้นหน้าชื่อกอง (หนาเท่าเส้นจริง)
+    ctx.beginPath(); ctx.moveTo(L + 18, y); ctx.lineTo(L + 44, y); ctx.stroke();
+    ctx.font = `700 18px ${FONT_B}`; ctx.fillStyle = s.color; ctx.fillText(s.name, L + 54, y);
+  });
+
+  // % ท้ายเส้น (สีเดียวกับเส้น กันซ้อนกัน)
+  const tags = ser.map(s => ({ s, y: Y(s.pts.at(-1)[1]), x: X(s.pts.at(-1)[0]) })).sort((a, b) => a.y - b.y);
+  const gap = 22;
+  for (let i = 1; i < tags.length; i++) if (tags[i].y - tags[i - 1].y < gap) tags[i].y = tags[i - 1].y + gap;
+  const over = tags.length ? tags.at(-1).y - base : 0;
+  if (over > 0) { tags.forEach(t => t.y -= over); for (let i = tags.length - 2; i >= 0; i--) if (tags[i + 1].y - tags[i].y < gap) tags[i].y = tags[i + 1].y - gap; }
+  for (const t of tags) {
+    ctx.font = `700 17px ${FONT_B}`; ctx.fillStyle = t.s.color; ctx.textAlign = "left"; ctx.textBaseline = "middle";
+    ctx.fillText(pct(t.s.pts.at(-1)[1], 2), L + pw + 10, t.y);
+  }
+  ctx.restore();
+}
+function roundRect(ctx, x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
+
+function renderChart() {
+  const dpr = Math.max(2, window.devicePixelRatio || 1);
+  for (const [id, fn] of [["cv", drawLine], ["cv2", drawBars]]) {
+    const cv = $(id); cv.width = W * dpr; cv.height = H * dpr;
+    const ctx = cv.getContext("2d"); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); fn(ctx);
+  }
+}
+function exportBars(scale = 2) {
+  const c = document.createElement("canvas"); c.width = W * scale; c.height = H * scale;
+  const ctx = c.getContext("2d"); ctx.scale(scale, scale); drawBars(ctx); return c;
+}
+function exportCanvas(scale = 2, h = H) {
+  const h0 = H; H = h;
+  try {
+    const c = document.createElement("canvas"); c.width = W * scale; c.height = H * scale;
+    const ctx = c.getContext("2d"); ctx.scale(scale, scale); draw(ctx); return c;
+  } finally { H = h0; }
+}
+const toBlob = (c) => new Promise((ok, no) => c.toBlob(b => b ? ok(b) : no(new Error("toBlob")), "image/png"));
+
+/* tooltip */
+$("cv").addEventListener("mousemove", (e) => {
+  const tt = $("tt"); if (!layout) { tt.style.display = "none"; return; }
+  const rect = $("cv").getBoundingClientRect(), k = W / rect.width;
+  const mx = (e.clientX - rect.left) * k;
+  if (mx < layout.L || mx > layout.L + layout.pw) { tt.style.display = "none"; return; }
+  const d = layout.x0 + (mx - layout.L) / layout.pw * (layout.x1 - layout.x0);
+  const rows = layout.ser.map(s => { let best = s.pts[0]; for (const p of s.pts) { if (p[0] <= d) best = p; else break; } return { s, p: best }; });
+  const iso = isoOf(Math.round(rows.reduce((m, r) => Math.max(m, r.p[0]), -Infinity)));
+  tt.innerHTML = `<b>${thDate(iso)}</b>` + rows.map(r => `<div class="r"><i style="background:${r.s.color}"></i>${esc(r.s.name)} <span style="margin-left:auto">${pct(r.p[1], 2)}</span></div>`).join("");
+  tt.style.display = "block";
+  const bx = $("chartBox").getBoundingClientRect(), x = e.clientX - bx.left;
+  tt.style.left = (x + 14 + tt.offsetWidth > bx.width ? x - 14 - tt.offsetWidth : x + 14) + "px";
+  tt.style.top = Math.max(8, e.clientY - bx.top - tt.offsetHeight / 2) + "px";
+});
+$("cv").addEventListener("mouseleave", () => $("tt").style.display = "none");
+
+/* ---------- ตารางข้อมูลเบื้องต้น */
+// field จาก SEC /v2/fund/general-info/profiles (แสดงเฉพาะแถวที่มีข้อมูล)
+const SEC_ROWS = [
+  ["ประเภทกองทุน", ["policy_desc"]],
+  ["ชนิดหน่วยลงทุน", ["fund_class_detail"]],
+  ["ป้องกันความเสี่ยงค่าเงิน", ["exchange_rate_protection_policy"], (v) => v.replace(/\s*\(.*$/, "")],
+  ["วันจดทะเบียนกองทุน", ["regis_date"]],
+];
+const stripHtml = (s) => String(s).replace(/<[^>]*>/g, " ").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
+const amcShort = (s) => String(s || "").replace(/^บริษัท\s*หลักทรัพย์จัดการกองทุน(รวม)?\s*/, "บลจ. ").replace(/\s*จำกัด(\s*\(มหาชน\))?$/, "");
+function secVal(f, keys, fmt) {
+  for (const k of keys) { const v = f.sec?.[k]; if (v != null && String(v).trim()) return /date/.test(k) && /^\d{4}-\d{2}-\d{2}/.test(v) ? thDate(v.slice(0, 10)) : fmt ? fmt(v) : v; }
+  return null;
+}
+// รหัส management_style ตามคู่มือ SEC (/v2/fund/general-info/profiles)
+const STYLE = {
+  AM: "Active – มุ่งให้ผลตอบแทนสูงกว่าดัชนีชี้วัด",
+  AN: "Feeder – กองหลักมุ่งให้ผลตอบแทนสูงกว่าดัชนีชี้วัด",
+  PM: "Passive – ตามดัชนีชี้วัด",
+  PN: "Feeder – กองหลักเคลื่อนไหวตามดัชนีชี้วัด",
+  IM: "Inverse – ตรงข้ามกับดัชนีอ้างอิงรายวัน",
+  IN: "Feeder – กองหลักแบบ Inverse",
+  LM: "Leveraged – ทวีคูณกับดัชนีอ้างอิงรายวัน",
+  LN: "Feeder – กองหลักแบบ Leveraged",
+  BH: "Buy-and-hold – ลงทุนครั้งเดียว",
+  SM: "ตามดัชนีชี้วัด และบางโอกาสอาจสูงกว่าดัชนี",
+  OT: "อื่น ๆ",
+};
+const fxText = (f) => { const v = f.sec?.exchange_rate_protection_policy; return v ? String(v).replace(/\s*\(.*$/, "") : ""; };
+function renderInfos() {
+  const fs = selected.map(byName).filter(f => f && !f.custom && !f.sim);   // ไม่แสดงการ์ด FIXEDSP (ข้อมูลจาก CSV)
+  $("infos").innerHTML = fs.map(f => {
+    const sec = f.sec || {}, st = sec.management_style;
+    const rows = f.custom ? [] : [
+      ["บลจ.", amcShort(sec.comp_name_th || f.info?.comp_name_th)],
+      ["วันที่จดทะเบียนกองทุน", secVal(f, ["regis_date"])],
+      ["นโยบายค่าเงิน", fxText(f)],
+      ["กลยุทธ์การลงทุน", st ? (STYLE[st] || st) : ""],
+      ...(sec.feederfund_master_fund ? [["กองแม่", sec.feederfund_master_fund]] : []),   // เฉพาะกอง feeder
+    ];
+    const names = f.custom ? "ข้อมูลที่อัปโหลดจากไฟล์ CSV" : [sec.proj_name_th || f.info?.proj_name_th, sec.proj_name_en].filter(Boolean).map(esc).join("<br>");
+    const fsl = f.x?.fs;
+    const doc = fsl?.[0] ? `<a class="docbtn" href="${esc(fsl[0])}" target="_blank" rel="noopener" title="หนังสือชี้ชวนส่วนสรุปข้อมูลสำคัญ (Fund Fact Sheet)${fsl[1] ? " ข้อมูล ณ " + esc(thDate(fsl[1])) : ""}">` +
+      `<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 2.5h6.5L16 7v10.5H5z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M11.5 2.5V7H16M7.8 10.5h5.4M7.8 13.5h5.4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>หนังสือชี้ชวน</a>` : "";
+    return `<div class="info" style="--c:${colorOf(f.name)}"><div class="info-head"><h4>${esc(f.name)}${ipoTag(f)}</h4>${doc}</div><div class="sub">${names}</div>` +
+      (rows.length ? `<dl>${rows.map(([k, v, raw]) => `<dt>${k}</dt><dd>${v ? (raw ? v : esc(v)) : "–"}</dd>`).join("")}</dl>` : "") + `</div>`;
+  }).join("");
+}
+$("infos").addEventListener("click", (e) => { const p = e.target.closest(".pol"); if (p) p.classList.toggle("open"); });
+function renderPerf() {
+  const fs = selected.map(byName).filter(Boolean);
+  $("perf").innerHTML = !fs.length ? "" : `<thead><tr><th>กองทุน</th><th>ผลตอบแทนช่วงที่เลือก</th><th>ผลตอบแทนต่อปี</th><th>ลดลงสูงสุดจากจุดสูงสุด</th></tr></thead><tbody>` +
+    fs.map(f => { const s = stats(slice(f)); const c = (v, t) => `<td class="${cls(v)}">${t}</td>`;
+      return `<tr><td><i style="background:${colorOf(f.name)}"></i>${esc(f.name)}${ipoTag(f)}</td>` +
+        (s ? c(s.ret, pct(s.ret)) + (s.ann != null ? c(s.ann, pct(s.ann)) : "<td>–</td>") + `<td class="${s.mdd < -0.005 ? "neg" : ""}">${s.mdd > -0.005 ? "0.00%" : pct(s.mdd)}</td>` : "<td>–</td><td>–</td><td>–</td>") +
+        `</tr>` + (f.note ? `<tr><td colspan="4"><small>${esc(f.name)}: ${esc(f.note)}</small></td></tr>` : "");
+    }).join("") + `</tbody>`;
+}
+/* ---------- ตารางเทียบกองที่เลือกกับ FIXEDSP ----------
+   ช่องที่ SEC ไม่มีข้อมูลเว้นว่างไว้ */
+
+const keyOf = (s) => String(s || "").replace(/[\s*]+/g, "").toUpperCase();   // ไม่สนช่องว่างและดอกจัน
+const ROWS_T1 = ["บลจ.", "นโยบายค่าเงิน", "สัดส่วนประเภทการลงทุน\nทั้งภาครัฐและเอกชน", "อายุเฉลี่ยของตราสาร", "อัตราผลตอบแทนที่คาดหวัง 1 ปี*",
+  "Average Credit Rating", "ระยะเวลาที่ควรถือลงทุน", "ค่าธรรมเนียมขาย (Front-End Fee)", "ค่าธรรมเนียมการจัดการ + อื่น ๆ",
+  "ระยะเวลารับเงินค่าขายคืน", "ทีมผู้เชี่ยวชาญดูแล"];
+const COUNTRY = { "1": "เน้นลงทุนต่างประเทศ", "2": "ลงทุนในต่างประเทศบางส่วน", "3": "ลงทุนในประเทศเท่านั้น", "4": "ลงทุนได้ทั้งในและต่างประเทศ" };
+const numPct = (v) => { if (v == null || v === "") return ""; const s = String(v).trim(); return /^-?\d+(\.\d+)?$/.test(s) ? `${(+s).toFixed(2)}%` : s; };
+function durText(v) {
+  if (v == null || v === "") return "";
+  const s = String(v).trim();
+  if (!/^\d+(\.\d+)?$/.test(s)) return s;          // ถ้า SEC ส่งมาเป็นข้อความอยู่แล้ว ใช้ตามนั้น
+  const months = +s * 12, m = Math.floor(months), d = Math.round((months - m) * 30.4);
+  return m ? `${m} เดือน${d ? ` ${d} วัน` : ""}` : `${d} วัน`;   // SEC รายงานเป็นปี
+}
+// อัตราผลตอบแทนที่คาดหวัง 1 ปี = ผลตอบแทน 3 เดือนย้อนหลัง (จาก NAV ล่าสุด) × 4 แสดงเป็นช่วงกว้าง 0.1% เช่น 0.57% → "0.5-0.6%"
+const EXP_MONTHS = 3, EXP_MULT = 12 / EXP_MONTHS;
+function expected1y(f) {
+  if (!f?.d?.length || f.d.length < 20) return "";
+  const end = f.d.at(-1), t = new Date(end + "T00:00:00Z");
+  t.setUTCMonth(t.getUTCMonth() - EXP_MONTHS);
+  const from = t.toISOString().slice(0, 10);
+  if (f.d[0] > from) return "";                                 // ข้อมูลไม่ถึง 3 เดือน
+  let i = f.d.length - 1; while (i > 0 && f.d[i] > from) i--;   // NAV วันทำการสุดท้ายก่อน/ตรงวันนั้น
+  const v = (f.v.at(-1) / f.v[i] - 1) * 100 * EXP_MULT;
+  const lo = Math.floor(v * 10 + 1e-9) / 10;                   // เหลือแค่ค่าต่ำของช่วง (เช่น 1.1-1.2% → 1.1%)
+  return `${lo.toFixed(1)}%`;
+}
+// แยกจากนโยบายลงทุน: พูดถึงตราสารเอกชน/หุ้นกู้ หรือเขียนกว้าง ๆ ว่าตราสารหนี้ = ได้ทั้งภาครัฐและเอกชน
+// พูดถึงแต่ตราสารภาครัฐ (ตั๋วเงินคลัง พันธบัตรรัฐบาล ธปท. ฯลฯ) ไม่พูดถึงเอกชน = ภาครัฐ
+function govPriv(f) {
+  const raw = String(f?.sec?.investment_policy_desc || ""); if (!raw) return "";
+  // ตัดข้อความเชิงห้าม/ยกเว้นออกก่อน เช่น "ต้องไม่เป็นหุ้นกู้ด้อยสิทธิ", "ไม่ลงทุนในตราสารหนี้ภาคเอกชน"
+  const t = raw.replace(/หุ้นกู้ด้อยสิทธิ|ตราสารด้อยสิทธิ/g, " ")
+    .replace(/(ต้องไม่เป็น|ไม่เป็น|ไม่รวม(?:ถึง)?|ยกเว้น|มิใช่|ไม่ใช่|ไม่ลงทุน(?:ใน)?|มิได้ลงทุน(?:ใน)?|ห้ามลงทุน(?:ใน)?)[^,.;()]{0,40}?(เอกชน|หุ้นกู้|ตั๋วแลกเงิน)/g, " ");
+  // ใช้เฉพาะคำที่บอกชัดว่าเป็นภาคเอกชน (คำอย่าง "หุ้นกู้" "ตั๋วแลกเงิน" มักอยู่ในรายการประเภทตราสารทั่วไปท้ายนโยบาย)
+  const priv = /เอกชน|ตราสารหนี้ของบริษัท|private sector|corporate/i.test(t);
+  // ภาครัฐ เฉพาะเมื่อประโยคแรก ๆ ของนโยบายบอกว่าเน้นตราสารภาครัฐ (ไม่นับรายการประเภทตราสารท้ายนโยบาย)
+  const gov = /ภาครัฐ|รัฐบาล|ตั๋วเงินคลัง|ธนาคารแห่งประเทศไทย|กระทรวงการคลัง|government|treasury|t-bill/i.test(t.slice(0, 300));
+  return !priv && gov ? "สามารถลงทุนในตราสารภาครัฐ" : "สามารถลงทุนได้ทั้งตราสารภาครัฐ และเอกชน";
+}
+function feeOf(f, test) {
+  const fees = f?.x?.fees || {};
+  const k = Object.keys(fees).find(test); if (!k) return "";
+  const e = fees[k], a = e.actual ?? e.rate;
+  if (a == null || a === "") return e.other || "";
+  const s = String(a).trim(), zero = (v) => v == null || v === "" || /^0+(\.0+)?$/.test(String(v).trim());
+  if (!zero(s)) return numPct(s);
+  // เก็บจริง 0: ถ้าหนังสือชี้ชวนกำหนดอัตราไว้ (เรียกเก็บได้แต่ยกเว้นอยู่) = ปัจจุบันไม่เรียกเก็บ · ถ้าอัตราเป็น 0 ด้วย = ไม่มี
+  return zero(e.rate) ? "ไม่มี" : "ปัจจุบันไม่เรียกเก็บ";
+}
+function redempOf(f) {
+  const rs = f?.x?.redemp || []; if (!rs.length) return "";
+  const r = rs.find(x => /redemp|ขายคืน|รับซื้อคืน|^R$/i.test(String(x.type || ""))) || rs[0];
+  const s = String(r.settlement_period ?? "").trim();
+  if (/^\d+$/.test(s)) return `T+${s}`;
+  const m = s.match(/^T\s*\+\s*(\d+)/i) || s.match(/(\d+)\s*วันทำการ/);
+  return m ? `T+${m[1]}` : (s || r.redemp_period_oth || "");
+}
+function fxShort(f) {
+  const v = String(f?.sec?.exchange_rate_protection_policy || "");
+  if (/^ทั้งหมด|fully/i.test(v)) return "ป้องกันทั้งหมด/เกือบทั้งหมด";
+  if (/บางส่วน|partial/i.test(v)) return "ป้องกันบางส่วน";
+  if (/ดุลยพินิจ|discret/i.test(v)) return "ขึ้นอยู่กับดุลยพินิจของผู้จัดการกองทุน";
+  if (/ไม่ป้องกัน|^ไม่/.test(v)) return "ไม่ป้องกัน";
+  if (!v && String(f?.sec?.invest_country_flag) === "3") return "ไม่มีความเสี่ยงค่าเงิน";
+  return v;
+}
+// ค่าจาก SEC ตามหัวข้อ
+function secCell(f, label) {
+  if (!f || f.custom) return "";
+  switch (keyOf(label)) {
+    case keyOf("บลจ."): return amcShort(f.sec?.comp_name_th || f.info?.comp_name_th);
+    case keyOf("นโยบายค่าเงิน"): return fxShort(f);
+    case keyOf("ความเสี่ยง"): return f.risk ? String(f.risk) : "";
+    case keyOf("สัดส่วนการลงทุนทั้งในและต่างประเทศ"): return COUNTRY[String(f.sec?.invest_country_flag || "")] || "";
+    case keyOf("อายุเฉลี่ยของตราสาร"): return durText(f.x?.duration);
+    case keyOf("Yield to Maturity"): return numPct(f.x?.ytm);
+    case keyOf("อัตราผลตอบแทนที่คาดหวัง 1 ปี"): return expected1y(f);
+    case keyOf("สัดส่วนประเภทการลงทุนทั้งภาครัฐและเอกชน"): return govPriv(f);
+    case keyOf("ทีมผู้เชี่ยวชาญดูแล"): return "ไม่มี";
+    case keyOf("ค่าธรรมเนียมขาย (Front-End Fee)"): return feeOf(f, k => /ขาย|front/i.test(k) && !/ขายคืน|รับซื้อคืน|back|สับเปลี่ยน|switch/i.test(k))
+      || (Object.keys(f.x?.fees || {}).length ? "ไม่มี" : "");
+    case keyOf("ค่าธรรมเนียมการจัดการ + อื่น ๆ"): return feeOf(f, k => /รวม|total/i.test(k) && /ค่าใช้จ่าย|ค่าธรรมเนียม|expense/i.test(k)) || feeOf(f, k => /การจัดการ|management/i.test(k));
+    case keyOf("ระยะเวลารับเงินค่าขายคืน"): return redempOf(f);
+    case keyOf("วันที่จดทะเบียนกองทุน"): return secVal(f, ["regis_date"]) || "";
+    case keyOf("ขนาดกองทุน (ล้านบาท)"): return f.x?.aum ? Math.round(f.x.aum[1] / 1e6).toLocaleString("en-US") : "";
+  }
+  return "";
+}
+// ข้อมูลคอลัมน์ FIXEDSP (ตามสไลด์เทียบกอง) แก้ข้อความได้ที่นี่
+const FIXEDSP_INFO = {
+  "บลจ.": "BLS",
+  "นโยบายค่าเงิน": "ป้องกันทั้งหมด/เกือบทั้งหมด",
+  "สัดส่วนประเภทการลงทุนทั้งภาครัฐและเอกชน": "สามารถลงทุนได้ทั้งตราสารภาครัฐ และเอกชนคุณภาพดี",
+  "อายุเฉลี่ยของตราสาร": "3 เดือน",
+  "อัตราผลตอบแทนที่คาดหวัง 1 ปี": "1.0% +/-",
+  "Average Credit Rating": "AA",
+  "ระยะเวลาที่ควรถือลงทุน": "แนะนำประมาณ 1 เดือนขึ้นไป",
+  "ค่าธรรมเนียมขาย (Front-End Fee)": "ปัจจุบันไม่เรียกเก็บ",
+  "ค่าธรรมเนียมการจัดการ + อื่น ๆ": "0.22%",
+  "ระยะเวลารับเงินค่าขายคืน": "T+2**",
+  "ทีมผู้เชี่ยวชาญดูแล": "ปรับพอร์ตให้ตามสถานการณ์ มีคนดูแล",
+};
+const FIXEDSP_MAP = Object.fromEntries(Object.entries(FIXEDSP_INFO).map(([k, v]) => [keyOf(k), v]));
+// แถวที่ SEC ไม่มีข้อมูล ให้เลือกเองจาก dropdown ในตาราง (จำไว้ในเบราว์เซอร์ + ติดไปกับลิงก์)
+const PICK = {
+  "Average Credit Rating": ["AAA", "AA+", "AA", "AA-", "A+", "A", "A-", "BBB+", "BBB", "BBB-", "ต่ำกว่า BBB-"],
+  "ระยะเวลาที่ควรถือลงทุน": ["แนะนำประมาณ 1 สัปดาห์ขึ้นไป", "แนะนำประมาณ 1 เดือนขึ้นไป", "แนะนำประมาณ 3 เดือนขึ้นไป", "แนะนำประมาณ 6 เดือนขึ้นไป", "แนะนำประมาณ 1 ปีขึ้นไป"],
+};
+const MANUAL_STORE = "compare-manual";
+let MANUAL = {};
+try { MANUAL = JSON.parse(localStorage.getItem(MANUAL_STORE) || "{}") || {}; } catch (e) { MANUAL = {}; }
+// ค่าที่เลือกไว้แบบเดิม "ตั้งแต่ … ขึ้นไป" → "แนะนำประมาณ … ขึ้นไป"
+const migrateHold = (v) => typeof v === "string" ? v.replace(/^ตั้งแต่\s*(.+?)\s*ขึ้นไป$/, (_, x) => `แนะนำประมาณ ${x.replace(/\s+/g, " ")}ขึ้นไป`).replace("ประมาณ 1 วันขึ้นไป", "ประมาณ 1 สัปดาห์ขึ้นไป") : v;
+for (const o of Object.values(MANUAL)) if (o && o["ระยะเวลาที่ควรถือลงทุน"]) o["ระยะเวลาที่ควรถือลงทุน"] = migrateHold(o["ระยะเวลาที่ควรถือลงทุน"]);
+const saveManual = () => { try { localStorage.setItem(MANUAL_STORE, JSON.stringify(MANUAL)); } catch (e) {} };
+const cellFor = (name, f, label) => name === "FIXEDSP" && !f ? (FIXEDSP_MAP[keyOf(label)] || "")
+  : (PICK[label] && MANUAL[name]?.[label]) || secCell(f, label);
+function modelT1() {
+  const others = selected.map(byName).filter(f => f && !f.custom && !f.sim && lowRisk(f));   // ตาราง: เฉพาะกองความเสี่ยง 1–4 (โมเดลอื่นยังไม่มีข้อมูลตาราง)
+  const cols = [...others.map(f => ({ name: f.name, f })), { name: "FIXEDSP", f: null }];
+  return { cols, rows: ROWS_T1.map(l => [l, cols.map(c => cellFor(c.name, c.f, l))]) };
+}
+function pickHTML(name, label, v) {
+  const opts = PICK[label].includes(v) || !v ? PICK[label] : [v, ...PICK[label]];
+  return `<select class="pick" data-n="${esc(name)}" data-l="${esc(label)}" aria-label="${esc(label)} ${esc(name)}">` +
+    `<option value="">— เลือก —</option>${opts.map(o => `<option${o === v ? " selected" : ""}>${esc(o)}</option>`).join("")}</select>`;
+}
+function tableHTML({ cols, rows }) {
+  const lab = (l) => esc(l).replace(/\n/g, "<br>");
+  const fx = (i) => isFxCol(cols[i]) ? ' class="fx"' : "";
+  return `<thead><tr><th>กองทุน</th>${cols.map((c, i) => `<th${fx(i)}>${esc(c.name)}${c.f ? ipoTag(c.f) : ""}</th>`).join("")}</tr></thead>` +
+    `<tbody>${rows.map(([l, vs]) => `<tr><th>${lab(l)}</th>${vs.map((v, i) => `<td${fx(i)}>${PICK[l] && !isFxCol(cols[i]) ? pickHTML(cols[i].name, l, v) : esc(v)}</td>`).join("")}</tr>`).join("")}</tbody>`;
+}
+// ตารางเทียบ FIXEDSP และไฟล์ Ver. เปรียบเทียบกับรายกอง ใช้ได้เฉพาะกองความเสี่ยง 1–4 (กราฟเทียบได้ทุกกอง)
+const lowRisk = (f) => f && +f.risk >= 1 && +f.risk <= 4;
+const highRiskPicked = () => selected.map(byName).filter(f => f && !f.custom && !f.sim && !lowRisk(f));
+function renderTable() {
+  renderInfos();
+  $("t1").innerHTML = tableHTML(modelT1());
+  const hi = highRiskPicked();
+  $("t1Note").hidden = !hi.length;
+  $("t1Note").innerHTML = hi.length ? `ตารางและไฟล์ <b>Ver. เปรียบเทียบกับรายกอง</b> เทียบได้เฉพาะกองความเสี่ยง 1–4 · ไม่รวม: ${hi.map(f => `${esc(f.name)} (${f.risk ? "ความเสี่ยง " + esc(f.risk) : "ไม่ระบุความเสี่ยง"})`).join(", ")}` : "";
+}
+/* ขนาดกรอบตารางในสไลด์ 16:9 (13.33 × 7.5 นิ้ว = 960 × 540 pt) ตามสไลด์ "รายละเอียดพอร์ตกองทุนตราสารหนี้ระยะสั้น"
+   ตารางกว้าง 878 pt สูง 398 pt · คอลัมน์หัวข้อกว้าง 340 pt · หัวข้อ 16 pt ตัวหนา · กองอื่น 12 pt · FIXEDSP 16 pt BLS Bold (พื้นฟ้าอ่อน) */
+const SLIDE_T = { w: 878, h: 398, labelW: 340, labelSize: 16, bodySize: 12, fxSize: 16, fxBg: "#dce8fb" };
+const isFxCol = (c) => c.name === "FIXEDSP" && !c.f;
+const NAVY = "#1b3560", LINE = "#1f2a44";
+// PowerPoint บน Windows ที่ตั้งขนาดหน้าจอ (Display scale) เกิน 100% ย่อตารางที่วางลงตามสัดส่วนนั้น
+// จึงขยายขนาดใน HTML ชดเชยไว้ก่อน (Mac ไม่ต้อง)
+function pasteScale() {
+  if (!/Windows/i.test(navigator.userAgent)) return 1;
+  const zoom = window.outerWidth && window.innerWidth ? window.outerWidth / window.innerWidth : 1;
+  const os = (window.devicePixelRatio || 1) / (zoom > 0.3 && zoom < 5 ? zoom : 1);
+  return Math.min(3, Math.max(1, Math.round(os * 4) / 4));
+}
+async function copyModel(m) {
+  const txt = (v) => v || "", k = pasteScale(), pt = (v) => `${+(v * k).toFixed(2)}pt`;
+  const tsv = [["กองทุน", ...m.cols.map(c => c.name)].join("\t"), ...m.rows.map(([l, vs]) => [l.replace(/\n/g, " "), ...vs.map(txt)].join("\t"))].join("\n");
+  const n = m.cols.length, colW = Math.floor((SLIDE_T.w - SLIDE_T.labelW) / Math.max(n, 1)), rowH = Math.floor(SLIDE_T.h / (m.rows.length + 1));
+  const base = `border:1px solid ${LINE};padding:${pt(2)} ${pt(6)};text-align:center;vertical-align:middle;height:${pt(rowH)};`;
+  const lab = base + `width:${pt(SLIDE_T.labelW)};background:${NAVY};color:#fff;font-weight:bold;font-family:'BLS Bold','BLS Text',Tahoma,sans-serif;font-size:${pt(SLIDE_T.labelSize)};border-color:#fff ${LINE};`;
+  const cs = (c, head) => base + `width:${pt(colW)};background:${isFxCol(c) ? SLIDE_T.fxBg : "#fff"};color:${NAVY};` +
+    (isFxCol(c) ? `font-weight:bold;font-family:'BLS Bold','BLS Text',Tahoma,sans-serif;` : `font-family:'BLS Text',Tahoma,sans-serif;`) +
+    `font-size:${pt(isFxCol(c) ? SLIDE_T.fxSize : SLIDE_T.bodySize)};`;
+  const html = `<table style="border-collapse:collapse;width:${pt(SLIDE_T.w)}"><colgroup><col style="width:${pt(SLIDE_T.labelW)}">${m.cols.map(() => `<col style="width:${pt(colW)}">`).join("")}</colgroup>` +
+    `<tr><td style="${lab}">กองทุน</td>${m.cols.map(c => `<td style="${cs(c, true)}">${esc(c.name)}</td>`).join("")}</tr>` +
+    m.rows.map(([l, vs]) => `<tr><td style="${lab}">${esc(l).replace(/\n/g, "<br>")}</td>${vs.map((v, i) => `<td style="${cs(m.cols[i], false)}">${esc(txt(v))}</td>`).join("")}</tr>`).join("") + `</table>`;
+  try {
+    await navigator.clipboard.write([new ClipboardItem({ "text/html": new Blob([html], { type: "text/html" }), "text/plain": new Blob([tsv], { type: "text/plain" }) })]);
+  } catch (e) { await navigator.clipboard.writeText(tsv); }
+  toast("Copy ตารางแล้ว · วางใน PowerPoint แล้วเลือก Keep Source Formatting (คลิกขวา → ตัวเลือกการวาง → เก็บการจัดรูปแบบต้นฉบับ)", 6000);
+}
+// วาดตารางเป็นรูป สัดส่วนเท่ากรอบเนื้อหาในสไลด์ (วางแล้วลากให้เต็มกรอบได้พอดี)
+function tableCanvas(m, scale = 3) {
+  const W2 = SLIDE_T.w, H2 = SLIDE_T.h, n = Math.max(m.cols.length, 1);
+  const c = document.createElement("canvas"); c.width = W2 * scale; c.height = H2 * scale;
+  const ctx = c.getContext("2d"); ctx.scale(scale, scale);
+  const rows = [["กองทุน", m.cols.map(c => c.name), true], ...m.rows.map(([l, vs]) => [l, vs, false])];
+  // แถวที่หัวข้อ 2 บรรทัดสูงกว่าแถวอื่น (เหมือนในสไลด์)
+  const wts = rows.map(([l]) => String(l).includes("\n") ? 1.6 : 1), unit = H2 / wts.reduce((a, b) => a + b, 0);
+  const ys = wts.reduce((a, w) => (a.push(a.at(-1) + w * unit), a), [0]);
+  let rh = unit; const lw = SLIDE_T.labelW, cw = (W2 - lw) / n;
+  const fsL = SLIDE_T.labelSize, fsB = SLIDE_T.bodySize, fsF = SLIDE_T.fxSize;
+  ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, W2, H2);
+  m.cols.forEach((c, i) => { if (isFxCol(c)) { ctx.fillStyle = SLIDE_T.fxBg; ctx.fillRect(lw + i * cw, 0, cw, H2); } });
+  ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  // ตัดบรรทัด: ตาม \n ก่อน แล้วตัดหลัง "/" หรือช่องว่างถ้ายาวเกินช่อง
+  const wrap = (text, maxW) => {
+    const out = [];
+    for (const para of String(text || "").split("\n")) {
+      if (ctx.measureText(para).width <= maxW) { out.push(para); continue; }
+      // ตัดคำภาษาไทยด้วย Intl.Segmenter (ไทยไม่มีช่องว่างระหว่างคำ) ถ้าไม่มีให้ตัดที่ "/" หรือช่องว่าง
+      const parts = typeof Intl !== "undefined" && Intl.Segmenter
+        ? [...new Intl.Segmenter("th", { granularity: "word" }).segment(para)].map(x => x.segment)
+        : para.split(/(?<=\/)|(?<= )/);
+      let line = "";
+      for (const p of parts) { if (line && ctx.measureText(line + p).width > maxW) { out.push(line.trim()); line = p; } else line += p; }
+      if (line) out.push(line.trim());
+    }
+    return out;
+  };
+  const cell = (text, x, y, w, size, font, color) => {
+    let sz = size, lines;
+    for (;;) { ctx.font = `${font === "b" ? 700 : 400} ${sz}px ${font === "b" ? FONT_B : FONT}`; lines = wrap(text, w - 10);
+      const fitsW = lines.every(l => ctx.measureText(l).width <= w - 10);
+      if ((fitsW && lines.length * sz * 1.25 <= rh - 4) || sz <= 8) break; sz -= 0.5; }
+    ctx.fillStyle = color;
+    lines.forEach((ln, i) => ctx.fillText(ln, x + w / 2, y + rh / 2 + (i - (lines.length - 1) / 2) * sz * 1.25 + 0.5));
+  };
+  rows.forEach(([label, vals, isHead], r) => {
+    const y = ys[r]; rh = ys[r + 1] - ys[r];
+    ctx.fillStyle = NAVY; ctx.fillRect(0, y, lw, rh);
+    cell(label, 0, y, lw, fsL, "b", "#fff");
+    vals.forEach((v, i) => { const fx = isFxCol(m.cols[i]); cell(v, lw + i * cw, y, cw, fx ? fsF : fsB, fx ? "b" : "t", NAVY); });
+  });
+  // เส้นตาราง: เส้นขาวคั่นแถวในคอลัมน์หัวข้อ, เส้นเทาคั่นแถวในเนื้อหา, เส้นเข้มคั่นคอลัมน์และใต้หัวตาราง
+  ctx.lineWidth = 1;
+  for (let r = 1; r < rows.length; r++) {
+    const y = Math.round(ys[r]) + 0.5;
+    ctx.strokeStyle = "#fff"; ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(lw, y); ctx.stroke();
+    ctx.strokeStyle = r === 1 ? LINE : "#e3e6eb"; ctx.beginPath(); ctx.moveTo(lw, y); ctx.lineTo(W2, y); ctx.stroke();
+  }
+  ctx.strokeStyle = LINE;
+  for (let i = 1; i < n; i++) { const x = Math.round(lw + i * cw) + 0.5; ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H2); ctx.stroke(); }
+  ctx.strokeRect(0.5, 0.5, W2 - 1, H2 - 1);
+  return c;
+}
+// ใส่ค่า DPI (chunk pHYs) ใน PNG เพื่อให้วางแล้วได้ขนาดจริงตามสไลด์
+const CRC_T = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+const crc32 = (u8) => { let c = 0xffffffff; for (const b of u8) c = CRC_T[(c ^ b) & 0xff] ^ (c >>> 8); return (c ^ 0xffffffff) >>> 0; };
+async function pngWithDpi(blob, dpi) {
+  const src = new Uint8Array(await blob.arrayBuffer()), ppm = Math.round(dpi / 0.0254);
+  const chunk = new Uint8Array(21), dv = new DataView(chunk.buffer);
+  dv.setUint32(0, 9); chunk.set([0x70, 0x48, 0x59, 0x73], 4); dv.setUint32(8, ppm); dv.setUint32(12, ppm); chunk[16] = 1;
+  dv.setUint32(17, crc32(chunk.subarray(4, 17)));
+  const at = 8 + 25;                                   // หลัง signature + IHDR
+  const out = new Uint8Array(src.length + 21); out.set(src.subarray(0, at)); out.set(chunk, at); out.set(src.subarray(at), at + 21);
+  return new Blob([out], { type: "image/png" });
+}
+const TABLE_SCALE = 3;                                  // 3 px ต่อ 1 pt = 216 dpi
+async function tablePng(m) { return pngWithDpi(await toBlob(tableCanvas(m, TABLE_SCALE)), 72 * TABLE_SCALE); }
+async function copyTableImage(m) {
+  try {
+    await navigator.clipboard.write([new ClipboardItem({ "image/png": tablePng(m) })]);
+    toast("Copy รูปตารางแล้ว ขนาด 30.97 × 14.04 ซม. (พอดีกรอบเนื้อหาในสไลด์)");
+  } catch (e) { toast("เบราว์เซอร์นี้ copy รูปไม่ได้"); }
+}
+/* ---------- ปุ่ม */
+function fileName(ext) { return (($("title").value.trim() || selected.join("_")) || "compare").replace(/[\\/:*?"<>|]+/g, "-").slice(0, 80) + `_${range.s}_${range.e}.${ext}`; }
+$("copy").onclick = async () => {
+  if (!selected.length) return;
+  const btn = $("copy");
+  try {
+    await navigator.clipboard.write([new ClipboardItem({ "image/png": toBlob(exportCanvas(2)) })]);
+    btn.textContent = "Copy แล้ว ✓"; btn.classList.add("done"); toast("Copy รูปแล้ว ไปวางใน PowerPoint ได้เลย");
+  } catch (e) { toast("เบราว์เซอร์นี้ copy รูปไม่ได้ ใช้ดาวน์โหลด PNG แทน"); }
+  setTimeout(() => { btn.textContent = "Copy รูป"; btn.classList.remove("done"); }, 1800);
+};
+$("download").onclick = async () => {
+  if (!selected.length) return;
+  const a = document.createElement("a"); a.href = URL.createObjectURL(await toBlob(exportCanvas(2))); a.download = fileName("png"); a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+};
+/* ---------- PowerPoint: ใช้ docs/assets/template.pptx (ไฟล์ Review Portfolio ของทีม) เป็นแม่แบบ ----------
+   สไลด์ 1 ปก (ชื่อกอง) · 2 กราฟเส้น · 3 กราฟแท่ง · 4 ตารางเทียบ · ที่เหลือคงไว้ตามแม่แบบ
+   อยากเปลี่ยนหน้าตา/สไลด์ 5 เป็นต้นไป: อัปโหลดไฟล์ใหม่ทับ template.pptx บน GitHub */
+let PPTX_TPL = null;
+const loadJSZip = () => window.JSZip ? Promise.resolve(window.JSZip) : new Promise((ok, no) => {
+  const sc = document.createElement("script");
+  sc.src = "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js";
+  sc.onload = () => ok(window.JSZip); sc.onerror = () => no(new Error("โหลด JSZip ไม่ได้")); document.head.appendChild(sc);
+});
+const NS_A = "http://schemas.openxmlformats.org/drawingml/2006/main";
+const NS_P = "http://schemas.openxmlformats.org/presentationml/2006/main";
+const NS_R = "http://schemas.openxmlformats.org/officeDocument/2006/relationships";
+const NS_PR = "http://schemas.openxmlformats.org/package/2006/relationships";
+const xmlOf = (str) => new DOMParser().parseFromString(str, "application/xml");
+const strOf = (doc) => new XMLSerializer().serializeToString(doc);
+const tsOf = (el) => [...el.getElementsByTagNameNS(NS_A, "t")];
+const textOf = (el) => tsOf(el).map(t => t.textContent).join("");
+async function slidePaths(zip) {
+  const pres = xmlOf(await zip.file("ppt/presentation.xml").async("string"));
+  const rels = xmlOf(await zip.file("ppt/_rels/presentation.xml.rels").async("string"));
+  const tgt = Object.fromEntries([...rels.getElementsByTagNameNS(NS_PR, "Relationship")].map(r => [r.getAttribute("Id"), r.getAttribute("Target")]));
+  return [...pres.getElementsByTagNameNS(NS_P, "sldId")].map(e => "ppt/" + tgt[e.getAttributeNS(NS_R, "id")].replace(/^\/?ppt\//, ""));
+}
+// ใส่รูปใหม่แทนรูปแรกในสไลด์ (กว้างเท่าเดิม สูงตามสัดส่วนรูปใหม่)
+async function swapPicture(zip, path, doc, canvas, name) {
+  const pic = doc.getElementsByTagNameNS(NS_P, "pic")[0]; if (!pic) return;
+  const blip = pic.getElementsByTagNameNS(NS_A, "blip")[0], rid = blip.getAttributeNS(NS_R, "embed");
+  const media = `ppt/media/${name}.png`;
+  zip.file(media, await toBlob(canvas));
+  const relPath = path.replace(/slides\/(slide\d+\.xml)$/, "slides/_rels/$1.rels");
+  const rels = xmlOf(await zip.file(relPath).async("string"));
+  for (const r of rels.getElementsByTagNameNS(NS_PR, "Relationship")) if (r.getAttribute("Id") === rid) r.setAttribute("Target", `../media/${name}.png`);
+  zip.file(relPath, strOf(rels));
+  for (const sr of [...pic.getElementsByTagNameNS(NS_A, "srcRect")]) sr.remove();
+  const ext = pic.getElementsByTagNameNS(NS_A, "ext")[0];
+  const xfrmExt = [...pic.getElementsByTagNameNS(NS_A, "xfrm")][0]?.getElementsByTagNameNS(NS_A, "ext")[0] || ext;
+  const cx = +xfrmExt.getAttribute("cx");
+  xfrmExt.setAttribute("cy", String(Math.round(cx * canvas.height / canvas.width)));
+}
+// ความสูงรูป (px ที่กว้าง W) ให้รูปแรกในสไลด์ยาวลงไปถึงขอบล่างสไลด์พอดี
+async function fillHeight(zip, doc) {
+  const pres = xmlOf(await zip.file("ppt/presentation.xml").async("string"));
+  const sldCy = +pres.getElementsByTagNameNS(NS_P, "sldSz")[0].getAttribute("cy");
+  const pic = doc.getElementsByTagNameNS(NS_P, "pic")[0]; if (!pic) return H;
+  const xf = pic.getElementsByTagNameNS(NS_A, "xfrm")[0];
+  const y = +xf.getElementsByTagNameNS(NS_A, "off")[0].getAttribute("y"), cx = +xf.getElementsByTagNameNS(NS_A, "ext")[0].getAttribute("cx");
+  return Math.max(300, Math.round(W * (sldCy - y) / cx));
+}
+// แทนชื่อกองเดิมด้วยชื่อใหม่ในทุกข้อความของสไลด์
+function swapNames(doc, oldName, newName) {
+  if (!oldName) return;
+  for (const t of tsOf(doc)) if (t.textContent.includes(oldName)) t.textContent = t.textContent.split(oldName).join(newName);
+}
+// "ข้อมูล ณ เดือน ต.ค. 69" → เดือนของข้อมูลล่าสุด (เดือน/ปีอาจแยกเป็นหลาย run)
+// "ข้อมูล … ณ เดือน ต.ค. 69" (หรือ "ณ วันที่ …") → "ณ เดือน <เดือนที่ทำรายงาน>" (ข้อความอาจแยกเป็นหลาย run)
+const todayIso = () => { const t = new Date(); return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, "0")}-${String(t.getDate()).padStart(2, "0")}`; };
+function swapAsOf(doc, iso = todayIso()) {
+  const mon = TH_MON[+iso.slice(5, 7) - 1], yy = String((+iso.slice(0, 4) + 543) % 100).padStart(2, "0");
+  const ts = tsOf(doc), M = "(?:ม\\.ค\\.|ก\\.พ\\.|มี\\.ค\\.|เม\\.ย\\.|พ\\.ค\\.|มิ\\.ย\\.|ก\\.ค\\.|ส\\.ค\\.|ก\\.ย\\.|ต\\.ค\\.|พ\\.ย\\.|ธ\\.ค\\.)";
+  const whole = new RegExp(`ณ\\s*(?:เดือน|วันที่)\\s*(?:\\d{1,2}\\s*)?${M}\\s*\\d{2}`);
+  for (let i = 0; i < ts.length; i++) {
+    const t = ts[i].textContent;
+    if (whole.test(t)) { ts[i].textContent = t.replace(whole, `ณ เดือน ${mon} ${yy}`); continue; }
+    if (!/ณ\s*(เดือน|วันที่)\s*$/.test(t)) continue;
+    // แยก run: "ณ เดือน " + "ต.ค." + " 69" (หรือ "ต.ค. 69")
+    let k = i + 1, rest = ""; const used = [];
+    while (k < ts.length && used.length < 4 && !new RegExp(`^(?:\\d{1,2}\\s*)?${M}\\s*\\d{2}`).test(rest.trim())) { rest += ts[k].textContent; used.push(ts[k]); k++; }
+    const mm = rest.match(new RegExp(`^(\\s*)(?:\\d{1,2}\\s*)?${M}\\s*\\d{2}(.*)$`, "s")); if (!mm) continue;
+    ts[i].textContent = t.replace(/วันที่(\s*)$/, "เดือน$1");
+    used[0].textContent = `${mm[1]}${mon} ${yy}${mm[2]}`; used.slice(1).forEach(x => x.textContent = "");
+  }
+}
+// ตั้งข้อความในช่องตาราง: ใช้รูปแบบของ run แรก ลบ run/บรรทัดที่เหลือ
+function setCellText(tc, text) {
+  const ps = [...tc.getElementsByTagNameNS(NS_A, "p")]; if (!ps.length) return;
+  ps.slice(1).forEach(p => p.remove());
+  const p = ps[0], rs = [...p.getElementsByTagNameNS(NS_A, "r")];
+  [...p.getElementsByTagNameNS(NS_A, "br")].forEach(b => b.remove());
+  if (rs.length) { rs.slice(1).forEach(r => r.remove()); rs[0].getElementsByTagNameNS(NS_A, "t")[0].textContent = text; return; }
+  const r = p.ownerDocument.createElementNS(NS_A, "a:r"), t = p.ownerDocument.createElementNS(NS_A, "a:t");
+  t.textContent = text; r.appendChild(t);
+  const end = p.getElementsByTagNameNS(NS_A, "endParaRPr")[0];
+  if (end) { const rpr = p.ownerDocument.createElementNS(NS_A, "a:rPr"); for (const at of end.attributes) rpr.setAttribute(at.name, at.value);
+    for (const ch of end.childNodes) rpr.appendChild(ch.cloneNode(true)); r.insertBefore(rpr, t); p.insertBefore(r, end); } else p.appendChild(r);
+}
+// ตาราง: คอลัมน์ = หัวข้อ + กองที่เลือก (ใช้รูปแบบคอลัมน์กองเดิม) + FIXEDSP (รูปแบบคอลัมน์สุดท้ายเดิม)
+function fillTable(doc, m) {
+  const tbl = doc.getElementsByTagNameNS(NS_A, "tbl")[0]; if (!tbl) return null;
+  const rows = [...tbl.getElementsByTagNameNS(NS_A, "tr")];
+  const head = [...rows[0].getElementsByTagNameNS(NS_A, "tc")];
+  const oldNames = head.slice(1, -1).map(textOf).map(x => x.trim()).filter(Boolean);
+  const others = m.cols.filter(c => !isFxCol(c)), fxc = m.cols.find(isFxCol);
+  const byKey = Object.fromEntries(m.rows.map(([l, vs]) => [keyOf(l), vs]));
+  rows.forEach((tr, ri) => {
+    const tcs = [...tr.children].filter(e => e.localName === "tc"); if (tcs.length < 3) return;
+    const tplO = tcs[1], tplF = tcs.at(-1);
+    tcs.slice(1, -1).forEach(tc => tc.remove());
+    const vals = ri === 0 ? m.cols.map(c => c.name) : byKey[keyOf(textOf(tcs[0]))];
+    others.forEach((c, i) => { const tc = tplO.cloneNode(true); if (vals) setCellText(tc, vals[m.cols.indexOf(c)] || ""); tr.insertBefore(tc, tplF); });
+    if (vals && fxc) setCellText(tplF, vals[m.cols.indexOf(fxc)] || "");
+  });
+  // ความกว้างคอลัมน์: หัวข้อและ FIXEDSP เท่าเดิม กองอื่นแบ่งที่เหลือเท่า ๆ กัน
+  const grid = tbl.getElementsByTagNameNS(NS_A, "tblGrid")[0], gcs = [...grid.getElementsByTagNameNS(NS_A, "gridCol")];
+  const total = gcs.reduce((a, g) => a + +g.getAttribute("w"), 0), wL = +gcs[0].getAttribute("w"), wF = +gcs.at(-1).getAttribute("w");
+  const wO = Math.floor((total - wL - wF) / Math.max(others.length, 1));
+  gcs.slice(1, -1).forEach(g => g.remove());
+  others.forEach(() => { const g = doc.createElementNS(NS_A, "a:gridCol"); g.setAttribute("w", String(wO)); grid.insertBefore(g, gcs.at(-1)); });
+  return oldNames.join(" / ");
+}
+async function buildPptx(file) {
+  const JSZip = await loadJSZip();
+  const zip = await JSZip.loadAsync(await file.arrayBuffer());
+  const paths = await slidePaths(zip);
+  if (paths.length < 4) throw new Error("แม่แบบต้องมีอย่างน้อย 4 สไลด์ (ปก, กราฟเส้น, กราฟแท่ง, ตาราง)");
+  const docs = await Promise.all(paths.slice(0, 4).map(async p => xmlOf(await zip.file(p).async("string"))));
+  const m = modelT1(), names = m.cols.filter(c => !isFxCol(c)).map(c => c.name).join(" / ");
+  const oldNames = fillTable(docs[3], m);
+  if (oldNames == null) throw new Error("ไม่พบตารางในสไลด์ที่ 4 ของแม่แบบ");
+  [0, 1, 3].forEach(i => swapNames(docs[i], oldNames, names));
+  [2, 3].forEach(i => swapAsOf(docs[i]));
+  const stamp = Date.now().toString(36);
+  await swapPicture(zip, paths[1], docs[1], exportCanvas(3, await fillHeight(zip, docs[1])), "compare_line_" + stamp);
+  await swapPicture(zip, paths[2], docs[2], exportBars(3), "compare_bar_" + stamp);
+  docs.forEach((d, i) => zip.file(paths[i], strOf(d)));
+  return { zip, name: `Review Portfolio กองทุนตราสารหนี้ ${names.replace(/ \/ /g, ", ")}` };
+}
+async function saveZip(zip, name) {
+  const blob = await zip.generateAsync({ type: "blob", mimeType: "application/vnd.openxmlformats-officedocument.presentationml.presentation", compression: "DEFLATE" });
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
+  a.download = name.replace(/[\\/:*?"<>|]+/g, "-"); a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+/* ---------- Ver. SP Only (สำหรับลูกค้า Bank): template_sp.pptx ----------
+   สไลด์ 5 = กราฟแท่งรายปี FIXEDSP + ค่าเฉลี่ยกลุ่ม (แทนกราฟ PowerPoint เดิมด้วยรูป) · สไลด์ 6 = กราฟเส้น FIXEDSP ย้อนหลัง 3 ปี
+   สไลด์อื่นคงไว้ตามแม่แบบ */
+const heroSeries = () => allSeries().find(isHero);
+const hasFx = () => selected.some(n => isHero(byName(n)));
+// วาดกราฟของ FIXEDSP อย่างเดียว ช่วง 3 ปี โดยไม่แตะสิ่งที่เลือกไว้บนหน้า
+function spCharts(lineH = H) {
+  const hero = heroSeries(), keep = { selected, range: { ...range }, title: $("title").value };
+  try {
+    selected = [hero.name]; applyQuick("3Y", true);
+    $("title").value = LANG === "en" ? "Cumulative Return" : "ผลตอบแทนสะสม";
+    return { line: exportCanvas(3, lineH), bar: exportBars(3), ytdEnd: annualModel()?.ytdEnd || hero.d.at(-1) };
+  } finally { selected = keep.selected; range = keep.range; $("title").value = keep.title; }
+}
+// แทนกราฟ PowerPoint (chart) ตัวแรกในสไลด์ด้วยรูป ในกรอบเดิม (คงสัดส่วนรูป)
+async function chartToPicture(zip, path, doc, canvas, name) {
+  const NS_C = "http://schemas.openxmlformats.org/drawingml/2006/chart";
+  const gf = [...doc.getElementsByTagNameNS(NS_P, "graphicFrame")].find(g => g.getElementsByTagNameNS(NS_C, "chart").length);
+  if (!gf) return swapPicture(zip, path, doc, canvas, name);
+  const xf = gf.getElementsByTagNameNS(NS_P, "xfrm")[0], off = xf.getElementsByTagNameNS(NS_A, "off")[0], ext = xf.getElementsByTagNameNS(NS_A, "ext")[0];
+  let x = +off.getAttribute("x"), y = +off.getAttribute("y"), cx = +ext.getAttribute("cx"), cy = +ext.getAttribute("cy");
+  const h = Math.round(cx * canvas.height / canvas.width);
+  if (h <= cy) { y += Math.round((cy - h) / 2); cy = h; } else { const w = Math.round(cy * canvas.width / canvas.height); x += Math.round((cx - w) / 2); cx = w; }
+  zip.file(`ppt/media/${name}.png`, await toBlob(canvas));
+  const relPath = path.replace(/slides\/(slide\d+\.xml)$/, "slides/_rels/$1.rels");
+  const rels = xmlOf(await zip.file(relPath).async("string")), root = rels.documentElement;
+  const rid = "rIdCmp" + name.replace(/\W/g, "");
+  const rel = rels.createElementNS(NS_PR, "Relationship");
+  rel.setAttribute("Id", rid); rel.setAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/image"); rel.setAttribute("Target", `../media/${name}.png`);
+  root.appendChild(rel); zip.file(relPath, strOf(rels));
+  const ids = [...doc.getElementsByTagNameNS(NS_P, "cNvPr")].map(e => +e.getAttribute("id") || 0);
+  const pic = xmlOf(`<p:pic xmlns:p="${NS_P}" xmlns:a="${NS_A}" xmlns:r="${NS_R}"><p:nvPicPr><p:cNvPr id="${Math.max(0, ...ids) + 1}" name="FIXEDSP yearly returns"/><p:cNvPicPr><a:picLocks noChangeAspect="1"/></p:cNvPicPr><p:nvPr/></p:nvPicPr>` +
+    `<p:blipFill><a:blip r:embed="${rid}"/><a:stretch><a:fillRect/></a:stretch></p:blipFill><p:spPr><a:xfrm><a:off x="${x}" y="${y}"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></p:spPr></p:pic>`).documentElement;
+  gf.parentNode.replaceChild(doc.importNode(pic, true), gf);
+}
+async function buildSpPptx(file) {
+  const JSZip = await loadJSZip();
+  const zip = await JSZip.loadAsync(await file.arrayBuffer());
+  const paths = await slidePaths(zip);
+  if (paths.length < 6) throw new Error("แม่แบบ SP ต้องมีสไลด์กราฟแท่งเป็นสไลด์ที่ 5 และกราฟเส้นเป็นสไลด์ที่ 6");
+  const [bar, line] = await Promise.all([4, 5].map(async i => xmlOf(await zip.file(paths[i]).async("string"))));
+  const c = spCharts(await fillHeight(zip, line)), stamp = Date.now().toString(36);
+  await chartToPicture(zip, paths[4], bar, c.bar, "sp_bar_" + stamp);
+  await swapPicture(zip, paths[5], line, c.line, "sp_line_" + stamp);
+  swapAsOf(bar); swapAsOf(line);
+  zip.file(paths[4], strOf(bar)); zip.file(paths[5], strOf(line));
+  return { zip, name: "FIXEDSP_จัดพอร์ตกองทุนรวมตราสารหนี้ระยะสั้นอัตโนมัติ" };
+}
+// ก่อนดาวน์โหลด: เตือนถ้ายังไม่ใส่ค่าเฉลี่ยกลุ่ม YTD / Credit Rating / ระยะเวลาถือ
+function missingInputs() {
+  const out = [], m = modelT1(), am = annualModel();
+  if ($("showPeer").checked && am && am.ytd && peerYtd() == null)
+    out.push({ text: `ค่าเฉลี่ยกลุ่ม Short Term General Bond (YTD ${yearLabel(am.years.at(-1))})`, el: () => $("peerYtd") });
+  for (const label of Object.keys(PICK)) {
+    const row = m.rows.find(([l]) => l === label); if (!row) continue;
+    const miss = m.cols.filter((c, i) => !isFxCol(c) && !row[1][i]).map(c => c.name);
+    if (miss.length) out.push({ text: `${label}: ${miss.join(", ")}`, el: () => document.querySelector(`#t1 select.pick[data-l="${CSS.escape(label)}"][data-n="${CSS.escape(miss[0])}"]`) });
+  }
+  return out;
+}
+function flash(el) { if (!el) return; el.scrollIntoView({ behavior: "smooth", block: "center" }); el.classList.add("flash"); setTimeout(() => { el.focus({ preventScroll: true }); }, 350); setTimeout(() => el.classList.remove("flash"), 2500); }
+function warnMissing(items) {
+  return new Promise((ok) => {
+    const bg = $("warnBg"), list = $("warnList");
+    list.innerHTML = items.map((it, i) => `<li><a data-i="${i}">${esc(it.text)}</a></li>`).join("");
+    bg.hidden = false; $("warnBack").focus();
+    const done = (go, target) => { bg.hidden = true; document.removeEventListener("keydown", key); ok(go); if (target) flash(target); };
+    const key = (e) => { if (e.key === "Escape") done(false); };
+    document.addEventListener("keydown", key);
+    $("warnGo").onclick = () => done(true);
+    $("warnBack").onclick = () => done(false, items[0].el());
+    bg.onclick = (e) => { if (e.target === bg) done(false); };
+    list.onclick = (e) => { const a = e.target.closest("a[data-i]"); if (a) done(false, items[+a.dataset.i].el()); };
+  });
+}
+const TPL = {};
+async function getTpl(name) {
+  if (!TPL[name]) { const r = await fetch(UTFIT_SRC.atfCompare + `assets/${name}?v=` + Date.now()); if (!r.ok) throw new Error("ไม่พบไฟล์แม่แบบ " + name); TPL[name] = await r.blob(); }
+  return TPL[name];
+}
+// PDF: วาดสไลด์จากไฟล์ PowerPoint ที่สร้าง (docs/assets/pptx2pdf.js + jsPDF) ทำในเบราว์เซอร์ทั้งหมด
+const loadScript = (src, test) => test() ? Promise.resolve() : new Promise((ok, no) => {
+  const sc = document.createElement("script"); sc.src = src; sc.onload = () => ok(); sc.onerror = () => no(new Error("โหลดไฟล์ไม่ได้: " + src)); document.head.appendChild(sc);
+});
+async function savePdf(zip, name, onProgress) {
+  await Promise.all([
+    loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js", () => window.jspdf),
+    loadScript(UTFIT_SRC.atfCompare + "assets/pptx2pdf.js?v=" + Date.now(), () => window.PptxPdf),
+  ]);
+  const blob = await PptxPdf.render(zip, { jsPDF: window.jspdf.jsPDF, scale: 4, quality: 0.95, onProgress });   // 4 เท่า = คมเวลาซูม
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = (name + ".pdf").replace(/[\\/:*?"<>|]+/g, "-"); a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+async function busy(btn, build) {
+  const fmt = btn.dataset.fmt, label = fmt === "pdf" ? "PDF" : "PowerPoint";
+  const sp = btn.querySelector("span"), html = sp.innerHTML; btn.disabled = true; sp.textContent = "กำลังสร้าง…";
+  const keep = selected; selected = selected.filter(n => !byName(n)?.sim);   // พอร์ตจำลองไม่ใส่ในไฟล์
+  try {
+    const { zip, name } = await build();
+    if (fmt === "pdf") await savePdf(zip, name, (i, n) => { sp.textContent = `หน้า ${i}/${n}`; });
+    else await saveZip(zip, name + ".pptx");
+    toast(`ดาวน์โหลด ${label} แล้ว`);
+  }
+  catch (e) { console.error(e); toast(`สร้าง ${label} ไม่ได้: ` + e.message, 5000); }
+  finally { selected = keep; btn.disabled = false; sp.innerHTML = html; }
+}
+async function runPptx(e) {
+  const btn = e.currentTarget;
+  if (!selected.length) { toast("เลือกกองที่จะเทียบก่อน"); return; }
+  const hi = highRiskPicked();
+  if (hi.length) {
+    toast(`ไฟล์ Ver. เปรียบเทียบกับรายกอง เทียบได้เฉพาะกองความเสี่ยง 1–4 · เอา ${hi.map(f => f.name).join(", ")} ออกก่อน (Ver. SP Only ดาวน์โหลดได้ตามปกติ)`, 6000);
+    $("t1Note")?.scrollIntoView({ behavior: "smooth", block: "center" }); return;
+  }
+  if (!selected.some(n => lowRisk(byName(n)))) { toast("เลือกกองความเสี่ยง 1–4 อย่างน้อย 1 กองเพื่อเทียบกับ FIXEDSP ในไฟล์"); return; }
+  const miss = missingInputs();
+  if (miss.length && !(await warnMissing(miss))) return;
+  await busy(btn, async () => buildPptx(await getTpl("template.pptx")));
+}
+async function runPptxSp(e) {
+  const btn = e.currentTarget, hero = heroSeries();
+  if (!hero) { toast("อัปโหลดข้อมูล Auto Top Funds ที่มีโมเดล FIXEDSP ก่อน (ปุ่มด้านบน)", 4000); $("fxOpen").click(); return; }
+  const last = hero.d.at(-1);
+  if ($("showPeer").checked && !last.endsWith("-12-31") && peerYtd() == null) {
+    const ok = await warnMissing([{ text: `ค่าเฉลี่ยกลุ่ม Short Term General Bond (YTD ${yearLabel(last.slice(0, 4))})`, el: () => $("peerYtd") }]);
+    if (!ok) return;
+  }
+  await busy(btn, async () => buildSpPptx(await getTpl("template_sp.pptx")));
+}
+$("pptx").onclick = $("pdf").onclick = runPptx;
+$("pptxSp").onclick = $("pdfSp").onclick = runPptxSp;
+$("copyT1").onclick = () => copyModel(modelT1());
+$("copyBar").onclick = async () => {
+  try { await navigator.clipboard.write([new ClipboardItem({ "image/png": toBlob(exportBars(2)) })]); toast("Copy กราฟแท่งแล้ว ไปวางใน PowerPoint ได้เลย"); }
+  catch (e) { toast("เบราว์เซอร์นี้ copy รูปไม่ได้ ใช้ดาวน์โหลด PNG แทน"); }
+};
+$("dlBar").onclick = async () => {
+  const a = document.createElement("a"); a.href = URL.createObjectURL(await toBlob(exportBars(2))); a.download = fileName("png").replace(/\.png$/, "_รายปี.png"); a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+};
+const onPeer = () => { $("peerIn").setAttribute("aria-disabled", !$("showPeer").checked); renderChart(); saveHash(); };
+["showPeer", "peerYtd"].forEach(id => { $(id).oninput = onPeer; $(id).onchange = onPeer; });
+$("t1").addEventListener("change", (e) => {
+  const sel = e.target.closest("select.pick"); if (!sel) return;
+  const n = sel.dataset.n, l = sel.dataset.l;
+  MANUAL[n] = { ...(MANUAL[n] || {}) };
+  if (sel.value) MANUAL[n][l] = sel.value; else delete MANUAL[n][l];
+  if (!Object.keys(MANUAL[n]).length) delete MANUAL[n];
+  saveManual(); saveHash();
+});
+$("title").addEventListener("input", () => { renderChart(); saveHash(); });
+$("showTitle").onchange = () => { renderChart(); saveHash(); };
+/* ---------- พอร์ตจำลอง ----------
+   def = { name, rb: "none"|"M"|"Q"|"Y", parts: [{ n: ชื่อกอง, w: % }] } · จำไว้ในเบราว์เซอร์ 1 วันนับจากบันทึกล่าสุด */
+const SIM_GROUP = "พอร์ตจำลอง", SIM_STORE = "atf-sims-v1", SIM_KEEP_DAYS = 1, SIM_MAX = 10;
+const RB_TEXT = { none: "ไม่ปรับสัดส่วน", M: "ปรับสัดส่วนรายเดือน", Q: "ปรับสัดส่วนรายไตรมาส", Y: "ปรับสัดส่วนรายปี" };
+let SIM_DEFS = [];
+const simStore = {
+  get() {
+    try {
+      const o = JSON.parse(localStorage.getItem(SIM_STORE) || "null");
+      if (!o || !Array.isArray(o.sims) || Date.now() - o.at > SIM_KEEP_DAYS * 864e5) { localStorage.removeItem(SIM_STORE); return []; }
+      return o.sims.filter(d => d && d.name && Array.isArray(d.parts));
+    } catch (e) { return []; }
+  },
+  set(defs) { try { if (!defs.length) localStorage.removeItem(SIM_STORE); else localStorage.setItem(SIM_STORE, JSON.stringify({ at: Date.now(), sims: defs })); } catch (e) {} },
+};
+const simDesc = (def) => def.parts.map(p => `${p.n} ${+p.w.toFixed(2)}%`).join(" · ") + ` · ${RB_TEXT[def.rb] || RB_TEXT.none}`;
+const rbKey = (iso, rb) => rb === "M" ? iso.slice(0, 7) : rb === "Q" ? iso.slice(0, 4) + "Q" + Math.ceil(+iso.slice(5, 7) / 3) : rb === "Y" ? iso.slice(0, 4) : "";
+// มูลค่าพอร์ตเริ่ม 100 · ซื้อตามสัดส่วนวันแรก · rebalance = วันทำการแรกของเดือน/ไตรมาส/ปีใหม่ ปรับกลับเป็นสัดส่วนเดิม (ใช้ NAV ล่าสุดที่มีของแต่ละกอง)
+function simulate(def, s0, e0) {
+  const tot = def.parts.reduce((a, p) => a + p.w, 0);
+  const cs = def.parts.map(p => ({ f: byName(p.n), w: p.w / tot }));
+  if (!cs.length || !tot || cs.some(c => !c.f || !c.f.d.length)) return null;
+  let s = cs.reduce((m, c) => c.f.d[0] > m ? c.f.d[0] : m, s0 || "");
+  let e = cs.reduce((m, c) => c.f.d.at(-1) < m ? c.f.d.at(-1) : m, e0 || "9999");
+  if (s > e) return null;
+  const set = new Set(); for (const c of cs) for (const d of c.f.d) if (d >= s && d <= e) set.add(d);
+  const d = [...set].sort(), v = [];
+  if (d.length < 1) return null;
+  const nav = (c, iso) => navOn(c.f, iso);
+  let units = cs.map(c => c.w * 100 / nav(c, d[0])), key = rbKey(d[0], def.rb);
+  for (const iso of d) {
+    const val = cs.reduce((a, c, i) => a + units[i] * nav(c, iso), 0);
+    if (def.rb && def.rb !== "none") { const k = rbKey(iso, def.rb); if (k !== key) { key = k; units = cs.map(c => c.w * val / nav(c, iso)); } }
+    v.push(val);
+  }
+  return { d, v };
+}
+async function buildSims() {
+  const need = new Set(SIM_DEFS.flatMap(def => def.parts.map(p => p.n)).filter(n => !byName(n) && STUBS.has(n)));
+  await Promise.all([...need].map(loadFund));
+  SIMS = SIM_DEFS.map(def => { const r = simulate(def); return r && { name: def.name, group: SIM_GROUP, sim: true, def, d: r.d, v: r.v, info: { proj_name_th: simDesc(def) }, sec: {} }; }).filter(Boolean);
+  if (SIMS.length) openGroups.add(SIM_GROUP);
+}
+let simEditing = null, simRb = "none";
+const simRow = (n = "", w = "") => `<div class="simrow"><input class="n" autocomplete="off" value="${esc(n)}" placeholder="พิมพ์ชื่อกองหรือโมเดล" aria-label="กองทุน"><span class="wrap-w"><input class="w" type="number" min="0" max="100" step="0.01" value="${esc(w)}" aria-label="สัดส่วน %"></span><button type="button" class="rm" title="เอาออก">×</button></div>`;
+const defaultSimName = () => { for (let i = 1; ; i++) { const n = `พอร์ตจำลอง ${i}`; if (!SIM_DEFS.some(d => d.name === n)) return n; } };
+function simSetRb(r) { simRb = RB_TEXT[r] ? r : "none"; document.querySelectorAll("#simRb button").forEach(b => b.setAttribute("aria-pressed", b.dataset.r === simRb)); }
+function simOpen(name) {
+  const def = name ? SIM_DEFS.find(d => d.name === name) : null;
+  simEditing = def ? def.name : null;
+  $("simTitle").textContent = def ? "แก้พอร์ตจำลอง" : "สร้างพอร์ตจำลอง";
+  $("simDel").hidden = !def;
+  $("simName").value = def ? def.name : defaultSimName();
+  simSetRb(def ? def.rb : "none");
+  // ตั้งต้น: กองที่เลือกอยู่ (ไม่รวมพอร์ตจำลอง) แบ่งเท่ากัน
+  const seed = def ? def.parts : (() => { const ns = selected.filter(n => !byName(n)?.sim).slice(0, SIM_MAX); return ns.length ? ns.map(n => ({ n, w: +(100 / ns.length).toFixed(2) })) : [{ n: "", w: "" }, { n: "", w: "" }]; })();
+  $("simRows").innerHTML = seed.map(p => simRow(p.n, p.w)).join("");
+  simSum(); $("simBg").hidden = false; $("simName").focus(); $("simName").select();
+}
+const simClose = () => { acHide(); $("simBg").hidden = true; simEditing = null; };
+/* ช่องเลือกกองในพอร์ตจำลอง: ค้นแบบเดียวกับช่องค้นหาหลัก (ไม่สนขีด ช่องว่าง ตัวพิมพ์ · ค้นชื่อย่อ ชื่อเต็ม บลจ. ได้) */
+let acInput = null, acHits = [], acIdx = 0;
+const acHide = () => { $("simAc").hidden = true; acInput = null; };
+function acShow(inp) {
+  const qn = qnorm(inp.value); acInput = inp;
+  if (!qn) { acHide(); return; }
+  const used = new Set(simParts().filter(p => p.el.querySelector(".n") !== inp).map(p => p.n));
+  acHits = listSeries().filter(f => !f.sim && !used.has(f.name)).map(f => [searchScore(f, qn), f]).filter(([sc]) => sc > 0)
+    .sort((a, b) => b[0] - a[0] || a[1].name.localeCompare(b[1].name)).slice(0, 40).map(([, f]) => f);
+  acIdx = 0;
+  const ac = $("simAc");
+  ac.innerHTML = acHits.length ? acHits.map((f, i) => `<div data-i="${i}" class="${i ? "" : "on"}">${hl(f.name, qn)}<small>${f.custom ? "Auto Top Funds" : esc(f.info?.proj_name_th || "")}</small></div>`).join("") : `<div class="none">ไม่พบกองที่ค้นหา</div>`;
+  const r = inp.getBoundingClientRect();
+  ac.style.left = r.left + "px"; ac.style.width = Math.max(r.width, 280) + "px";
+  const below = window.innerHeight - r.bottom;
+  if (below < 200 && r.top > below) { ac.style.top = ""; ac.style.bottom = (window.innerHeight - r.top + 4) + "px"; } else { ac.style.bottom = ""; ac.style.top = (r.bottom + 4) + "px"; }
+  ac.hidden = false; acInput = inp;
+}
+function acPick(i) {
+  const f = acHits[i], inp = acInput; if (!f || !inp) return;
+  inp.value = f.name; acHide(); simSum();
+  const w = inp.closest(".simrow").querySelector(".w"); w.focus(); w.select();
+}
+function acMove(d) {
+  if (!acHits.length) return;
+  acIdx = (acIdx + d + acHits.length) % acHits.length;
+  document.querySelectorAll("#simAc div[data-i]").forEach(el => el.classList.toggle("on", +el.dataset.i === acIdx));
+  document.querySelector(`#simAc div[data-i="${acIdx}"]`)?.scrollIntoView({ block: "nearest" });
+}
+$("simAc").addEventListener("mousedown", (e) => { e.preventDefault(); const el = e.target.closest("div[data-i]"); if (el) acPick(+el.dataset.i); });
+$("simRows").addEventListener("input", (e) => { if (e.target.classList.contains("n")) acShow(e.target); });
+$("simRows").addEventListener("focusin", (e) => { if (e.target.classList.contains("n") && e.target.value && !simValidName(e.target.value.trim())) acShow(e.target); });
+$("simRows").addEventListener("focusout", (e) => { if (e.target === acInput) setTimeout(() => { if (document.activeElement !== acInput) acHide(); }, 0); });
+$("simRows").addEventListener("keydown", (e) => {
+  if (!e.target.classList.contains("n") || $("simAc").hidden) return;
+  if (e.key === "ArrowDown") { e.preventDefault(); acMove(1); }
+  else if (e.key === "ArrowUp") { e.preventDefault(); acMove(-1); }
+  else if (e.key === "Enter" || e.key === "Tab" && acHits.length) { if (acHits.length) { e.preventDefault(); acPick(acIdx); } }
+  else if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); acHide(); }
+});
+document.querySelector(".modal.sim").addEventListener("scroll", acHide);
+window.addEventListener("resize", acHide);
+function simParts() {
+  return [...document.querySelectorAll("#simRows .simrow")].map(r => ({ el: r, n: simResolve(r.querySelector(".n").value.trim()), w: parseFloat(r.querySelector(".w").value) }));
+}
+// พิมพ์ชื่อเองไม่ตรงตัว (เช่น bbharata) แต่ตรงกับกองเดียวแบบไม่สนขีด/ตัวพิมพ์ ก็ใช้ได้
+function simResolve(raw) {
+  if (!raw || byName(raw) || STUBS.has(raw)) return raw;
+  const qn = qnorm(raw), m = listSeries().filter(f => !f.sim && qnorm(f.name) === qn);
+  return m.length === 1 ? m[0].name : raw;
+}
+const simValidName = (n) => !!(byName(n) && !byName(n).sim) || STUBS.has(n);
+function simSum() {
+  const ps = simParts(), sum = ps.reduce((a, p) => a + (isFinite(p.w) ? p.w : 0), 0);
+  ps.forEach(p => p.el.querySelector(".n").classList.toggle("bad", !!p.n && !simValidName(p.n)));
+  $("simSum").textContent = `รวม ${+sum.toFixed(2)}%`;
+  $("simSum").classList.toggle("bad", Math.abs(sum - 100) > 0.01);
+  $("simAdd").disabled = ps.length >= SIM_MAX;
+}
+$("simNew").onclick = () => simOpen(null);
+$("simRb").onclick = (e) => { if (e.target.dataset.r) simSetRb(e.target.dataset.r); };
+$("simAdd").onclick = () => { $("simRows").insertAdjacentHTML("beforeend", simRow()); simSum(); $("simRows").lastElementChild.querySelector(".n").focus(); };
+$("simEqual").onclick = () => { const ps = simParts().filter(p => p.n); if (!ps.length) return; const w = Math.floor(10000 / ps.length) / 100;
+  ps.forEach((p, i) => p.el.querySelector(".w").value = i === ps.length - 1 ? +(100 - w * (ps.length - 1)).toFixed(2) : w); simSum(); };
+$("simRows").addEventListener("input", simSum);
+$("simRows").addEventListener("click", (e) => { if (e.target.classList.contains("rm")) { e.target.closest(".simrow").remove(); if (!simParts().length) $("simRows").innerHTML = simRow(); simSum(); } });
+$("simCancel").onclick = simClose;
+$("simBg").addEventListener("click", (e) => { if (e.target.id === "simBg") simClose(); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("simBg").hidden) simClose(); });
+function renameSel(from, to) {
+  selected = selected.map(n => n === from ? to : n);
+  if (COLORS[from]) { COLORS[to] = COLORS[from]; delete COLORS[from]; saveColors(); }
+}
+$("simDel").onclick = () => {
+  const n = simEditing; if (!n) return;
+  SIM_DEFS = SIM_DEFS.filter(d => d.name !== n); simStore.set(SIM_DEFS);
+  SIMS = SIMS.filter(s => s.name !== n); selected = selected.filter(x => x !== n);
+  simClose(); rebuildDates(); renderList(); update(); toast(`ลบ ${n} แล้ว`);
+};
+$("simSave").onclick = async () => {
+  const name = $("simName").value.trim().slice(0, 40) || defaultSimName();
+  const ps = simParts().filter(p => p.n || isFinite(p.w));
+  if (!ps.length) { toast("ใส่กองอย่างน้อย 1 กอง"); return; }
+  const badN = ps.find(p => !simValidName(p.n)); if (badN) { toast(badN.n ? `ไม่พบกอง ${badN.n} (เลือกจากรายการที่ขึ้นมา)` : "ใส่ชื่อกองให้ครบทุกแถว"); badN.el.querySelector(".n").focus(); return; }
+  const badW = ps.find(p => !(p.w > 0)); if (badW) { toast(`ใส่สัดส่วนของ ${badW.n} (มากกว่า 0%)`); badW.el.querySelector(".w").focus(); return; }
+  if (new Set(ps.map(p => p.n)).size < ps.length) { toast("มีกองซ้ำกัน รวมเป็นแถวเดียวก่อน"); return; }
+  const sum = ps.reduce((a, p) => a + p.w, 0);
+  if (Math.abs(sum - 100) > 0.01) { toast(`สัดส่วนรวม ${+sum.toFixed(2)}% ต้องรวมได้ 100% (กด "แบ่งเท่ากัน" ได้)`, 4000); return; }
+  if (name !== simEditing && (SIM_DEFS.some(d => d.name === name) || byName(name) || STUBS.has(name))) { toast(`ชื่อ ${name} ซ้ำกับพอร์ตหรือกองที่มีอยู่ ตั้งชื่ออื่น`); $("simName").focus(); return; }
+  const def = { name, rb: simRb, parts: ps.map(p => ({ n: p.n, w: p.w })) };
+  const btn = $("simSave"); btn.disabled = true;
+  try {
+    const old = simEditing, prev = SIM_DEFS;
+    SIM_DEFS = old ? SIM_DEFS.map(d => d.name === old ? def : d) : [...SIM_DEFS, def];
+    await buildSims();
+    if (!SIMS.some(s => s.name === name)) { toast("คำนวณพอร์ตไม่ได้: กองในพอร์ตไม่มีช่วงวันที่ที่มี NAV ตรงกัน", 4000); SIM_DEFS = prev; await buildSims(); return; }
+    simStore.set(SIM_DEFS);
+    if (old && old !== name) renameSel(old, name);
+    if (!selected.includes(name)) { if (selected.length >= MAX_SEL) toast(`บันทึกแล้ว แต่เลือกครบ ${MAX_SEL} เส้นแล้ว เอาเส้นอื่นออกก่อนแล้วติ๊ก ${name} ในกลุ่มพอร์ตจำลอง`, 5000); else selected.push(name); }
+    openGroups.add(SIM_GROUP);
+    simClose(); rebuildDates(); renderList(); update();
+    toast(old ? `แก้ ${name} แล้ว` : `สร้าง ${name} แล้ว`);
+  } finally { btn.disabled = false; }
+};
+
+function setLang(l) {
+  LANG = l === "en" ? "en" : "th";
+  document.querySelectorAll("#lang button").forEach(b => b.setAttribute("aria-pressed", b.dataset.l === LANG));
+  try { localStorage.setItem("compare-lang", LANG); } catch (e) {}
+}
+$("lang").onclick = (e) => { const l = e.target.dataset.l; if (l) { setLang(l); update(); } };
+
+/* ---------- state ใน URL */
+function saveHash() {
+  const p = new URLSearchParams();
+  if (selected.length) p.set("f", selected.join("|"));
+  if (range.q) p.set("q", range.q); else { p.set("s", range.s || ""); p.set("e", range.e || ""); }
+  if ($("title").value.trim()) p.set("t", $("title").value.trim());
+  if (!$("showTitle").checked) p.set("nt", "1");
+  if (LANG === "en") p.set("l", "en");
+  const cs = selected.filter(n => COLORS[n]).map(n => n + ":" + COLORS[n].slice(1));
+  if (cs.length) p.set("c", cs.join("|"));
+  if (!$("align").checked) p.set("a", "0");
+  if (peerYtd() != null) p.set("py", peerYtd());
+  const man = {}; for (const n of selected) if (MANUAL[n]) man[n] = MANUAL[n];
+  if (Object.keys(man).length) p.set("m", JSON.stringify(man));
+  try { history.replaceState(null, "", "#" + p.toString()); } catch (e) {}
+}
+function loadHash() {
+  const p = new URLSearchParams(location.hash.slice(1));
+  const f = (p.get("f") || "").split("|").filter(n => byName(n) || STUBS.has(n));
+  if (f.length) selected = f.slice(0, MAX_SEL);
+  if (p.get("q")) range.q = p.get("q");
+  else if (p.get("s") && p.get("e")) range = { s: p.get("s"), e: p.get("e"), q: null };
+  if (p.get("t")) $("title").value = p.get("t");
+  if (p.get("nt") === "1") $("showTitle").checked = false;
+  setLang("th");   // ยังไม่มีเวอร์ชันภาษาอังกฤษ
+  for (const kv of (p.get("c") || "").split("|")) { const i = kv.lastIndexOf(":"); if (i > 0 && /^[0-9a-f]{6}$/i.test(kv.slice(i + 1))) COLORS[kv.slice(0, i)] = "#" + kv.slice(i + 1); }
+  if (p.get("a") === "0") $("align").checked = false;
+  if (p.get("py") && !isNaN(+p.get("py"))) $("peerYtd").value = p.get("py");
+  try { const man = JSON.parse(p.get("m") || "{}"); for (const [n, o] of Object.entries(man)) if (o && typeof o === "object")
+    MANUAL[n] = Object.fromEntries(Object.entries(o).filter(([l, v]) => PICK[l] && typeof v === "string" && v.length < 60).map(([l, v]) => [l, migrateHold(v)])); saveManual(); } catch (e) {}
+}
+
+function update() {
+  syncRangeUI();
+  const any = selected.some(n => byName(n));
+  $("chartBox").hidden = !any; $("empty").hidden = any;
+  ["copy", "download", "pptx", "pdf"].forEach(id => $(id).disabled = !any);
+  // ตาราง/ดาวน์โหลด PowerPoint/ค่าเฉลี่ยกลุ่ม มีแม่แบบเฉพาะ FIXEDSP · โมเดลอื่นแสดงแค่กราฟ
+  const fx = hasFx();
+  document.querySelectorAll(".fxonly").forEach(el => { el.hidden = !fx; });
+  const si = startInfo();
+  const notes = [];
+  if (si.late) notes.push(`เริ่มนับ ${thDate(si.s)} เพราะ ${si.late.name} มีข้อมูลตั้งแต่วันนั้น`);
+  if (si.early) notes.push(`ถึง ${thDate(si.e)} เพราะข้อมูล ${si.early.name} มีถึงวันนั้น`);
+  $("alignNote").hidden = !(any && notes.length);
+  if (notes.length) $("alignNote").textContent = notes.join(" · ") + ` (เอาติ๊ก "ทุกเส้นเริ่มและจบวันเดียวกัน" ออกถ้าอยากเห็นช่วงเต็มของแต่ละกอง)`;
+  renderChart(); renderTable(); saveHash();
+}
+
+/* ---------- เริ่ม */
+(async function init() {
+  try { COLORS = JSON.parse(localStorage.getItem(COLOR_STORE) || "{}") || {}; } catch (e) { COLORS = {}; }
+  setLang("th");
+  try { localStorage.removeItem(STORE); } catch (e) {}           // รูปแบบเก่า (ไม่ใช้แล้ว)
+  { const o = store.get(); ATF_AT = o.at;
+    CUSTOM = o.funds.map(f => ({ name: f.name, group: ATF_GROUP, custom: true, d: f.d, v: f.v, info: { proj_name_th: f.src || "อัปโหลดจากไฟล์" }, sec: {} }));
+    // ไฟล์ที่อัปโหลดไว้ในหน้า Auto Top Funds (ใหม่กว่าที่หน้านี้จำไว้ = ใช้ไฟล์นั้น)
+    const s = await UTFIT_ATF.get();
+    if (s && s.savedAt > ATF_AT) { try { CUSTOM = []; ingestATF(s.text, s.name); ATF_AT = s.savedAt; } catch (e) {} } }
+  try {
+    const r = await fetch(UTFIT_SRC.atfCompare + "data/index.json?v=" + Date.now());
+    if (!r.ok) throw new Error(r.status);
+    INDEX = await r.json();
+    const C = Object.fromEntries((INDEX.cols || []).map((c, k) => [c, k]));
+    for (const row of INDEX.funds) {
+      const g = INDEX.groups[row[C.group]];
+      STUBS.set(row[C.name], { name: row[C.name], group: g, risk: row[C.risk], file: row[C.file], stub: true,
+        info: { proj_name_th: row[C.proj_name_th], comp_name_th: row[C.comp_name_th], proj_abbr_name: row[C.abbr] },
+        sec: { proj_name_th: row[C.proj_name_th], comp_name_th: row[C.comp_name_th], fund_status: row[C.ipo] ? "IPO" : "" } });
+    }
+    DATA = { funds: [], missing: INDEX.missing || {}, start: INDEX.start, nav_to: INDEX.nav_to, updated: INDEX.updated };
+    const from = DATA.start ? (DATA.start.slice(0, 4) === "2021" ? "ม.ค. 65" : thDate(DATA.start)) : null;
+    $("asof").textContent = `NAV กองทุนรวม ${STUBS.size.toLocaleString()} กอง ${from ? `ตั้งแต่ ${from} – ` : "ถึง "}${thDate(DATA.nav_to || DATA.updated)}` +
+      (INDEX.pending ? ` · กำลังทยอยดึงอีก ${INDEX.pending.toLocaleString()} กอง` : "");
+  } catch (e) {
+    $("asof").textContent = "ยังไม่มีข้อมูล";
+    $("notice").hidden = false;
+    $("notice").innerHTML = "ยังไม่มีไฟล์ข้อมูล — ไปที่ GitHub → Actions → <b>Update fund data</b> → Run workflow ครั้งแรก (ระหว่างนี้อัปโหลดไฟล์ Auto Top Funds เพื่อลองได้)";
+  }
+  fxStatus();
+  SIM_DEFS = simStore.get(); await buildSims();
+  loadHash();
+  await Promise.all(selected.map(loadFund));
+  selected = selected.filter(n => byName(n));
+  if (!selected.length && CUSTOM.length) selected = [CUSTOM[0].name];
+  rebuildDates(); renderList(); update();
+  // โหลดฟอนต์บริษัทก่อนวาดกราฟ (ฟอนต์ใน canvas ต้องโหลดเสร็จก่อนถึงจะใช้ได้)
+  if (document.fonts) Promise.all(["700 16px BLSHead", "16px BLSBody", "16px 'IBM Plex Sans Thai'"].map(f => document.fonts.load(f).catch(() => {})))
+    .then(() => document.fonts.ready).then(renderChart);
+})();
+</script>
+</body>
+</html>

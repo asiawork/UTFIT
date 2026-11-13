@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Master Fund Lookup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #13294B;
+    --text: #1C2738;
+    --muted: #6B7A90;
+    --line: #DDE3EC;
+    --lotus: #2A5CAA;
+    --wash: #F3F6FB;
+    --hover: #E7EAEF;
+    --mark: #FFE9A8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: #F7F8FA; color: var(--text);
+    font-family: "IBM Plex Sans Thai", "Noto Sans Thai", Tahoma, sans-serif;
+    font-size: 15px; line-height: 1.6;
+  }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+  header.wrap { padding-top: 40px; padding-bottom: 8px; }
+  h1 { margin: 0; font-size: 34px; font-weight: 700; color: var(--ink); letter-spacing: -0.01em; line-height: 1.2; }
+  h1 a { color: inherit; text-decoration: none; border-radius: 6px; }
+  h1 a:hover { opacity: .8; }
+  h1 a:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+  .sub { margin: 2px 0 20px; color: var(--muted); }
+
+  /* ---------- combobox ---------- */
+  .combo { position: relative; }
+  .field {
+    display: flex; align-items: center; gap: 12px;
+    background: #fff; border: 1px solid var(--line); border-radius: 12px;
+    padding: 0 16px; box-shadow: 0 1px 2px rgba(19,41,75,.06);
+  }
+  .field:focus-within { border-color: var(--lotus); box-shadow: 0 0 0 3px rgba(42,92,170,.15); }
+  .field svg { flex: none; color: var(--muted); }
+  .field input {
+    flex: 1; border: 0; outline: none; background: none; font: inherit; font-size: 18px;
+    padding: 16px 0; color: var(--text); min-width: 0;
+  }
+  .clear {
+    flex: none; width: 24px; height: 24px; border-radius: 50%; border: 0; cursor: pointer;
+    background: #6B7A90; color: #fff; font-size: 14px; line-height: 24px; padding: 0;
+  }
+  .clear:focus-visible { outline: 2px solid var(--lotus); outline-offset: 2px; }
+
+  .dropdown {
+    position: absolute; left: 0; right: 0; top: calc(100% + 6px); z-index: 10;
+    background: #fff; border: 1px solid var(--line); border-radius: 12px;
+    box-shadow: 0 12px 32px rgba(19,41,75,.14); max-height: min(460px, 55vh); max-height: min(460px, 55dvh); overflow-y: auto; -webkit-overflow-scrolling: touch;
+    list-style: none; margin: 0; padding: 6px 0;
+  }
+  .group-label { padding: 10px 20px 4px; font-size: 12.5px; color: var(--muted); font-weight: 500; }
+  .opt { padding: 10px 20px; cursor: pointer; }
+  .opt[aria-selected="true"] { background: var(--hover); }
+  .opt .t { font-weight: 700; color: var(--ink); font-size: 16px; line-height: 1.4; }
+  .opt .d { color: var(--muted); font-size: 13.5px; line-height: 1.5; margin-top: 2px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .opt-empty { padding: 14px 20px; color: var(--muted); }
+  mark { background: var(--mark); color: inherit; border-radius: 2px; }
+
+  .head-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 18px; }
+  .stats { color: var(--muted); font-size: 13px; padding-top: 6px; white-space: nowrap; }
+
+  /* ---------- result ---------- */
+  main.wrap { padding-top: 24px; padding-bottom: 60px; }
+  .card { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 24px; }
+  .detail h2 { margin: 0; font-size: 22px; color: var(--ink); line-height: 1.35; }
+  .to-master { color: var(--lotus); font-weight: 500; }
+  a.ext { color: inherit; text-decoration: none; }
+  a.ext svg { margin-left: 8px; vertical-align: -2px; color: var(--lotus); }
+  a.ext:hover { color: var(--lotus); text-decoration: underline; text-underline-offset: 4px; }
+  a.ext:focus-visible { outline: 2px solid var(--lotus); outline-offset: 3px; border-radius: 4px; }
+  .meta { color: var(--muted); margin: 6px 0 18px; font-size: 14px; }
+  .toolbar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+  .btn {
+    font: inherit; font-size: 14px; padding: 7px 14px; border-radius: 8px; cursor: pointer;
+    border: 1px solid var(--lotus); background: #fff; color: var(--lotus);
+  }
+  .btn:hover { background: var(--wash); }
+  .btn:focus-visible { outline: 2px solid var(--lotus); outline-offset: 2px; }
+
+  .table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; }
+  table { width: 100%; border-collapse: collapse; min-width: 760px; }
+  th, td { padding: 12px 14px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
+  th { background: var(--wash); font-size: 13px; font-weight: 600; color: var(--muted); }
+  tr:last-child td { border-bottom: 0; }
+  tr.hit td { background: #FFFBEA; }
+  .abbr { font-weight: 700; color: var(--ink); }
+  .small { color: var(--muted); font-size: 13px; }
+  .amc { font-weight: 600; }
+  table { table-layout: fixed; }
+  .c-fund { width: 30%; } .c-amc { width: 14%; } .c-cls { width: 22%; } .c-st { width: 16%; } .c-fx { width: 18%; }
+  td.c-fund .abbr, td.c-amc .amc { font-size: 16px; line-height: 1.5; }
+  .cls { font-size: 15px; line-height: 1.5; padding: 0; }
+  .cls + .cls { margin-top: 6px; }
+  .tax { font-size: 11.5px; color: var(--lotus); border: 1px solid #C9D7EE; border-radius: 4px; padding: 0 5px; margin-left: 4px; vertical-align: 1px; }
+  td.c-fx, td.c-st { font-size: 15px; }
+  .code { font-weight: 600; color: var(--ink); margin-right: 4px; }
+  /* hover / tap for full wording */
+  .tip { cursor: help; border-bottom: 1px dotted #9AA8BD; outline: none; }
+  .tip:focus-visible { outline: 2px solid var(--lotus); outline-offset: 2px; border-radius: 2px; }
+  #tipbox {
+    position: fixed; z-index: 50; max-width: 300px; padding: 9px 12px; border-radius: 8px;
+    background: var(--ink); color: #fff; font-size: 13px; line-height: 1.55;
+    box-shadow: 0 8px 24px rgba(19,41,75,.25); pointer-events: none;
+  }
+  .variants { margin-top: 18px; font-size: 13px; color: var(--muted); }
+  .variants ul { margin: 6px 0 0; padding-left: 18px; }
+
+  .top h2 { margin: 0 0 12px; font-size: 17px; color: var(--ink); }
+  .top-list { list-style: none; margin: 0; padding: 0; }
+  .top-list button {
+    display: flex; justify-content: space-between; gap: 12px; width: 100%; text-align: left;
+    font: inherit; color: var(--text); background: none; border: 0; border-top: 1px solid var(--line);
+    padding: 11px 4px; cursor: pointer;
+  }
+  .top-list li:first-child button { border-top: 0; }
+  .top-list button:hover { background: var(--wash); }
+  .top-list button:focus-visible { outline: 2px solid var(--lotus); outline-offset: -2px; }
+  .count { flex: none; color: var(--lotus); font-weight: 600; }
+
+  .top-list .nm { min-width: 0; }
+  .top-list .mn { display: block; }
+  .top-list .nm .small { display: block; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .top-list .count { font-size: 14px; padding-top: 1px; }
+
+  /* A–Z jump bar + letter sections */
+  .az-bar {
+    position: sticky; top: 0; z-index: 5; display: flex; flex-wrap: wrap; gap: 2px;
+    background: #fff; padding: 8px 0; margin: 0 0 4px; border-bottom: 1px solid var(--line);
+  }
+  .az-bar button, .az-bar span {
+    min-width: 30px; height: 30px; padding: 0 6px; border-radius: 6px; font: inherit; font-size: 14px; font-weight: 600;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .az-bar button { border: 0; background: none; color: var(--lotus); cursor: pointer; }
+  .az-bar button:hover { background: var(--wash); }
+  .az-bar button[aria-pressed="true"] { background: var(--lotus); color: #fff; }
+  .az-bar button[data-letter=""] { padding: 0 10px; font-weight: 500; }
+  .home-count { font-size: 13.5px; color: var(--muted); margin: 8px 4px 4px; }
+  .style-row { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; margin: 2px 0 6px; }
+  .style-lbl { font-size: 13.5px; color: var(--muted); }
+  .seg { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  .seg button {
+    font: inherit; font-size: 14px; font-weight: 500; padding: 6px 12px; border: 0; border-left: 1px solid var(--line);
+    background: #fff; color: var(--ink); cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+  }
+  .seg button:first-child { border-left: 0; }
+  .seg button .n { font-size: 12px; color: var(--muted); font-weight: 400; }
+  .seg button:hover:not(:disabled) { background: var(--wash); }
+  .seg button[aria-pressed="true"] { background: var(--lotus); color: #fff; }
+  .seg button[aria-pressed="true"] .n { color: rgba(255,255,255,.8); }
+  .seg button[aria-pressed="true"]:hover { background: #224C8F; color: #fff; }
+  .seg button:disabled { color: #C3CBD8; cursor: default; }
+  .seg button:focus-visible { outline: 2px solid var(--lotus); outline-offset: -2px; }
+  .az-bar button:focus-visible { outline: 2px solid var(--lotus); outline-offset: 1px; }
+  .az-bar span { color: #C3CBD8; }
+  .note { font-size: 12.5px; color: var(--muted); margin: 0 0 6px; }
+
+  .upload { text-align: center; }
+
+  /* ---------- list + filter sidebar ---------- */
+  .browse2 { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 18px; align-items: start; }
+  .side { position: sticky; top: 12px; padding: 16px 16px 10px; max-height: calc(100vh - 24px); overflow-y: auto; }
+  .side-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; color: var(--ink); font-size: 16px; }
+  .fs { border: 0; border-top: 1px solid var(--line); margin: 0; padding: 10px 0 8px; }
+  .fs legend { padding: 0; margin-bottom: 4px; font-size: 13px; font-weight: 600; color: var(--muted); float: left; width: 100%; }
+  .fs legend + * { clear: both; }
+  .opt-row { display: flex; align-items: center; gap: 8px; padding: 4px 2px; cursor: pointer; border-radius: 6px; font-size: 14.5px; line-height: 1.35; }
+  .opt-row:hover { background: var(--wash); }
+  .opt-row input { margin: 0; width: 16px; height: 16px; accent-color: var(--lotus); flex: none; }
+  .opt-row .ol { flex: 1; min-width: 0; }
+  .opt-row .on { color: var(--muted); font-size: 12.5px; }
+  .opt-row.zero { color: #A9B3C2; }
+  .side-note { font-size: 12px; color: var(--muted); margin: 8px 0 4px; line-height: 1.5; }
+  .listcard { padding: 16px 18px; }
+  .list-top { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .list-top .home-count { margin: 0; flex: 1; font-size: 14px; color: var(--text); }
+  .sortlbl { display: inline-flex; align-items: center; gap: 6px; }
+  .filter-btn, .side-done { display: none; }
+  .browse2 .active-bar { margin: 10px 0 4px; min-height: 0; }
+  .tag-detail { display: grid; grid-template-columns: max-content 1fr; gap: 4px 16px; margin: -4px 0 18px;
+                font-size: 13.5px; line-height: 1.5; }
+  .tag-detail dt { color: var(--muted); }
+  .similar { margin-top: 26px; padding-top: 18px; border-top: 1px solid var(--line); }
+  .similar h3 { margin: 0; font-size: 17px; color: var(--ink); }
+  .similar > .small { margin: 2px 0 8px; }
+  .why { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .why span { font-size: 12px; color: #8A5A00; background: #FFF4D6; border-radius: 4px; padding: 2px 7px; }
+  .why span::before { content: "✓ "; }
+  .tag-detail dd { margin: 0; color: var(--text); }
+  .row-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .tg { font-size: 12px; line-height: 1; padding: 4px 8px; border-radius: 999px; background: #E3EBF7; color: var(--ink); font-weight: 500; }
+  .tg-m { background: #F0F2F5; color: #4A5568; }
+  .kv { display: flex; flex-wrap: wrap; gap: 4px 22px; margin-top: 7px; font-size: 13px; color: var(--text); }
+  .kv i { font-style: normal; color: var(--muted); margin-right: 6px; }
+  @media (max-width: 820px) {
+    .browse2 { grid-template-columns: 1fr; gap: 10px; }
+    .side { display: none; position: static; max-height: none; order: 0; }
+    .side.open { display: block; }
+    .filter-btn { display: inline-block; }
+    .side-done { display: block; width: 100%; margin: 6px 0 8px; background: var(--lotus); color: #fff; }
+    .list-top .home-count { flex-basis: 100%; order: 3; }
+  }
+
+  /* ---------- browse by category ---------- */
+  .browse h2 { margin: 0 0 4px; font-size: 17px; color: var(--ink); }
+  .browse .lead { margin: 0 0 16px; color: var(--muted); font-size: 13.5px; }
+  .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-bottom: 18px; }
+  .tile {
+    font: inherit; text-align: left; cursor: pointer; border: 1px solid var(--line); border-radius: 10px;
+    background: #fff; padding: 12px 14px; color: var(--ink); display: flex; flex-direction: column; gap: 2px;
+  }
+  .tile b { font-size: 15.5px; font-weight: 600; }
+  .tile .n { font-size: 12.5px; color: var(--muted); }
+  .tile:hover { border-color: var(--lotus); background: var(--wash); }
+  .tile[aria-pressed="true"] { background: var(--lotus); border-color: var(--lotus); color: #fff; }
+  .tile[aria-pressed="true"] .n { color: rgba(255,255,255,.85); }
+  .tile:focus-visible { outline: 2px solid var(--lotus); outline-offset: 2px; }
+  .facet { padding: 10px 0; border-top: 1px solid var(--line); }
+  .facet-h { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 13.5px; color: var(--muted); font-weight: 500; }
+  .facet-h input {
+    margin-left: auto; font: inherit; font-size: 13px; padding: 4px 10px; border: 1px solid var(--line);
+    border-radius: 6px; width: 170px; max-width: 45%;
+  }
+  .facet-h input:focus { outline: none; border-color: var(--lotus); }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    font: inherit; font-size: 13.5px; padding: 4px 10px; border-radius: 999px; cursor: pointer;
+    border: 1px solid var(--line); background: #fff; color: var(--ink); display: inline-flex; gap: 6px; align-items: center;
+  }
+  .chip .n { font-size: 11.5px; color: var(--muted); }
+  .chip:hover { border-color: var(--lotus); }
+  .chip[aria-pressed="true"] { background: var(--lotus); border-color: var(--lotus); color: #fff; }
+  .chip[aria-pressed="true"] .n { color: rgba(255,255,255,.85); }
+  .chip:focus-visible { outline: 2px solid var(--lotus); outline-offset: 2px; }
+  .chip.more { border-style: dashed; color: var(--lotus); }
+  .active-bar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 4px 0 12px; min-height: 30px; }
+  .active-bar .lbl { font-size: 13px; color: var(--muted); margin-right: 2px; }
+  .pill {
+    font: inherit; font-size: 13px; padding: 3px 6px 3px 10px; border-radius: 999px; cursor: pointer;
+    border: 0; background: #E3EBF7; color: var(--ink); display: inline-flex; gap: 6px; align-items: center;
+  }
+  .pill span { font-size: 12px; color: var(--muted); }
+  .pill:hover { background: #D3E0F3; }
+  .linkbtn { font: inherit; font-size: 13px; border: 0; background: none; color: var(--lotus); cursor: pointer; padding: 3px 4px; }
+  .linkbtn:hover { text-decoration: underline; }
+  .linkbtn.jump { margin-left: auto; font-weight: 600; }
+  .res-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;
+              margin: 14px 0 4px; padding-top: 12px; border-top: 1px solid var(--line); }
+  .res-head .home-count { margin: 0; }
+  .sortsel { font: inherit; font-size: 13px; padding: 4px 8px; border: 1px solid var(--line); border-radius: 6px; background: #fff; color: var(--ink); }
+  .tagline { display: block; margin-top: 3px; font-size: 12.5px; color: var(--muted); white-space: normal; }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; margin: -6px 0 16px; }
+  .tags .chip { font-size: 12.5px; padding: 2px 9px; }
+  .tags .lbl { font-size: 12.5px; color: var(--muted); align-self: center; }
+
+  /* ---------- mobile ---------- */
+  @media (max-width: 640px) {
+    .wrap { padding: 0 14px; }
+    header.wrap { padding-top: 20px; padding-bottom: 4px; }
+    h1 { font-size: 26px; }
+    .sub { font-size: 14px; margin-bottom: 14px; }
+    .field input { font-size: 16px; padding: 14px 0; }   /* 16px+ stops iOS from zooming in */
+    .opt { padding: 12px 16px; }
+    .group-label { padding: 10px 16px 4px; }
+    main.wrap { padding-top: 16px; padding-bottom: 40px; }
+    .card { padding: 16px; border-radius: 10px; }
+    .detail h2 { font-size: 19px; }
+    .toolbar .btn { flex: 1; padding: 10px 12px; }
+
+    /* table becomes stacked cards */
+    .table-scroll { overflow: visible; border: 0; }
+    table { min-width: 0; }
+    thead { display: none; }
+    table, tbody, tr, td { display: block; width: 100%; }
+    tr { border: 1px solid var(--line); border-radius: 10px; margin-bottom: 10px; padding: 6px 0; }
+    tr.hit { background: #FFFBEA; }
+    tr.hit td { background: none; }
+    td { border: 0; padding: 6px 14px; }
+    td[data-label]::before { content: attr(data-label); display: block; font-size: 12px; color: var(--muted); }
+    table { table-layout: auto; }
+    .c-fund, .c-amc, .c-cls, .c-st, .c-fx { width: 100%; }
+    .head-row { flex-direction: column; gap: 2px; margin-bottom: 14px; }
+    .stats { padding-top: 0; }
+    .top-list button { padding: 12px 2px; }
+    .az-bar { flex-wrap: nowrap; overflow-x: auto; margin: 0 -16px 4px; padding: 8px 12px; -webkit-overflow-scrolling: touch; }
+    .az-bar button, .az-bar span { flex: none; min-width: 34px; height: 34px; }
+  }
+
+  /* ---------- round 5: quick picks, folded filters, compare ---------- */
+  .quick { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+  .qp { font: inherit; font-size: 13.5px; padding: 5px 12px; border-radius: 999px; border: 1px solid var(--line); background: #fff; color: var(--ink); cursor: pointer; }
+  .qp:hover { border-color: var(--lotus); background: var(--wash); }
+  .qp[aria-pressed="true"] { background: var(--lotus); border-color: var(--lotus); color: #fff; }
+  .qp:focus-visible { outline: 2px solid var(--lotus); outline-offset: 2px; }
+  .sub + .sub { margin-top: 6px; }
+  .sub-h { font-size: 12px; color: var(--muted); margin: 4px 2px 2px; }
+  .fs-fold { padding: 4px 0; }
+  .fold-btn { width: 100%; display: flex; justify-content: space-between; font: inherit; font-size: 13px; font-weight: 600; color: var(--muted);
+              background: none; border: 0; padding: 8px 2px; cursor: pointer; }
+  .fold-btn:hover { color: var(--lotus); }
+  .fold-x { float: right; border: 0; background: none; color: var(--muted); cursor: pointer; font: inherit; padding: 0 2px; }
+  .top-list.rows li { display: flex; align-items: stretch; border-top: 1px solid var(--line); }
+  .top-list.rows li:first-child { border-top: 0; }
+  .top-list.rows li > button { flex: 1; min-width: 0; border-top: 0; }
+  .cmp { flex: none; display: flex; align-items: center; gap: 5px; padding: 0 4px 0 12px; font-size: 12.5px; color: var(--muted); cursor: pointer; user-select: none; }
+  .cmp input { width: 15px; height: 15px; margin: 0; accent-color: var(--lotus); }
+  .cmp:hover { color: var(--lotus); }
+  .similar { margin: 4px 0 22px; padding: 14px; background: var(--wash); border-radius: 10px; border-top: 0; }
+  .sim-h { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+  .sim-h h3 { margin: 0; font-size: 15px; color: var(--ink); }
+  .sim-row { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(220px, 1fr); gap: 10px; overflow-x: auto; padding-bottom: 4px; }
+  .sim-card { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; }
+  .sim-open { font: inherit; text-align: left; background: none; border: 0; padding: 0; cursor: pointer; color: var(--ink); display: flex; flex-direction: column; gap: 2px; }
+  .sim-open .mn { font-weight: 600; font-size: 14px; line-height: 1.35; }
+  .sim-open:hover .mn { color: var(--lotus); text-decoration: underline; }
+  .sim-card .why { margin-top: 0; }
+  .sim-foot { margin-top: auto; display: flex; justify-content: space-between; align-items: center; }
+  .sim-foot .count { font-size: 13px; }
+  .sim-foot .cmp { padding: 0; }
+  .tbl-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin: 6px 0 10px; }
+  .tbl-head h3 { margin: 0; font-size: 16px; color: var(--ink); }
+  .btn-sm { padding: 4px 10px; font-size: 13px; }
+  .btn-primary { background: var(--lotus); color: #fff; }
+  .btn-primary:hover { background: #224C8F; }
+  .btn-primary:disabled { background: #B9C6DB; border-color: #B9C6DB; cursor: default; }
+  .cmp-btn { display: inline-flex; align-items: center; gap: 6px; }
+  .cmp-btn input { margin: 0; accent-color: var(--lotus); }
+  .fxbar { margin-bottom: 10px; }
+  .cls-more { display: none; }
+  td.open .cls-more { display: block; }
+  .cls-more .cls { margin-top: 6px; }
+  .cls-btn { padding: 2px 0; font-size: 12.5px; }
+  .tray { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; background: #fff; border-top: 1px solid var(--line);
+          box-shadow: 0 -6px 20px rgba(19,41,75,.10); }
+  .tray-in { max-width: 1100px; margin: 0 auto; padding: 10px 24px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .tray-list { flex: 1; display: flex; gap: 6px; flex-wrap: wrap; min-width: 0; }
+  .tray-item { display: inline-flex; align-items: center; gap: 4px; max-width: 240px; font-size: 13px; background: var(--wash);
+               border-radius: 6px; padding: 3px 4px 3px 9px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tray-item button { border: 0; background: none; cursor: pointer; color: var(--muted); font-size: 12px; }
+  .tray-act { display: flex; align-items: center; gap: 10px; }
+  #trayMsg.warn { color: #B42318; }
+  body.has-tray main.wrap { padding-bottom: 110px; }
+  .cmp-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  .cmp-table { table-layout: fixed; }
+  .cmp-table th.c-lbl { width: 170px; background: var(--wash); font-size: 13px; color: var(--muted); font-weight: 600; }
+  .cmp-table thead th { vertical-align: top; background: #fff; }
+  .cmp-name { font: inherit; font-size: 15px; font-weight: 700; color: var(--ink); background: none; border: 0; padding: 0; text-align: left; cursor: pointer; display: block; margin-bottom: 4px; }
+  .cmp-name:hover { color: var(--lotus); text-decoration: underline; }
+  .cmp-table td { font-size: 14px; }
+  .cmp-table tr.same td { color: #98A2B3; }
+  @media (max-width: 640px) {
+    .tray-in { padding: 8px 14px; }
+    .tray-list { display: none; }
+    .tray-act { width: 100%; justify-content: space-between; }
+    .cmp-table { display: table; } .cmp-table thead { display: table-header-group; }
+    .cmp-table tbody { display: table-row-group; } .cmp-table tr { display: table-row; border: 0; padding: 0; margin: 0; }
+    .cmp-table td, .cmp-table th { display: table-cell; width: auto; }
+    .compare .table-scroll { overflow-x: auto; }
+    .cmp { padding-left: 8px; }
+    .cmp span { display: none; }
+  }
+  .hidden { display: none !important; }
+</style>
+<script src="../../shared/sources.js"></script>
+<script src="../../shared/nav.js" data-section="funds" data-title="ค้นหาด้วย Master Fund"></script>
+</head>
+<body>
+
+<header class="wrap">
+  <div class="head-row">
+    <h1><a href="?" id="home" title="กลับหน้าแรก">Master Fund Search</a></h1>
+    <div class="stats" id="stats">กำลังโหลดข้อมูล…</div>
+  </div>
+
+  <div class="combo" id="combo">
+    <div class="field">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" type="text" autocomplete="off" spellcheck="false"
+             placeholder="ระบุชื่อ Master Fund ที่ต้องการ หรือค้นหาจากกองทุนในไทย"
+             role="combobox" aria-expanded="false" aria-controls="dd" aria-autocomplete="list" aria-label="ค้นหา master fund หรือกองทุนไทย">
+      <button class="clear hidden" id="clear" type="button" aria-label="ล้างคำค้น">✕</button>
+    </div>
+    <ul class="dropdown hidden" id="dd" role="listbox"></ul>
+  </div>
+</header>
+
+<main class="wrap">
+  <div id="upload" class="card upload hidden">
+    <p>โหลดข้อมูลอัตโนมัติไม่ได้ (มักเกิดเมื่อเปิดไฟล์จากเครื่องโดยตรง)</p>
+    <p>เลือกไฟล์ <b>funds_data.json</b> เพื่อเริ่มใช้งาน</p>
+    <input type="file" id="file" accept=".json,.csv" multiple>
+  </div>
+  <section id="result" aria-live="polite"></section>
+</main>
+
+<div id="tipbox" class="hidden" role="tooltip"></div>
+
+<script>
+const DATA_URL = UTFIT_SRC.masterfund + "funds_data.json";
+const AMC_URL  = UTFIT_SRC.masterfund + "amc_abbr.csv";
+const TAGS_URL = UTFIT_SRC.masterfund + "master_tags.csv";
+const MAX_MASTERS = 8, MAX_FUNDS = 6;
+
+let MASTERS = [], MASTER_BY_KEY = new Map(), FUNDS = [], AMC = new Map();
+let items = [], active = -1;
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const norm = s => String(s ?? "").toLowerCase().replace(/[–—]/g, "-").replace(/[^\p{L}\p{N}]+/gu, " ").trim();
+const clean = v => { const s = String(v ?? "").trim(); return ["", "none", "nan", "null"].includes(s.toLowerCase()) ? "" : s; };
+// strip Thai/English label prefixes some AMCs type into the master fund field, e.g. "ชื่อกองทุนหลัก : iShares ..."
+const cleanMaster = v => clean(v)
+  .replace(/^\s*(ชื่อ\s*)?กองทุน\s*(หลัก)?\s*[:：]\s*/i, "")
+  .replace(/^\s*(name\s+of\s+)?master\s*fund\s*(name)?\s*[:：]\s*/i, "")
+  .trim();
+
+// ---------- AMC abbreviation ----------
+const amcKey = s => String(s ?? "")
+  .replace(/บริษัท|หลักทรัพย์|จัดการกองทุนรวม|จัดการกองทุน|จำกัด|\(มหาชน\)|มหาชน|\(ประเทศไทย\)|ประเทศไทย/g, "")
+  .replace(/[\s()]/g, "").toLowerCase();
+const amcShortTh = s => String(s ?? "")
+  .replace(/^บริษัท\s*หลักทรัพย์\s*จัดการกองทุน(รวม)?\s*/, "").replace(/\s*จำกัด.*$/, "").trim();
+// ชื่อย่อ บลจ. ฝังไว้ในไฟล์ ใช้ได้แม้เปิดแบบ offline
+// (ถ้ามี amc_abbr.csv อยู่ข้างไฟล์นี้ ค่าในไฟล์ CSV จะเพิ่ม/ทับรายการด้านล่าง)
+const AMC_BUILTIN = [
+  ["ABERDEEN", "บริษัทหลักทรัพย์จัดการกองทุน อเบอร์ดีน (ประเทศไทย) จำกัด"],
+  ["AIAM", "บริษัทหลักทรัพย์จัดการกองทุน ไอร่า จำกัด"],
+  ["ASSETFUND", "บริษัทหลักทรัพย์จัดการกองทุน แอสเซท พลัส จำกัด"],
+  ["BBLAM", "บริษัทหลักทรัพย์จัดการกองทุน บัวหลวง จำกัด"],
+  ["BCAP", "บริษัทหลักทรัพย์จัดการกองทุนรวม บางกอกแคปปิตอล จำกัด"],
+  ["DAOLINV", "บริษัทหลักทรัพย์จัดการกองทุน ดาโอ จำกัด"],
+  ["EASTSPRING", "บริษัทหลักทรัพย์จัดการกองทุน อีสท์สปริง (ประเทศไทย) จำกัด"],
+  ["KASSET", "บริษัทหลักทรัพย์จัดการกองทุน กสิกรไทย จำกัด"],
+  ["KKPAM", "บริษัทหลักทรัพย์จัดการกองทุน เกียรตินาคินภัทร จำกัด"],
+  ["KSAM", "บริษัทหลักทรัพย์จัดการกองทุน กรุงศรี จำกัด"],
+  ["KTAM", "บริษัทหลักทรัพย์จัดการกองทุน กรุงไทย จำกัด (มหาชน)"],
+  ["KWIAM", "บริษัทหลักทรัพย์จัดการกองทุน เคดับบลิวไอ จำกัด"],
+  ["LHFUND", "บริษัทหลักทรัพย์จัดการกองทุน แลนด์ แอนด์ เฮ้าส์ จำกัด"],
+  ["MFC", "บริษัทหลักทรัพย์จัดการกองทุน เอ็มเอฟซี จำกัด (มหาชน)"],
+  ["MPAM", "บริษัทหลักทรัพย์จัดการกองทุน เมอร์ชั่น พาร์ทเนอร์ จำกัด"],
+  ["ONEAM", "บริษัทหลักทรัพย์จัดการกองทุน วรรณ จำกัด"],
+  ["PAMC", "บริษัทหลักทรัพย์จัดการกองทุนรวม ฟิลลิป จำกัด"],
+  ["PRINCIPAL", "บริษัทหลักทรัพย์จัดการกองทุน พรินซิเพิล จำกัด"],
+  ["SAMC", "บริษัทหลักทรัพย์จัดการกองทุน ซาวาคามิ (ประเทศไทย) จำกัด"],
+  ["SCBAM", "บริษัทหลักทรัพย์จัดการกองทุน ไทยพาณิชย์ จำกัด"],
+  ["TALISAM", "บริษัทหลักทรัพย์จัดการกองทุน ทาลิส จำกัด"],
+  ["TISCOASSET", "บริษัทหลักทรัพย์จัดการกองทุน ทิสโก้ จำกัด"],
+  ["UOBAM", "บริษัทหลักทรัพย์จัดการกองทุน ยูโอบี (ประเทศไทย) จำกัด"],
+  ["WISE", "บริษัทหลักทรัพย์จัดการกองทุน ไวส์ จำกัด"],
+  ["XSpringAM", "บริษัทหลักทรัพย์จัดการกองทุน เอ็กซ์สปริง จำกัด"]
+];
+AMC_BUILTIN.forEach(([abbr, name]) => AMC.set(amcKey(name), abbr));
+
+function parseAmc(text) {
+  text.replace(/^\uFEFF/, "").split(/\r?\n/).slice(1).forEach(line => {
+    const [abbr, ...rest] = line.split(",");
+    const name = rest.join(",").replace(/^"|"$/g, "").trim();
+    if (abbr && name) AMC.set(amcKey(name), abbr.trim());
+  });
+}
+// fallback when an AMC isn't in the list: shorten its English name from SEC,
+// e.g. "FIRST PLUS ASSET MANAGEMENT (THAILAND) COMPANY LIMITED" -> "FIRSTPLUS"
+const AMC_EN = new Map();
+const amcShortEn = s => String(s ?? "").toUpperCase()
+  .replace(/\(.*?\)/g, " ")
+  .replace(/\b(PUBLIC|COMPANY|CO\.?|LIMITED|LTD\.?|ASSET|MANAGEMENT|FUND|MUTUAL|SECURITIES|INVESTMENT|THAILAND)\b/g, " ")
+  .replace(/[^A-Z0-9]+/g, "");   // no spaces, same style as the list (e.g. FIRSTPLUS)
+const amcAbbr = name => AMC.get(amcKey(name)) || amcShortEn(AMC_EN.get(amcKey(name))) || amcShortTh(name);
+
+// ---------- load ----------
+Promise.all([
+  fetch(DATA_URL, { cache: "no-cache" }).then(r => r.ok ? r.json() : Promise.reject()),
+  fetch(AMC_URL, { cache: "no-cache" }).then(r => r.ok ? r.text() : "").catch(() => ""),
+  fetch(TAGS_URL, { cache: "no-cache" }).then(r => r.ok ? r.text() : "").catch(() => "")
+]).then(([rows, csv, tags]) => { if (csv) parseAmc(csv); if (tags) parseTags(tags); init(rows); })
+  .catch(() => { $("upload").classList.remove("hidden"); $("stats").textContent = ""; });
+
+$("file").addEventListener("change", async e => {
+  let rows = null;
+  for (const f of e.target.files) {
+    const t = await f.text();
+    if (f.name.toLowerCase().includes("tags")) parseTags(t);
+    else if (f.name.toLowerCase().endsWith(".csv")) parseAmc(t); else rows = JSON.parse(t);
+  }
+  if (rows) { $("upload").classList.add("hidden"); init(rows); }
+});
+
+function init(rows) {
+  rows.forEach(r => { if (clean(r.comp_name_en)) AMC_EN.set(amcKey(r.comp_name_th), clean(r.comp_name_en)); });
+  const map = new Map();
+  for (const r of rows) {
+    const name = cleanMaster(r.Master_Fund_Search) || cleanMaster(r.feederfund_master_fund);
+    if (!name) continue;
+    const gk = clean(r.Master_Fund_Key) || norm(name);   // group key built in master_names.py
+    if (!map.has(gk)) map.set(gk, { gk, name, rows: [], variants: new Set(), countries: new Set() });
+    const m = map.get(gk);
+    m.rows.push(r);
+    if (clean(r.feederfund_master_fund)) m.variants.add(clean(r.feederfund_master_fund));
+    if (clean(r.feederfund_country)) m.countries.add(clean(r.feederfund_country));
+  }
+  MASTERS = [...map.values()].map(m => {
+    const projs = new Map();
+    m.rows.forEach(r => { const k = r.proj_id || r.proj_abbr_name; if (!projs.has(k)) projs.set(k, r); });
+    const amcs = [...new Set([...projs.values()].map(r => amcAbbr(r.comp_name_th)))].sort();
+    // Active / Passive / … of each Thai feeder, from its SEC management_style code
+    const styles = [...new Set([...projs.values()].map(r => styleGroup(r.management_style)))];
+    // search text covers every spelling the AMCs used, so an old spelling still finds the group
+    const key = norm([m.name, ...m.variants].join(" "));
+    const tag = TAGS.get(norm(m.name)) || [...m.variants].map(v => TAGS.get(norm(v))).find(Boolean) || UNTAGGED;
+    return { ...m, key, projects: projs.size, amcs, styles, tag };
+  }).sort((a, b) => b.projects - a.projects || a.name.localeCompare(b.name));
+  MASTER_BY_KEY = new Map();
+  MASTERS.forEach(m => [m.name, ...m.variants].forEach(v => {
+    const k = norm(v); if (!MASTER_BY_KEY.has(k)) MASTER_BY_KEY.set(k, m);
+  }));
+  // home list buttons carry the display name
+  MASTERS.forEach(m => MASTER_BY_KEY.set(norm(m.name), m));
+
+  // Thai funds (one entry per project, searchable by abbr, class names, Thai/English names)
+  const fmap = new Map();
+  for (const m of MASTERS) for (const r of m.rows) {
+    const k = r.proj_id || r.proj_abbr_name;
+    if (!fmap.has(k)) fmap.set(k, { abbr: clean(r.proj_abbr_name), nameTh: clean(r.proj_name_th), master: m, classes: new Set(), amc: amcAbbr(r.comp_name_th),
+                                    extra: [r.proj_name_en] });
+    const f = fmap.get(k);
+    if (clean(r.Search_Name)) f.classes.add(clean(r.Search_Name));
+  }
+  FUNDS = [...fmap.values()].map(f => ({ ...f, key: norm([f.abbr, ...f.classes, f.nameTh, ...f.extra].join(" ")) }));
+
+  const amcCount = new Set(rows.map(r => r.comp_name_th)).size;
+  const lastUpd = rows.map(r => String(r.last_upd_date || "")).sort().pop() || "";
+  const d = lastUpd ? new Date(lastUpd.slice(0, 10)) : null;
+  const MON = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  $("stats").textContent = d && !isNaN(d) ? `ข้อมูล SEC ล่าสุด ${d.getDate()} ${MON[d.getMonth()]} ${d.getFullYear()}` : "";
+  $("stats").title = `Master fund ${MASTERS.length.toLocaleString()} กอง · กองทุนไทย ${FUNDS.length.toLocaleString()} กอง จาก ${amcCount} บลจ.`;
+
+  history.replaceState({ view: "init" }, "", location.href);
+  route();
+}
+
+// ---------- combobox ----------
+const input = $("q"), dd = $("dd");
+
+function highlight(text, tokens) {
+  // one pass over the raw text, so a later word can never match inside an earlier <mark> tag
+  let ts = tokens.filter(Boolean);
+  if (ts.length > 1) ts = ts.filter(t => t.length > 1);          // skip single letters like "a" when typing several words
+  ts = [...new Set(ts)].sort((a, b) => b.length - a.length)
+        .map(t => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+  if (!ts.length) return esc(text);
+  const re = new RegExp(`(${ts.join("|")})`, "gi");
+  return String(text ?? "").split(re).map((part, i) => i % 2 ? `<mark>${esc(part)}</mark>` : esc(part)).join("");
+}
+
+function buildItems(q) {
+  const tokens = norm(q).split(" ").filter(Boolean);
+  if (!tokens.length) return { tokens, list: [] };
+  const full = norm(q);
+  const masters = MASTERS.filter(m => tokens.every(t => m.key.includes(t)))
+    .sort((a, b) => (b.key.startsWith(full) - a.key.startsWith(full)) || b.projects - a.projects)
+    .slice(0, MAX_MASTERS);
+  const funds = FUNDS.filter(f => tokens.every(t => f.key.includes(t)))
+    .sort((a, b) => (norm(b.abbr).startsWith(full) - norm(a.abbr).startsWith(full)) || a.abbr.localeCompare(b.abbr))
+    .slice(0, MAX_FUNDS);
+  return { tokens, list: [...masters.map(m => ({ type: "master", m })), ...funds.map(f => ({ type: "fund", f }))] };
+}
+
+function renderDropdown() {
+  const q = input.value;
+  $("clear").classList.toggle("hidden", !q);
+  const { tokens, list } = buildItems(q);
+  items = list; active = list.length ? 0 : -1;
+  if (!q.trim()) return closeDropdown();
+
+  let html = "", lastType = null;
+  list.forEach((it, i) => {
+    if (it.type !== lastType) {
+      html += `<li class="group-label" role="presentation">${it.type === "master" ? "Master fund" : "กองทุนไทย"}</li>`;
+      lastType = it.type;
+    }
+    if (it.type === "master") {
+      const m = it.m;
+      html += `<li class="opt" role="option" id="opt${i}" data-i="${i}">
+        <div class="t">${highlight(m.name, tokens)}</div>
+        <div class="d">กองทุนไทย ${m.projects} กอง · ${esc(m.amcs.join(", "))}</div></li>`;
+    } else {
+      const f = it.f;
+      html += `<li class="opt" role="option" id="opt${i}" data-i="${i}">
+        <div class="t">${highlight(f.abbr, tokens)} <span class="small" style="font-weight:500">${esc(f.amc)}</span></div>
+        <div class="d">ลงทุนใน <span class="to-master">${esc(f.master.name)} ›</span></div></li>`;
+    }
+  });
+  if (!list.length) html = `<li class="opt-empty">ไม่พบ “${esc(q)}” ลองพิมพ์ให้สั้นลง เช่น ชื่อบริษัทจัดการต่างประเทศ หรือคำหลักของกองทุน</li>`;
+  dd.innerHTML = html;
+  dd.classList.remove("hidden");
+  input.setAttribute("aria-expanded", "true");
+  paintActive();
+}
+
+function paintActive() {
+  dd.querySelectorAll(".opt").forEach(el => el.setAttribute("aria-selected", +el.dataset.i === active));
+  const el = $("opt" + active);
+  if (el) { el.scrollIntoView({ block: "nearest" }); input.setAttribute("aria-activedescendant", el.id); }
+  else input.removeAttribute("aria-activedescendant");
+}
+
+function closeDropdown() {
+  dd.classList.add("hidden");
+  input.setAttribute("aria-expanded", "false");
+  input.removeAttribute("aria-activedescendant");
+}
+
+input.addEventListener("input", renderDropdown);
+const isPhone = () => window.matchMedia("(max-width: 640px)").matches;
+input.addEventListener("focus", () => {
+  if (input.value.trim()) renderDropdown();
+  if (isPhone()) setTimeout(() => $("combo").scrollIntoView({ block: "start", behavior: "smooth" }), 250);
+});
+input.addEventListener("keydown", e => {
+  if (dd.classList.contains("hidden") && e.key === "ArrowDown") { renderDropdown(); return; }
+  if (e.key === "ArrowDown") { e.preventDefault(); if (items.length) { active = (active + 1) % items.length; paintActive(); } }
+  else if (e.key === "ArrowUp") { e.preventDefault(); if (items.length) { active = (active - 1 + items.length) % items.length; paintActive(); } }
+  else if (e.key === "Enter") { e.preventDefault(); if (items[active]) choose(items[active]); }
+  else if (e.key === "Escape") { closeDropdown(); }
+});
+dd.addEventListener("mousedown", e => {
+  const el = e.target.closest(".opt"); if (!el) return;
+  e.preventDefault(); choose(items[+el.dataset.i]);
+});
+dd.addEventListener("mousemove", e => {
+  const el = e.target.closest(".opt"); if (el && +el.dataset.i !== active) { active = +el.dataset.i; paintActive(); }
+});
+document.addEventListener("click", e => { if (!$("combo").contains(e.target)) closeDropdown(); });
+$("clear").addEventListener("click", () => {
+  input.value = ""; closeDropdown(); $("clear").classList.add("hidden"); input.focus();
+  if (new URLSearchParams(location.search).get("master")) goBack(); else showHome();
+});
+$("home").addEventListener("click", e => {
+  if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0 || !MASTERS.length) return; // new tab / data not loaded → normal link
+  e.preventDefault();
+  input.value = ""; closeDropdown(); $("clear").classList.add("hidden");
+  const url = new URL(location); url.search = "";
+  history.pushState({ view: "home" }, "", url);
+  filtersOpen = false; expanded.clear();
+  showHome();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+});
+
+// ---------- management style (SEC codes) ----------
+const STYLE = {
+  AM: ["Active",         "มุ่งหวังให้ผลประกอบการเคลื่อนไหวสูงกว่าดัชนีชี้วัด (active management)"],
+  AN: ["Active",         "กองทุนไทยมุ่งหวังให้ผลประกอบการเคลื่อนไหวตามกองทุนหลัก ส่วนกองทุนหลักมุ่งหวังให้ผลประกอบการสูงกว่าดัชนีชี้วัด"],
+  PM: ["Passive",        "มุ่งหวังให้ผลประกอบการเคลื่อนไหวตามดัชนีชี้วัด (passive management / index tracking)"],
+  PN: ["Passive",        "กองทุนไทยมุ่งหวังให้ผลประกอบการเคลื่อนไหวตามกองทุนหลัก ส่วนกองทุนหลักมุ่งหวังให้ผลประกอบการเคลื่อนไหวตามดัชนีชี้วัด"],
+  IM: ["Inverse",        "มุ่งหวังให้ได้รับผลประกอบการเคลื่อนไหวตรงกันข้ามกับผลตอบแทนรายวันของดัชนีอ้างอิง (inverse management)"],
+  IN: ["Inverse",        "กองทุนไทยมุ่งหวังให้ผลประกอบการเคลื่อนไหวตามกองทุนหลัก ส่วนกองทุนหลักมุ่งหวังให้ได้รับผลประกอบการเคลื่อนไหวตรงกันข้ามกับผลตอบแทนรายวันของดัชนีอ้างอิง"],
+  LM: ["Leveraged",      "มุ่งหวังให้ได้รับผลประกอบการเคลื่อนไหวทวีคูณกับผลตอบแทนรายวันของดัชนีอ้างอิง (leveraged management)"],
+  LN: ["Leveraged",      "กองทุนไทยมุ่งหวังให้ผลประกอบการเคลื่อนไหวตามกองทุนหลัก ส่วนกองทุนหลักมุ่งหวังให้ได้รับผลประกอบการเคลื่อนไหวทวีคูณกับผลตอบแทนรายวันของดัชนีอ้างอิง"],
+  BH: ["Buy & Hold",     "มีกลยุทธ์การลงทุนครั้งเดียว (buy-and-hold)"],
+  SM: ["Enhanced Index", "มุ่งหวังให้ผลประกอบการเคลื่อนไหวตามดัชนีชี้วัด และในบางโอกาสอาจสร้างผลตอบแทนสูงกว่าดัชนีชี้วัด"],
+  OT: ["อื่น ๆ",          "อื่น ๆ"]
+};
+function styleCell(v) {
+  const code = clean(v).toUpperCase();
+  if (!code) return "-";
+  const [label, full] = STYLE[code] || [code, ""];
+  const inner = `<span class="code">${esc(code)}</span>${label !== code ? esc(label) : ""}`;
+  return full ? `<span class="tip" tabindex="0" data-tip="${esc(code + " = " + full)}">${inner}</span>` : inner;
+}
+
+// ---------- tooltip: hover on desktop, tap on mobile ----------
+const tipbox = $("tipbox");
+let tipOwner = null;
+let tipShownAt = 0;
+function showTip(el) {
+  if (tipOwner !== el) tipShownAt = Date.now();
+  tipOwner = el;
+  tipbox.textContent = el.dataset.tip;
+  tipbox.classList.remove("hidden");
+  const r = el.getBoundingClientRect(), b = tipbox.getBoundingClientRect();
+  let left = Math.min(Math.max(8, r.left), window.innerWidth - b.width - 8);
+  let top = r.bottom + 8;
+  if (top + b.height > window.innerHeight - 8) top = r.top - b.height - 8;
+  tipbox.style.left = left + "px"; tipbox.style.top = top + "px";
+}
+function hideTip() { tipOwner = null; tipbox.classList.add("hidden"); }
+// hover only for a real mouse; touch screens use tap (click) below
+document.addEventListener("pointerover", e => { if (e.pointerType !== "mouse") return; const t = e.target.closest(".tip"); if (t) showTip(t); });
+document.addEventListener("pointerout",  e => { if (e.pointerType !== "mouse") return; if (e.target.closest(".tip") && !e.relatedTarget?.closest?.(".tip")) hideTip(); });
+document.addEventListener("focusin",   e => { const t = e.target.closest(".tip"); if (t) showTip(t); });
+document.addEventListener("focusout",  e => { if (e.target.closest(".tip")) hideTip(); });
+document.addEventListener("click", e => {
+  const t = e.target.closest(".tip");
+  if (!t) return hideTip();
+  // a tap fires mouseover/focus first, so only close if the tip was already open before this tap
+  if (tipOwner === t && !tipbox.classList.contains("hidden") && Date.now() - tipShownAt > 400) { t.blur(); hideTip(); }
+  else showTip(t);
+});
+window.addEventListener("scroll", hideTip, true);
+
+// ---------- FX hedging: short label, full text on hover ----------
+function fxShort(v) {
+  const s = clean(v); if (!s) return "-";
+  const t = s.toLowerCase();
+  if (t.includes("ไม่ป้องกัน") || t.includes("unhedged")) return "ไม่ป้องกัน";
+  if (t.includes("ทั้งหมด") || t.includes("fully")) return "ป้องกันทั้งหมด";
+  if (t.includes("ดุลยพินิจ") || t.includes("dynamic")) return "ดุลยพินิจ";
+  if (t.includes("บางส่วน") || t.includes("partial")) return "บางส่วน";
+  return s.split("(")[0].trim() || s;
+}
+
+// ---------- views ----------
+function choose(it) {
+  const m = it.type === "master" ? it.m : it.f.master;
+  const highlightAbbr = it.type === "fund" ? it.f.abbr : null;
+  input.value = m.name;
+  $("clear").classList.remove("hidden");
+  closeDropdown();
+  if (window.matchMedia("(pointer: coarse)").matches) input.blur();
+  const url = new URL(location); url.search = "?" + new URLSearchParams({ master: m.name });
+  const onHome = !new URLSearchParams(location.search).get("master");
+  if (onHome) {
+    history.replaceState({ ...(history.state || {}), view: "home", scroll: window.scrollY }, "", location.href);
+    history.pushState({ view: "master", fromHome: true }, "", url);
+  } else history.replaceState({ ...(history.state || {}), view: "master" }, "", url);
+  showMaster(m, highlightAbbr);
+  window.scrollTo(0, 0);
+}
+
+// Thai fund's management_style -> Active / Passive / อื่น ๆ
+function styleGroup(v) {
+  const label = (STYLE[clean(v).toUpperCase()] || [])[0];
+  return label === "Active" || label === "Passive" ? label : "อื่น ๆ";
+}
+
+// ---------- categories (master_tags.csv) ----------
+// one row per master fund, tags read from each Thai feeder's SEC investment policy
+const TAGS = new Map();
+const TAG_COLS = ["asset", "region", "countries", "excludes", "sector", "theme", "style", "index", "mgmt", "bond_type"];
+const UNTAGGED = { asset: ["Untagged"], region: [], countries: [], excludes: [], sector: [], theme: [], style: [], index: [], mgmt: [], bond_type: [], conf: "" };
+
+function csvRows(text) {
+  // small RFC-4180 parser: quoted fields may contain commas, quotes ("") and newlines
+  const out = []; let row = [], f = "", q = false;
+  text = text.replace(/^﻿/, "");
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) {
+      if (c === '"' && text[i + 1] === '"') { f += '"'; i++; }
+      else if (c === '"') q = false;
+      else f += c;
+    } else if (c === '"') q = true;
+    else if (c === ",") { row.push(f); f = ""; }
+    else if (c === "\n" || c === "\r") {
+      if (c === "\r" && text[i + 1] === "\n") i++;
+      row.push(f); f = ""; if (row.some(Boolean)) out.push(row); row = [];
+    } else f += c;
+  }
+  row.push(f); if (row.some(Boolean)) out.push(row);
+  return out;
+}
+function parseTags(text) {
+  const [hdr, ...rows] = csvRows(text);
+  const ix = Object.fromEntries(hdr.map((h, i) => [h.trim(), i]));
+  if (ix.master_fund == null) return;
+  rows.forEach(r => {
+    const t = { conf: (r[ix.conf] || "").trim() };
+    TAG_COLS.forEach(c => t[c] = String(r[ix[c]] ?? "").split(";").map(s => s.trim()).filter(Boolean));
+    TAGS.set(norm(r[ix.master_fund]), t);
+  });
+}
+
+// ---------- the groups ICs think in ----------
+// detailed tags (country, theme, sector…) roll up into a few plain groups; the detail stays on each master's page
+const ASSET = [
+  ["Equity", "หุ้น"], ["Fixed Income", "ตราสารหนี้"], ["Multi-Asset", "ผสม"], ["Real Estate", "อสังหาฯ / REITs"],
+  ["Commodity", "ทองคำ & สินค้าโภคภัณฑ์"], ["Alternative", "สินทรัพย์ทางเลือก"], ["Untagged", "ยังไม่จัดหมวด"]
+];
+const has = (arr, ...v) => v.some(x => arr.includes(x));
+const MARKET = [
+  ["us",     "สหรัฐฯ",        t => has(t.countries, "United States", "Canada") || (has(t.region, "North America") && !t.countries.length)],
+  ["eu",     "ยุโรป",          t => has(t.region, "Europe") || has(t.countries, "Germany", "France", "Italy", "United Kingdom") && t.countries.length <= 2],
+  ["jp",     "ญี่ปุ่น",          t => has(t.countries, "Japan") && t.countries.length <= 2],
+  ["cn",     "จีน (ทั้งหมด)",    t => has(t.countries, "China", "Hong Kong", "Macau")],
+  ["cna",    "จีน A-shares",      t => has(t.theme, "China A-shares", "STAR Market") || (has(t.countries, "China") && /CSI|SSE|A50|A500/.test(t.index.join(" ")))],
+  ["cnh",    "จีน H-shares / ฮ่องกง", t => has(t.theme, "China H-shares") || has(t.countries, "Hong Kong")],
+  ["tw",     "ไต้หวัน",         t => has(t.countries, "Taiwan")],
+  ["kr",     "เกาหลีใต้",       t => has(t.countries, "South Korea")],
+  ["in",     "อินเดีย",         t => has(t.countries, "India")],
+  ["vn",     "เวียดนาม",        t => has(t.countries, "Vietnam")],
+  ["asean",  "อาเซียน / ไทย / สิงคโปร์", t => has(t.countries, "Indonesia", "Singapore", "Thailand", "Malaysia", "Cambodia", "Myanmar") || has(t.theme, "ASEAN")],
+  ["au",     "ออสเตรเลีย",      t => has(t.countries, "Australia") && t.countries.length <= 2],
+  ["asia",   "เอเชีย",               t => has(t.region, "Asia") && (!t.countries.length || t.countries.length > 2)],
+  ["axj",    "เอเชียไม่รวมญี่ปุ่น",     t => has(t.region, "Asia ex Japan")],
+  ["apac",   "เอเชียแปซิฟิก",         t => has(t.region, "Asia Pacific") && t.countries.length !== 1],
+  ["em",     "ตลาดเกิดใหม่",     t => has(t.region, "Emerging Markets")],
+  ["emxc",   "ตลาดเกิดใหม่ไม่รวมจีน", t => has(t.region, "Emerging Markets") && has(t.excludes, "China")],
+  ["latam",  "ละตินอเมริกา / บราซิล", t => has(t.region, "Latin America") || has(t.countries, "Brazil")],
+  ["dm",     "ตลาดพัฒนาแล้ว",     t => has(t.region, "Developed Markets") && t.countries.length !== 1],
+  ["global", "ทั่วโลก",          t => has(t.region, "Global") && t.countries.length !== 1]
+];
+const THEME = [
+  ["tech",   "AI & เทคโนโลยี",          ["Technology", "Technology-heavy", "Artificial Intelligence", "Generative AI", "Cloud Computing", "Software", "Big Data", "Machine Learning", "Quantum Computing", "Digital Economy", "Disruptive Technology", "Next-Gen Technology", "Innovation", "Disruptive Innovation", "New Economy", "STAR Market", "Fintech", "EV"], ["Information Technology"]],
+  ["semi",   "Semiconductor / ชิป",      ["Semiconductor", "Memory", "Lithography", "Photonics"]],
+  ["robot",  "หุ่นยนต์ & Automation",    ["Robotics", "Automation", "Humanoid Robotics", "Physical AI", "Embodied AI"]],
+  ["cyber",  "Cybersecurity",           ["Cybersecurity", "Security"]],
+  ["health", "สุขภาพ & Biotech",         ["Healthcare", "Healthcare Innovation", "Biotechnology", "Biotech", "Life Sciences", "Medical Devices", "Digital Health", "Oncology", "Genomics", "Ageing"], ["Health Care"]],
+  ["clean",  "พลังงานสะอาด & Climate",   ["Clean Energy", "Energy Transition", "Climate Change", "Solar", "Hydrogen", "Smart Grid", "Smart Energy", "Electrification", "Alternative Energy", "Clean Technology", "Water", "Environmental", "Carbon Credits", "Green Building"]],
+  ["nuclear","นิวเคลียร์ & ยูเรเนียม",    ["Uranium", "Nuclear Energy"]],
+  ["infra",  "โครงสร้างพื้นฐาน & Data Center", ["Infrastructure", "Private Infrastructure", "Sustainable Infrastructure", "Data Centers", "Digital Infrastructure", "AI Infrastructure", "Power", "Real Assets"]],
+  ["gold",   "ทองคำ & โลหะ",            ["Gold", "Gold Miners", "Silver Miners", "Precious Metals", "Copper Miners", "Rare Earth", "Strategic Metals", "Critical Minerals", "Energy Transition Metals", "Metals & Mining"]],
+  ["oil",    "น้ำมัน & พลังงาน",          ["Crude Oil", "Oil & Gas", "Natural Gas", "Oil Services", "Energy"]],
+  ["defense","อวกาศ & กลาโหม",           ["Space", "Defense", "Defense Technology", "Drones", "Aerospace & Defense"]],
+  ["fin",    "ธนาคาร & การเงิน",          ["Banks", "US Banks", "Financial Services", "Financials"]],
+  ["consumer","แบรนด์ & ผู้บริโภค",        ["Global Brands", "Luxury", "Premium Brands/Luxury", "Consumer Trends", "Digital Consumer", "China Consumer", "Next-Gen Consumer", "Millennials", "Emerging Consumer", "Consumer Staples", "Video Gaming", "eSports", "Digital Entertainment", "Leisure & Entertainment", "Demographics"]],
+  ["income", "ปันผล & รายได้",           ["Covered Call", "Asia Pacific Income", "Autocallable/Structured Income", "Preferred Securities"], [], ["Income", "Dividend"]],
+  ["esg",    "ESG / ยั่งยืน",            ["ESG/Sustainable", "Impact/ESG"]],
+  ["crypto", "Crypto & Blockchain",     ["Blockchain/Crypto", "Digital Assets/Crypto", "Crypto (Bitcoin)", "Crypto (Ethereum)"]],
+  ["private","Private Markets",          ["Private Equity", "Private Credit", "Venture Capital", "Private Equity Secondaries", "Private Assets", "Private Real Estate", "Buyout", "Royalties"]],
+  ["absret", "Absolute Return / Hedge",  ["Absolute Return", "Equity Long/Short", "Global Macro", "Multi-Strategy", "Risk Parity", "All Weather", "Currency/FX"]]
+].map(([k, label, themes, sectors = [], styles = []]) => [k, label, t =>
+  has(t.theme, ...themes) || (sectors.length && has(t.sector, ...sectors) && !t.theme.length) || has(t.style, ...styles)]);
+const MGMT = [["Passive", "Passive"], ["Active", "Active"]];
+
+const FACETS = [
+  { k: "a",  title: "ประเภท",  opts: ASSET.map(([v, l]) => [v, l, t => t.asset[0] === v]) },
+  { k: "mk", title: "ตลาด",    opts: MARKET,
+    // countries first, then regions; each part folds on its own
+    groups: [["ประเทศ", ["us", "jp", "cn", "cna", "cnh", "tw", "kr", "in", "vn", "asean", "au", "latam"]],
+             ["ภูมิภาค", ["eu", "asia", "axj", "apac", "em", "emxc", "dm", "global"]]] },
+  { k: "th", title: "ธีม",      opts: THEME },
+  { k: "ix", title: "ดัชนีอ้างอิง", opts: [], byFunds: true, fold: true },
+  { k: "p",  title: "Active / Passive", opts: MGMT.map(([v, l]) => [v, l, t => t.mgmt.includes(v)]), fold: true }
+];
+// one-click starting points above the list
+const QUICK = [
+  ["S&P 500",        { ix: ["S&P 500"] }],
+  ["Nasdaq-100",     { ix: ["Nasdaq-100"] }],
+  ["หุ้นสหรัฐฯ",      { a: ["Equity"], mk: ["us"] }],
+  ["หุ้นจีน",         { a: ["Equity"], mk: ["cn"] }],
+  ["หุ้นญี่ปุ่น",       { a: ["Equity"], mk: ["jp"] }],
+  ["หุ้นอินเดีย",      { a: ["Equity"], mk: ["in"] }],
+  ["หุ้นเวียดนาม",     { a: ["Equity"], mk: ["vn"] }],
+  ["AI & เทคโนโลยี",  { th: ["tech"] }],
+  ["Semiconductor",  { th: ["semi"] }],
+  ["ทองคำ",          { th: ["gold"] }],
+  ["ตราสารหนี้",       { a: ["Fixed Income"] }],
+  ["Private Markets", { th: ["private"] }]
+];
+const MIN_GROUP = 2;   // a group needs at least this many master funds to be listed (smaller ones stay findable by search)
+const SHOW = 6;        // options shown before "ดูเพิ่ม"
+let sel = {};          // { a: Set, mk: Set, ... } – OR within a facet, AND across facets
+let expanded = new Set();
+let opened = new Set();    // folded facets the user opened
+let sortBy = "count";
+let filtersOpen = false;   // mobile drawer
+
+// "MSCI Korea 20/35 Custom" and "MSCI Korea" count as one index
+const normIndex = x => x.replace(/\s*\(USD hedged\)/i, "").replace(/\s+(20\/35 Custom|25\/50|10\/40)$/i, "").trim();
+function ensureIndexOpts() {
+  const f = FACETS.find(x => x.k === "ix");
+  if (f.opts.length) return;
+  const names = new Set();
+  MASTERS.forEach(m => m.tag.index.forEach(i => names.add(normIndex(i))));
+  f.opts = [...names].map(v => [v, v, t => t.index.some(i => normIndex(i) === v)]);
+}
+function categorize(m) {
+  ensureIndexOpts();
+  const t = m.tag;
+  m.cat = {};
+  FACETS.forEach(f => m.cat[f.k] = f.opts.filter(([, , test]) => test(t)).map(([v]) => v));
+}
+const optLabel = (k, v) => (FACETS.find(f => f.k === k).opts.find(o => o[0] === v) || [, v])[1];
+
+function readState() {
+  const p = new URLSearchParams(location.search);
+  sel = {};
+  FACETS.forEach(f => { const v = p.get(f.k); if (v) sel[f.k] = new Set(v.split(",")); });
+  sortBy = p.get("sort") === "az" ? "az" : "count";
+}
+function stateQuery() {
+  const q = new URLSearchParams();
+  FACETS.forEach(f => { if (sel[f.k] && sel[f.k].size) q.set(f.k, [...sel[f.k]].join(",")); });
+  if (sortBy === "az") q.set("sort", "az");
+  return q.toString();
+}
+function writeState() {
+  const url = new URL(location); const q = stateQuery(); url.search = q ? "?" + q : "";
+  history.replaceState({ view: "home" }, "", url);
+}
+const passes = (m, skip) => FACETS.every(f => f.k === skip || !sel[f.k] || !sel[f.k].size || m.cat[f.k].some(v => sel[f.k].has(v)));
+const nSel = () => FACETS.reduce((s, f) => s + (sel[f.k] ? sel[f.k].size : 0), 0);
+const sameSel = preset => {
+  const keys = FACETS.map(f => f.k).filter(k => sel[k] && sel[k].size);
+  return keys.length === Object.keys(preset).length &&
+    keys.every(k => preset[k] && preset[k].length === sel[k].size && preset[k].every(v => sel[k].has(v)));
+};
+
+function showHome() {
+  readState();
+  MASTERS.forEach(m => { if (!m.cat) categorize(m); });
+  $("result").innerHTML = `<div class="browse2 home">
+    <aside class="side card" id="side" aria-label="ตัวกรอง">
+      <div class="side-head"><b>ตัวกรอง</b><button type="button" class="linkbtn" data-clear="*" id="clearAll">ล้าง</button></div>
+      <div id="facets"></div>
+    </aside>
+    <section class="card listcard">
+      <div class="quick" id="quick" aria-label="ทางลัด"></div>
+      <div class="list-top">
+        <button type="button" class="btn filter-btn" id="filterBtn" aria-controls="side" aria-expanded="false">ตัวกรอง</button>
+        <div class="home-count" id="homeCount"></div>
+        <label class="small sortlbl">เรียง
+          <select class="sortsel" id="sortSel">
+            <option value="count">กองไทยมากสุด</option>
+            <option value="az">ชื่อ A–Z</option>
+          </select></label>
+      </div>
+      <div class="active-bar" id="activeBar"></div>
+      <ul class="top-list rows" id="homeList"></ul>
+    </section>
+  </div>`;
+  $("sortSel").value = sortBy;
+  $("sortSel").addEventListener("change", e => { sortBy = e.target.value; renderHome(); });
+  $("filterBtn").addEventListener("click", () => { filtersOpen = !filtersOpen; renderHome(); });
+  renderHome();
+  renderTray();
+  const sy = history.state && history.state.scroll;
+  if (sy) requestAnimationFrame(() => window.scrollTo(0, sy));
+}
+
+function optionRows(f, opts, s) {
+  return opts.map(o => `<label class="opt-row${o.n ? "" : " zero"}">
+    <input type="checkbox" data-f="${f.k}" value="${esc(o.v)}" ${s.has(o.v) ? "checked" : ""}>
+    <span class="ol">${esc(o.label)}</span>${f.byFunds
+      ? `<span class="on" title="${o.n} master fund">${o.funds} กองไทย</span>`
+      : `<span class="on" title="${o.funds} กองไทย">${o.n}</span>`}</label>`).join("");
+}
+function foldList(key, f, opts, s) {
+  const showAll = expanded.has(key) || opts.length <= SHOW + 1;
+  const shown = showAll ? opts : opts.filter((o, i) => i < SHOW || s.has(o.v));
+  return optionRows(f, shown, s) + (opts.length > shown.length
+    ? `<button type="button" class="linkbtn" data-more="${key}">ดูเพิ่ม ${opts.length - shown.length}</button>`
+    : expanded.has(key) && opts.length > SHOW + 1 ? `<button type="button" class="linkbtn" data-more="${key}">ย่อ</button>` : "");
+}
+
+function renderHome() {
+  writeState();
+  $("side").classList.toggle("open", filtersOpen);
+  $("filterBtn").setAttribute("aria-expanded", filtersOpen);
+  $("filterBtn").textContent = nSel() ? `ตัวกรอง (${nSel()})` : "ตัวกรอง";
+  $("clearAll").classList.toggle("hidden", !nSel());
+
+  $("quick").innerHTML = QUICK.map(([label, preset], i) => {
+    const on = sameSel(preset);
+    return `<button type="button" class="qp" data-quick="${i}" aria-pressed="${on}">${esc(label)}</button>`;
+  }).join("");
+
+  $("facets").innerHTML = FACETS.map(f => {
+    const pool = MASTERS.filter(m => passes(m, f.k));
+    const s = sel[f.k] || new Set();
+    let opts = f.opts.map(([v, label]) => {
+      const ms = pool.filter(m => m.cat[f.k].includes(v));
+      return { v, label, n: ms.length, funds: ms.reduce((a, m) => a + m.projects, 0) };
+    }).filter(o => s.has(o.v) || (f.byFunds ? o.funds >= MIN_GROUP && o.n : o.n >= MIN_GROUP));
+    if (f.k === "th") opts.sort((a, b) => b.n - a.n);
+    if (f.byFunds) opts.sort((a, b) => b.funds - a.funds || a.label.localeCompare(b.label));
+    if (opts.length < 2 && !s.size) return "";
+    // folded facets stay closed until opened or used
+    if (f.fold && !s.size && !opened.has(f.k))
+      return `<div class="fs fs-fold"><button type="button" class="fold-btn" data-open="${f.k}">${f.title}<span>▸</span></button></div>`;
+    const body = f.groups
+      ? f.groups.map(([title, keys]) => {
+          const part = opts.filter(o => keys.includes(o.v));
+          return part.length ? `<div class="sub"><div class="sub-h">${title}</div>${foldList(f.k + ":" + title, f, part, s)}</div>` : "";
+        }).join("")
+      : foldList(f.k, f, opts, s);
+    const close = f.fold && !s.size ? `<button type="button" class="fold-x" data-open="${f.k}" aria-label="ซ่อน">▾</button>` : "";
+    return `<fieldset class="fs"><legend>${f.title}${close}</legend>${body}</fieldset>`;
+  }).join("") + `<p class="side-note">หมวดที่มี master fund ตัวเดียวจะไม่แสดง ค้นหาได้จากช่องค้นหาด้านบน</p>
+    <button type="button" class="btn side-done" data-done="1">ดูผลลัพธ์ ${MASTERS.filter(m => passes(m, null)).length} กอง</button>`;
+
+  const picks = [];
+  FACETS.forEach(f => (sel[f.k] || []).forEach(v =>
+    picks.push(`<button type="button" class="pill" data-unset="${f.k}" data-v="${esc(v)}" title="เอาตัวกรองนี้ออก">${esc(optLabel(f.k, v))} ✕</button>`)));
+  $("activeBar").innerHTML = picks.length ? picks.join("") + `<button type="button" class="linkbtn" data-clear="*">ล้างทั้งหมด</button>` : "";
+  $("activeBar").classList.toggle("hidden", !picks.length);
+
+  const list = MASTERS.filter(m => passes(m, null)).sort(sortBy === "az"
+    ? (a, b) => a.name.localeCompare(b.name)
+    : (a, b) => b.projects - a.projects || a.name.localeCompare(b.name));
+  const funds = list.reduce((s, m) => s + m.projects, 0);
+  $("homeCount").innerHTML = `<b>${list.length.toLocaleString()}</b> master fund · กองทุนไทย <b>${funds.toLocaleString()}</b> กอง`;
+  $("homeList").innerHTML = list.length ? list.map(m => masterRow(m)).join("")
+    : `<li class="opt-empty">ไม่พบ master fund ตามตัวกรองนี้ ลองเอาตัวกรองบางตัวออก</li>`;
+}
+
+// one master in a list: open button + compare checkbox side by side
+function masterRow(m, extra = "") {
+  const k = norm(m.name);
+  return `<li><button data-k="${esc(k)}">
+      <span class="nm"><span class="mn">${esc(m.name)}</span>${rowTags(m)}${extra}</span>
+      <span class="count" title="จำนวนกองทุนไทยที่ลงทุน">${m.projects} กอง</span></button>
+    <label class="cmp" title="เลือกไว้เทียบ"><input type="checkbox" data-cmp="${esc(k)}" ${CMP.includes(k) ? "checked" : ""}><span>เทียบ</span></label></li>`;
+}
+
+const TH_C = { "United States": "สหรัฐฯ", "China": "จีน", "Japan": "ญี่ปุ่น", "India": "อินเดีย", "Hong Kong": "ฮ่องกง", "Taiwan": "ไต้หวัน",
+               "Vietnam": "เวียดนาม", "South Korea": "เกาหลีใต้", "Singapore": "สิงคโปร์", "Australia": "ออสเตรเลีย", "Thailand": "ไทย",
+               "Brazil": "บราซิล", "Indonesia": "อินโดนีเซีย", "Germany": "เยอรมนี", "Canada": "แคนาดา", "Macau": "มาเก๊า",
+               "Malaysia": "มาเลเซีย", "United Kingdom": "สหราชอาณาจักร", "France": "ฝรั่งเศส", "Italy": "อิตาลี",
+               "Pakistan": "ปากีสถาน", "Sri Lanka": "ศรีลังกา", "Bangladesh": "บังกลาเทศ", "New Zealand": "นิวซีแลนด์",
+               "Cambodia": "กัมพูชา", "Myanmar": "เมียนมา" };
+const thc = c => TH_C[c] || c;
+const whereOf = m => {
+  const t = m.tag;
+  return (t.countries.length ? t.countries.slice(0, 3).map(thc).join(", ") + (t.countries.length > 3 ? " ฯลฯ" : "")
+    : m.cat.mk.filter(v => v !== "cn" || !m.cat.mk.some(x => x === "cna" || x === "cnh")).map(v => optLabel("mk", v)).join(", "))
+    + (t.excludes.length ? ` (ไม่รวม${t.excludes.map(thc).join(", ")})` : "");
+};
+const themeOf = m => m.cat.th.map(v => optLabel("th", v)).join(", ");
+
+// under each master in a list: type + Active/Passive as tags, then market / theme / index as labelled items
+function rowTags(m) {
+  if (!m.cat) categorize(m);
+  const t = m.tag;
+  const tags = [optLabel("a", t.asset[0]), ...t.mgmt].filter(Boolean)
+    .map((v, i) => `<span class="tg${i ? " tg-m" : ""}">${esc(v)}</span>`).join("");
+  const items = [
+    whereOf(m) && ["ตลาด", whereOf(m)],
+    themeOf(m) && ["ธีม", themeOf(m)],
+    t.index.length && ["ดัชนี", t.index[0]]
+  ].filter(Boolean);
+  return `<span class="row-tags">${tags}</span>` + (items.length
+    ? `<span class="kv">${items.map(([k, v]) => `<span><i>${k}</i>${esc(v)}</span>`).join("")}</span>` : "");
+}
+
+// groups on a master's page (each opens the list filtered by it) + only the details the chips don't already say
+function tagChips(m) {
+  if (!m.cat) categorize(m);
+  if (m.tag === UNTAGGED) return "";
+  const t = m.tag;
+  const chips = FACETS.filter(f => f.k !== "ix").flatMap(f => m.cat[f.k].map(v =>
+    `<button type="button" class="chip" data-go="${f.k}" data-v="${esc(v)}" title="ดู master fund อื่นในหมวดนี้">${esc(optLabel(f.k, v))}</button>`));
+  const ixChips = m.cat.ix.map(v => `<button type="button" class="chip" data-go="ix" data-v="${esc(v)}" title="ดู master fund อื่นที่ใช้ดัชนีนี้">${esc(v)}</button>`);
+  const rows = [
+    ["ดัชนีอ้างอิง", ixChips.length ? ixChips.join("") : esc(t.index.join(", "))],
+    ["ประเทศ", t.countries.length > 1 ? esc(t.countries.map(thc).join(", ")) : ""],
+    ["ไม่รวม", esc(t.excludes.map(thc).join(", "))],
+    ["รายละเอียดธีม", esc(t.theme.join(", "))],
+    ["สไตล์", esc(t.style.join(", "))],
+    ["ตราสารหนี้", esc(t.bond_type.join(", "))]
+  ].filter(([, v]) => v);
+  return `<div class="tags" aria-label="หมวดหมู่">${chips.join("")}</div>` + (rows.length
+    ? `<dl class="tag-detail">${rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join("")}</dl>` : "");
+}
+
+$("result").addEventListener("change", e => {
+  const c = e.target.closest("input[data-cmp]");
+  if (c) { toggleCmp(c.dataset.cmp, c.checked); return; }
+  const cb = e.target.closest("input[data-f]"); if (!cb) return;
+  const k = cb.dataset.f;
+  sel[k] = sel[k] || new Set();
+  cb.checked ? sel[k].add(cb.value) : sel[k].delete(cb.value);
+  renderHome();
+});
+$("result").addEventListener("click", e => {
+  const b = e.target.closest("[data-k]");
+  if (b) { const m = MASTER_BY_KEY.get(b.dataset.k); if (m) choose({ type: "master", m }); return; }
+  const go = e.target.closest("[data-go]");
+  if (go) { openList({ [go.dataset.go]: [go.dataset.v] }); return; }
+  if (e.target.closest("[data-back]")) { goBack(); return; }
+  if (e.target.closest("[data-done]")) { filtersOpen = false; renderHome(); $("homeCount").scrollIntoView({ block: "start" }); return; }
+  const q = e.target.closest("[data-quick]");
+  if (q) {
+    const preset = QUICK[+q.dataset.quick][1];
+    sel = sameSel(preset) ? {} : Object.fromEntries(Object.entries(preset).map(([k, v]) => [k, new Set(v)]));
+    if (preset.ix) opened.add("ix");
+    renderHome(); return;
+  }
+  const op = e.target.closest("[data-open]");
+  if (op) { const k = op.dataset.open; opened.has(k) ? opened.delete(k) : opened.add(k); renderHome(); return; }
+  const more = e.target.closest("[data-more]");
+  if (more) { const k = more.dataset.more; expanded.has(k) ? expanded.delete(k) : expanded.add(k); renderHome(); return; }
+  const un = e.target.closest("[data-unset]");
+  if (un) { sel[un.dataset.unset].delete(un.dataset.v); renderHome(); return; }
+  if (e.target.closest("[data-clear]")) { sel = {}; renderHome(); return; }
+  const fx = e.target.closest("[data-fx]");
+  if (fx) { filterFx(fx.dataset.fx); return; }
+  const ec = e.target.closest("[data-cls]");
+  if (ec) { const box = ec.closest("td"); box.classList.toggle("open"); ec.textContent = box.classList.contains("open") ? "ย่อ" : ec.dataset.cls; return; }
+  const rm = e.target.closest("[data-rmcmp]");
+  if (rm) {
+    toggleCmp(rm.dataset.rmcmp, false);
+    if (!CMP.length) { goBack(); return; }
+    const url = new URL(location); url.search = "?" + new URLSearchParams({ compare: CMP.map(k => MASTER_BY_KEY.get(k).name).join("|") });
+    history.replaceState(history.state, "", url); showCompare(); return;
+  }
+});
+function openList(preset) {
+  input.value = ""; $("clear").classList.add("hidden");
+  sel = Object.fromEntries(Object.entries(preset).map(([k, v]) => [k, new Set(v)]));
+  expanded.clear();
+  if (preset.ix) opened.add("ix");
+  const url = new URL(location); url.search = "?" + stateQuery();
+  history.pushState({ view: "home" }, "", url);
+  showHome(); window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+// ---------- history: Back returns to the same filters and scroll position ----------
+function goBack() {
+  if (history.state && history.state.fromHome) history.back();
+  else { input.value = ""; $("clear").classList.add("hidden"); const url = new URL(location); url.search = "";
+         history.pushState({ view: "home" }, "", url); showHome(); }
+}
+function route() {
+  const p = new URLSearchParams(location.search);
+  const m = p.get("master") && MASTER_BY_KEY.get(norm(p.get("master")));
+  if (m) { input.value = m.name; $("clear").classList.remove("hidden"); showMaster(m, null); return; }
+  input.value = ""; $("clear").classList.add("hidden"); closeDropdown();
+  if (p.get("compare")) { setCmpFromUrl(p.get("compare")); showCompare(); return; }
+  showHome();
+}
+window.addEventListener("popstate", route);
+
+// ---------- similar master funds ----------
+// same index tracked > same market + theme > same market or theme; asset class must match unless the index is the same
+let MK_SIZE = null;
+const mkSize = v => {
+  if (!MK_SIZE) { MK_SIZE = new Map(); MASTERS.forEach(o => { if (!o.cat) categorize(o); o.cat.mk.forEach(k => MK_SIZE.set(k, (MK_SIZE.get(k) || 0) + 1)); }); }
+  return MK_SIZE.get(v) || 0;
+};
+function similar(m, limit = 6) {
+  if (!m.cat) categorize(m);
+  const t = m.tag; if (t === UNTAGGED) return [];
+  const myIx = t.index.map(normIndex);
+  const out = [];
+  for (const o of MASTERS) {
+    if (o === m) continue;
+    if (!o.cat) categorize(o);
+    const u = o.tag, why = [];
+    let sc = 0;
+    const sameIx = myIx.length && u.index.some(i => myIx.includes(normIndex(i)));
+    if (sameIx) { sc += t.mgmt[0] === "Passive" && u.mgmt[0] === "Passive" ? 100 : 45; why.push("ดัชนีเดียวกัน"); }
+    if (u.asset[0] !== t.asset[0] && !sameIx) continue;
+    const mk = o.cat.mk.filter(v => m.cat.mk.includes(v));
+    // most specific shared market first (e.g. "จีน H-shares" before "จีน (ทั้งหมด)")
+    const specific = mk.filter(v => !["global", "dm"].includes(v)).sort((a, b) => mkSize(a) - mkSize(b));
+    if (specific.length) { sc += 25 + 8 * (specific.length - 1); why.push(optLabel("mk", specific[0])); }
+    else if (mk.length) sc += 8;
+    const th = o.cat.th.filter(v => m.cat.th.includes(v));
+    if (th.length) { sc += 20 * th.length; why.push(...th.map(v => optLabel("th", v))); }
+    sc += 6 * u.theme.filter(v => t.theme.includes(v)).length;
+    const bt = u.bond_type.filter(v => t.bond_type.includes(v));
+    if (bt.length) { sc += 12 * bt.length; why.push(bt[0]); }
+    if (!specific.length && !th.length && !sameIx && !bt.length) continue;   // only "global equity" in common is not similar enough
+    sc += 4 * u.style.filter(v => t.style.includes(v)).length;   // e.g. both large-cap
+    if (u.mgmt[0] === t.mgmt[0]) sc += 3;
+    out.push({ o, sc, why: [...new Set(why)].slice(0, 3) });
+  }
+  return out.sort((a, b) => b.sc - a.sc || b.o.projects - a.o.projects).slice(0, limit);
+}
+// compact cards in a row, right under the master's tags
+function similarHtml(m) {
+  const list = similar(m);
+  if (!list.length) return "";
+  return `<section class="similar" aria-label="Master fund ที่ใกล้เคียง">
+    <div class="sim-h"><h3>Master fund ที่ใกล้เคียง</h3><span class="small">กดชื่อเพื่อเปิด หรือติ๊ก "เทียบ" เพื่อดูคู่กัน</span></div>
+    <div class="sim-row">${list.map(({ o, why }) => { const k = norm(o.name); return `<div class="sim-card">
+      <button type="button" class="sim-open" data-k="${esc(k)}"><span class="mn">${esc(o.name)}</span>
+        <span class="small">${esc(o.tag.mgmt[0] || "")}${o.tag.index[0] ? " · " + esc(o.tag.index[0]) : ""}</span></button>
+      <span class="why">${why.map(w => `<span>${esc(w)}</span>`).join("")}</span>
+      <div class="sim-foot"><span class="count">${o.projects} กองไทย</span>
+        <label class="cmp"><input type="checkbox" data-cmp="${esc(k)}" ${CMP.includes(k) ? "checked" : ""}><span>เทียบ</span></label></div>
+    </div>`; }).join("")}</div></section>`;
+}
+
+// ---------- FX hedging groups for the Thai fund table ----------
+const FX_ORDER = ["ป้องกันทั้งหมด", "ไม่ป้องกัน", "ดุลยพินิจ", "บางส่วน", "อื่น ๆ"];
+const fxGroup = v => { const s = fxShort(v); return FX_ORDER.includes(s) ? s : "อื่น ๆ"; };
+let fxSel = "";
+function filterFx(v) {
+  fxSel = v;
+  document.querySelectorAll("[data-fx]").forEach(b => b.setAttribute("aria-pressed", b.dataset.fx === v));
+  document.querySelectorAll("tr[data-fxg]").forEach(tr => tr.classList.toggle("hidden", !!v && tr.dataset.fxg !== v));
+}
+const projectsOf = m => {
+  const byProj = new Map();
+  for (const r of m.rows) {
+    const k = r.proj_id || r.proj_abbr_name;
+    if (!byProj.has(k)) byProj.set(k, { r, classes: [] });
+    byProj.get(k).classes.push(r);
+  }
+  return [...byProj.values()].sort((a, b) =>
+    amcAbbr(a.r.comp_name_th).localeCompare(amcAbbr(b.r.comp_name_th)) || String(a.r.proj_abbr_name).localeCompare(String(b.r.proj_abbr_name)));
+};
+
+function showMaster(m, hitAbbr) {
+  fxSel = "";
+  const projects = projectsOf(m);
+  const CLS_SHOW = 2;
+  const rowsHtml = projects.map(({ r, classes }) => {
+    const names = classes.map(c => `<div class="cls" title="${esc(clean(c.fund_class_description))}">${esc(clean(c.Search_Name) || clean(c.proj_abbr_name))}</div>`);
+    const extra = names.length - CLS_SHOW;
+    const classLines = extra > 1
+      ? names.slice(0, CLS_SHOW).join("") + `<div class="cls-more">${names.slice(CLS_SHOW).join("")}</div>
+         <button type="button" class="linkbtn cls-btn" data-cls="+ อีก ${extra} class">+ อีก ${extra} class</button>`
+      : names.join("");
+    const fxFull = clean(r.exchange_rate_protection_policy);
+    const hit = hitAbbr && clean(r.proj_abbr_name) === hitAbbr ? " hit" : "";
+    return `<tr class="${hit}" data-fxg="${esc(fxGroup(fxFull))}">
+      <td class="c-fund"><div class="abbr">${esc(r.proj_abbr_name)}</div><div class="small">${esc(r.proj_name_th)}</div></td>
+      <td class="c-amc" data-label="บลจ."><span class="amc" title="${esc(r.comp_name_th)}">${esc(amcAbbr(r.comp_name_th))}</span></td>
+      <td class="c-cls" data-label="Class">${classLines}</td>
+      <td class="c-st" data-label="กลยุทธ์ลงทุน">${styleCell(r.management_style)}</td>
+      <td class="c-fx" data-label="นโยบายค่าเงิน"><span title="${esc(fxFull)}">${esc(fxShort(fxFull))}</span></td>
+    </tr>`;
+  }).join("");
+
+  const fxCount = new Map();
+  projects.forEach(({ r }) => { const g = fxGroup(r.exchange_rate_protection_policy); fxCount.set(g, (fxCount.get(g) || 0) + 1); });
+  const fxBar = fxCount.size > 1 ? `<div class="seg fxbar" role="group" aria-label="กรองตามนโยบายค่าเงิน">
+      <button type="button" data-fx="" aria-pressed="true">ทั้งหมด<span class="n">${projects.length}</span></button>
+      ${FX_ORDER.filter(g => fxCount.has(g)).map(g => `<button type="button" data-fx="${g}" aria-pressed="false">${g}<span class="n">${fxCount.get(g)}</span></button>`).join("")}
+    </div>` : "";
+
+  const k = norm(m.name);
+  const variants = [...m.variants].filter(v => v !== m.name);
+  $("result").innerHTML = `<div class="card detail">
+    <h2><a class="ext" href="https://www.google.com/search?q=${encodeURIComponent(m.name)}" target="_blank" rel="noopener"
+         title="ค้นหาข้อมูลกองทุนหลักใน Google (เปิดแท็บใหม่)">${esc(m.name)}<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></a></h2>
+    ${m.countries.size ? `<div class="meta">กองทุนหลักจดทะเบียนที่ ${esc([...m.countries].join(", "))}</div>` : `<div class="meta"></div>`}
+    ${tagChips(m)}
+    <div class="toolbar">
+      <button class="btn" type="button" data-back="1">← กลับ</button>
+      <label class="btn cmp-btn"><input type="checkbox" data-cmp="${esc(k)}" ${CMP.includes(k) ? "checked" : ""}> เพิ่มในการเทียบ</label>
+    </div>
+    ${similarHtml(m)}
+    <div class="tbl-head"><h3>กองทุนไทยที่ลงทุน <span class="small">${projects.length} กอง</span></h3>
+      <button class="btn btn-sm" id="copy">คัดลอกชื่อกอง</button></div>
+    ${fxBar}
+    <div class="table-scroll"><table>
+      <thead><tr><th class="c-fund">ชื่อกองทุน</th><th class="c-amc">บลจ.</th><th class="c-cls">Class</th><th class="c-st">กลยุทธ์ลงทุน</th><th class="c-fx">นโยบายค่าเงิน</th></tr></thead>
+      <tbody>${rowsHtml}</tbody>
+    </table></div>
+    ${variants.length ? `<div class="variants">ชื่อ master fund ตามที่แต่ละ บลจ. ระบุใน SEC:<ul>${variants.map(v => `<li>${esc(v)}</li>`).join("")}</ul></div>` : ""}
+  </div>`;
+
+  $("copy").addEventListener("click", e => {
+    const shown = projects.filter(p => !fxSel || fxGroup(p.r.exchange_rate_protection_policy) === fxSel);
+    navigator.clipboard.writeText(shown.map(p => p.r.proj_abbr_name).join("\n")).then(() => {
+      e.target.textContent = "คัดลอกแล้ว"; setTimeout(() => e.target.textContent = "คัดลอกชื่อกอง", 1500);
+    });
+  });
+  renderTray();
+}
+
+// ---------- compare: pick up to 4 masters, see them side by side ----------
+const CMP_MAX = 4;
+let CMP = (() => { try { return JSON.parse(sessionStorage.getItem("mf-compare") || "[]"); } catch { return []; } })();
+const saveCmp = () => { try { sessionStorage.setItem("mf-compare", JSON.stringify(CMP)); } catch {} };
+function setCmpFromUrl(v) { CMP = v.split("|").map(x => norm(x)).filter(x => MASTER_BY_KEY.has(x)).slice(0, CMP_MAX); saveCmp(); }
+function toggleCmp(k, on) {
+  if (on && !CMP.includes(k)) {
+    if (CMP.length >= CMP_MAX) { flashTray(`เทียบได้สูงสุด ${CMP_MAX} กอง`); document.querySelectorAll(`input[data-cmp="${CSS.escape(k)}"]`).forEach(i => i.checked = false); return; }
+    CMP.push(k);
+  }
+  if (!on) CMP = CMP.filter(x => x !== k);
+  saveCmp();
+  document.querySelectorAll("input[data-cmp]").forEach(i => i.checked = CMP.includes(i.dataset.cmp));
+  renderTray();
+}
+function renderTray() {
+  let tray = $("tray");
+  if (!tray) { tray = document.createElement("div"); tray.id = "tray"; tray.className = "tray"; document.body.appendChild(tray); }
+  const onCompare = !!new URLSearchParams(location.search).get("compare");
+  if (!CMP.length || onCompare) { tray.classList.add("hidden"); document.body.classList.remove("has-tray"); return; }
+  tray.classList.remove("hidden"); document.body.classList.add("has-tray");
+  tray.innerHTML = `<div class="tray-in">
+    <div class="tray-list">${CMP.map(k => { const m = MASTER_BY_KEY.get(k); return m ? `<span class="tray-item" title="${esc(m.name)}">${esc(m.name)}
+      <button type="button" data-trayrm="${esc(k)}" aria-label="เอาออก">✕</button></span>` : ""; }).join("")}</div>
+    <div class="tray-act"><span class="small" id="trayMsg">${CMP.length}/${CMP_MAX}</span>
+      <button type="button" class="linkbtn" data-trayclear="1">ล้าง</button>
+      <button type="button" class="btn btn-primary" data-traygo="1" ${CMP.length < 2 ? "disabled" : ""}>${CMP.length < 2 ? "เลือกอีก 1 กอง" : `เทียบ ${CMP.length} กอง`}</button></div></div>`;
+}
+function flashTray(msg) { const t = $("trayMsg"); if (t) { t.textContent = msg; t.classList.add("warn"); setTimeout(renderTray, 1800); } }
+document.addEventListener("click", e => {
+  const rm = e.target.closest("[data-trayrm]"); if (rm) { toggleCmp(rm.dataset.trayrm, false); return; }
+  if (e.target.closest("[data-trayclear]")) { CMP = []; saveCmp(); document.querySelectorAll("input[data-cmp]").forEach(i => i.checked = false); renderTray(); return; }
+  if (e.target.closest("[data-traygo]")) {
+    const url = new URL(location); url.search = "?" + new URLSearchParams({ compare: CMP.map(k => MASTER_BY_KEY.get(k).name).join("|") });
+    history.replaceState({ ...(history.state || {}), scroll: window.scrollY }, "", location.href);
+    history.pushState({ view: "compare", fromHome: true }, "", url);
+    input.value = ""; $("clear").classList.add("hidden");
+    showCompare(); window.scrollTo(0, 0);
+  }
+});
+
+function showCompare() {
+  const ms = CMP.map(k => MASTER_BY_KEY.get(k)).filter(Boolean);
+  ms.forEach(m => { if (!m.cat) categorize(m); });
+  const fxMix = m => {
+    const c = new Map(); projectsOf(m).forEach(({ r }) => { const g = fxGroup(r.exchange_rate_protection_policy); c.set(g, (c.get(g) || 0) + 1); });
+    return FX_ORDER.filter(g => c.has(g)).map(g => `${g} ${c.get(g)}`).join("<br>");
+  };
+  const ROWS = [
+    ["ประเภท", m => esc(optLabel("a", m.tag.asset[0]))],
+    ["Active / Passive", m => esc(m.tag.mgmt.join(", ") || "-")],
+    ["ดัชนีอ้างอิง", m => esc(m.tag.index.join(", ") || "-")],
+    ["ตลาด", m => esc(whereOf(m) || "-")],
+    ["ธีม", m => esc(themeOf(m) || "-")],
+    ["รายละเอียดธีม", m => esc(m.tag.theme.join(", ") || "-")],
+    ["สไตล์", m => esc(m.tag.style.join(", ") || "-")],
+    ["ตราสารหนี้", m => esc(m.tag.bond_type.join(", ") || "-")],
+    ["จดทะเบียนที่", m => esc([...m.countries].join(", ") || "-")],
+    ["จำนวนกองไทย", m => `<b>${m.projects}</b> กอง`],
+    ["นโยบายค่าเงิน (กองไทย)", fxMix],
+    ["บลจ.", m => esc(m.amcs.join(", "))],
+    ["กองทุนไทย", m => projectsOf(m).map(({ r }) => `<div>${esc(r.proj_abbr_name)}</div>`).join("")]
+  ];
+  // hide rows where every master says "-"
+  const rows = ROWS.filter(([, f]) => ms.some(m => f(m) !== "-"));
+  const same = f => ms.length > 1 && ms.every(m => f(m) === f(ms[0]));
+  $("result").innerHTML = `<div class="card detail compare">
+    <div class="cmp-head"><h2>เปรียบเทียบ ${ms.length} master fund</h2>
+      <button class="btn" type="button" data-back="1">← กลับ</button></div>
+    <p class="small">แถวที่ทุกกองเหมือนกันจะเป็นสีจาง เพื่อให้เห็นจุดที่ต่างกันชัดขึ้น</p>
+    <div class="table-scroll"><table class="cmp-table" style="min-width:${180 + ms.length * 220}px">
+      <thead><tr><th class="c-lbl"></th>${ms.map(m => `<th>
+        <button type="button" class="cmp-name" data-k="${esc(norm(m.name))}">${esc(m.name)}</button>
+        <button type="button" class="linkbtn" data-rmcmp="${esc(norm(m.name))}">เอาออก</button></th>`).join("")}</tr></thead>
+      <tbody>${rows.map(([lbl, f]) => `<tr class="${same(f) ? "same" : ""}"><th class="c-lbl">${lbl}</th>${ms.map(m => `<td>${f(m)}</td>`).join("")}</tr>`).join("")}</tbody>
+    </table></div>
+  </div>`;
+  renderTray();
+}
+
+</script>
+</body>
+</html>

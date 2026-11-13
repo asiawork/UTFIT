@@ -1,0 +1,581 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Top Funds Weekly Charts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #1b3560; --navy-2: #24467d; --red: #d0273e;
+    --bg: #f4f6f9; --card: #ffffff; --ink: #1f2937; --muted: #6b7280; --line: #e5e7eb;
+    --pos: #0f8a4b; --neg: #c62828;
+  }
+  /* ฟอนต์บริษัท: ใช้ BLS เฉพาะเครื่องที่ติดตั้งไว้ (ไม่ได้แนบไฟล์ฟอนต์ใน repo) · เครื่องอื่นใช้ IBM Plex Sans Thai */
+  :root { --f-body: "BLS Text", "IBM Plex Sans Thai", system-ui, sans-serif;
+          --f-head: "BLS Bold", "IBM Plex Sans Thai", system-ui, sans-serif; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font-family: var(--f-body); font-size: 15px; }
+  /* หัวข้อ = BLS Bold · ปิดตัวหนาสังเคราะห์ ไม่ให้ BLS Bold ถูกทำหนาซ้ำ */
+  h1, h2, h3 { font-family: var(--f-head); font-synthesis: none; }
+  h3 .btn { font-family: var(--f-body); font-synthesis: initial; }
+  header { background: var(--navy); color: #fff; padding: 22px 16px 26px; }
+  /* แท็บสลับหน้า */
+  header.has-tabs { padding-bottom: 0; }
+  header .wrap.tabs { display: flex; justify-content: flex-start; align-items: end; gap: 4px; margin-top: 18px; overflow-x: auto; flex-wrap: nowrap; }
+  .tabs a { color: #fff; opacity: .8; text-decoration: none; font-size: 15px; font-weight: 600; padding: 10px 18px;
+            border-radius: 10px 10px 0 0; white-space: nowrap; }
+  .tabs a:hover { opacity: 1; background: rgba(255,255,255,.1); }
+  .tabs a[aria-current="page"] { opacity: 1; background: var(--bg); color: var(--navy); }
+
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 0 16px; }
+  header .wrap { padding: 0; display: flex; justify-content: space-between; align-items: end; gap: 16px; flex-wrap: wrap; }
+  header h1 { margin: 0; font-size: 24px; font-weight: 700; letter-spacing: .2px; }
+  header p { margin: 4px 0 0; opacity: .8; font-size: 14px; }
+  header .asof { background: rgba(255,255,255,.12); border-radius: 8px; padding: 6px 12px; font-size: 13px; }
+
+  /* ปุ่มกองกว้างเท่ากันทุกปุ่ม · ขึ้นแถวใหม่เองเมื่อจอแคบ */
+  .chips { display: grid; grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)); gap: 8px; margin: 20px 0 16px; }
+  .chips .chip { width: 100%; height: 100%; white-space: nowrap; }
+  /* ชื่อกองในปุ่ม = BLS Bold (เครื่องที่ไม่มีใช้ IBM Plex ตัวหนา) */
+  .chip .nm { font-family: var(--f-head); font-weight: 600; font-synthesis: none; }
+  .chip { border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 999px;
+          padding: 7px 14px; font: inherit; font-size: 14px; font-weight: 500; cursor: pointer; }
+  .chip:hover { border-color: var(--navy-2); }
+  .chip[aria-pressed="true"] { background: var(--navy); border-color: var(--navy); color: #fff; }
+  /* ผลตอบแทนตั้งแต่แนะนำในปุ่มกอง */
+  .chip:has(.ret) { display: inline-flex; flex-direction: column; align-items: center; gap: 1px;
+                   border-radius: 14px; padding: 6px 14px; line-height: 1.25; }
+  .chip .ret { display: block; font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .chip .ret.pos { color: var(--pos); } .chip .ret.neg { color: var(--neg); }
+  .chip[aria-pressed="true"] .ret.pos { color: #8ee6b4; }
+  .chip[aria-pressed="true"] .ret.neg { color: #ffa3a3; }
+  .chip .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--red); margin-left: 6px; vertical-align: middle; }
+
+  .card { background: var(--card); border-radius: 14px; box-shadow: 0 1px 2px rgba(16,24,40,.06), 0 1px 3px rgba(16,24,40,.08); padding: 18px; }
+  .head { display: flex; justify-content: space-between; align-items: start; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+  .head h2 { margin: 0; font-size: 22px; color: var(--navy); }
+  .head .sub { color: var(--muted); font-size: 13px; margin-top: 2px; }
+  .actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .btn { font: inherit; font-size: 14px; font-weight: 600; border-radius: 10px; padding: 9px 16px; cursor: pointer; border: 1px solid var(--navy); }
+  .btn.primary { background: var(--navy); color: #fff; }
+  .btn.primary:hover { background: var(--navy-2); }
+  .btn.ghost { background: #fff; color: var(--navy); }
+  .btn.done { background: var(--pos); border-color: var(--pos); color: #fff; }
+
+  .chart { position: relative; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: #fff; }
+  .chart img { display: block; width: 100%; height: auto; }
+  .chart canvas { position: absolute; inset: 0; width: 100%; height: 100%; cursor: crosshair; touch-action: pan-y; }
+  .chart canvas.grab { cursor: ns-resize; }
+  .chart canvas.off { cursor: default; }
+
+  /* แนวรับ–แนวต้าน */
+  .lv { margin-top: 14px; border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+  .lv-head { display: flex; justify-content: space-between; align-items: center; gap: 8px 12px; flex-wrap: wrap; }
+  .lv-head b { color: var(--navy); font-size: 15px; }
+  .lv-head .state { color: var(--muted); font-size: 12px; font-weight: 400; margin-left: 6px; }
+  .lv-tools { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .btn.sm { padding: 5px 11px; font-size: 13px; border-radius: 8px; }
+  .tgl { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; margin-right: 4px; cursor: pointer; }
+  .tgl input { accent-color: var(--navy); width: 15px; height: 15px; }
+  .lv-hint { color: var(--muted); font-size: 12.5px; margin: 6px 0 10px; }
+  .lv-row { display: grid; grid-template-columns: 74px 120px 1fr auto 32px; align-items: center; gap: 10px;
+            padding: 7px 0; border-top: 1px solid var(--line); font-size: 13.5px; }
+  .lv-row:first-child { border-top: 0; }
+  .badge { border-radius: 6px; padding: 2px 8px; font-size: 12.5px; font-weight: 600; text-align: center; }
+  .badge.res { background: #fdecec; color: var(--neg); }
+  .badge.sup { background: #e7f5ee; color: var(--pos); }
+  .lv-row input { font: inherit; font-size: 14px; width: 100%; padding: 4px 8px; border: 1px solid var(--line);
+                  border-radius: 7px; font-variant-numeric: tabular-nums; }
+  .lv-row input:focus { outline: 2px solid var(--navy-2); outline-offset: -1px; }
+  .lv-row .dist { font-variant-numeric: tabular-nums; }
+  .lv-row .src { color: var(--muted); font-size: 12.5px; text-align: right; }
+  .lv-row .x { border: 0; background: none; font-size: 18px; line-height: 1; color: var(--muted); cursor: pointer;
+               border-radius: 6px; width: 28px; height: 28px; }
+  .lv-row .x:hover { background: var(--bg); color: var(--neg); }
+  .lv-empty { color: var(--muted); font-size: 13px; padding: 4px 0; }
+
+  .kpis { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-top: 14px; }
+  .kpi { background: var(--bg); border-radius: 10px; padding: 10px 12px; }
+  .kpi .k { color: var(--muted); font-size: 12px; }
+  .kpi .v { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .pos { color: var(--pos); } .neg { color: var(--neg); }
+
+  .notice { margin-top: 12px; border-radius: 10px; padding: 10px 12px; font-size: 13px; background: #fff7e6; color: #7a4b00; border: 1px solid #f3d9a4; }
+  .notice ul { margin: 4px 0 0; padding-left: 18px; }
+
+  .tip { margin-top: 12px; font-size: 13px; color: var(--muted); }
+  .tip b { color: var(--ink); }
+
+  h3 { margin: 28px 0 10px; font-size: 18px; color: var(--navy); display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .tbl-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; background: #fff; font-variant-numeric: tabular-nums; }
+  th, td { padding: 9px 10px; text-align: right; border-bottom: 1px solid var(--line); font-size: 14px; white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; }
+  th { background: var(--navy); color: #fff; font-weight: 600; font-size: 13px; }
+  td small { color: var(--muted); }
+  footer { color: var(--muted); font-size: 12px; padding: 28px 0 40px; }
+
+  .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(20px); opacity: 0;
+           background: var(--ink); color: #fff; padding: 10px 16px; border-radius: 10px; font-size: 14px; transition: .2s; pointer-events: none; }
+  .toast.show { opacity: 1; transform: translateX(-50%); }
+
+  @media (max-width: 720px) {
+    .kpis { grid-template-columns: repeat(3, 1fr); }
+    .lv-row { grid-template-columns: 64px 1fr 28px; }
+    .lv-row .dist, .lv-row .src { grid-column: 2 / 3; text-align: left; margin-top: -6px; }
+    header h1 { font-size: 20px; }
+  }
+</style>
+<script src="../../shared/sources.js"></script>
+<script src="../../shared/nav.js" data-section="funds" data-title="กราฟ Weekly"></script>
+</head>
+<body>
+<header class="has-tabs">
+  <div class="wrap">
+    <div>
+      <h1>Top Funds Weekly Charts</h1>
+      <p>กราฟ NAV สำหรับรายงาน Top Funds Weekly Market Recap · อัปเดตอัตโนมัติทุกวันจันทร์เช้า</p>
+    </div>
+    <div class="asof" id="asof">กำลังโหลด…</div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="chips" id="chips" role="toolbar" aria-label="เลือกกองทุน"></div>
+
+  <section class="card" id="panel" hidden>
+    <div class="head">
+      <div>
+        <h2 id="title"></h2>
+        <div class="sub" id="sub"></div>
+      </div>
+      <div class="actions">
+        <label class="tgl"><input type="checkbox" id="nameShow"> แสดงชื่อกองบนกราฟ</label>
+        <button class="btn primary" id="copy">Copy รูป</button>
+        <button class="btn ghost" id="download">ดาวน์โหลด PNG</button>
+      </div>
+    </div>
+    <div class="chart" id="chartBox"><img id="img" alt=""><canvas id="ov" aria-label="คลิกเพื่อเพิ่มเส้นแนวรับแนวต้าน"></canvas></div>
+    <div class="lv" id="lv" hidden>
+      <div class="lv-head">
+        <div><b>แนวรับ–แนวต้าน</b><span class="state" id="lvState"></span></div>
+        <div class="lv-tools">
+          <label class="tgl"><input type="checkbox" id="lvShow"> แสดงบนกราฟ</label>
+          <button class="btn ghost sm" id="lvReset">ใช้แนวที่ระบบเสนอ</button>
+          <button class="btn ghost sm" id="lvClear">ลบทั้งหมด</button>
+        </div>
+      </div>
+      <div class="lv-hint">คลิกบนกราฟเพื่อเพิ่มเส้น · ลากเส้นขึ้นลงเพื่อเลื่อน · ดับเบิลคลิกที่เส้นเพื่อลบ · พิมพ์ NAV ในช่องเพื่อตั้งค่าเป๊ะๆ — เส้นที่เห็นจะติดไปกับรูปตอนกด Copy / ดาวน์โหลด</div>
+      <div id="lvList"></div>
+    </div>
+    <div class="kpis" id="kpis"></div>
+    <div class="notice" id="notice" hidden></div>
+    <div class="tip">วางใน PowerPoint ให้พอดีกรอบเดิม: <b>คลิกขวาที่รูปกราฟเก่า → Change Picture → From Clipboard</b> รูปใหม่จะเข้าไปแทนที่ขนาดและตำแหน่งเดิมทันที</div>
+  </section>
+
+  <h3>สรุปผลตอบแทน <button class="btn ghost" id="copyTable">Copy ตาราง</button></h3>
+  <div class="tbl-wrap card" style="padding:0">
+    <table id="tbl"></table>
+  </div>
+
+  <footer>ข้อมูล NAV จาก SEC Open API (สำนักงาน ก.ล.ต.) · ผลตอบแทนคำนวณจาก NAV ต่อหน่วย ไม่รวมค่าธรรมเนียมซื้อขาย · แก้รายชื่อกองได้ที่ไฟล์ funds.csv ใน repo<br>
+  แนวรับ–แนวต้านที่ระบบเสนอหาจากจุดกลับตัวของ NAV (ZigZag) ในช่วงที่แสดงบนกราฟ ใช้ประกอบการดูภาพรวมเท่านั้น ไม่ใช่สัญญาณซื้อขาย · เส้นที่ปรับเองบันทึกไว้ในเบราว์เซอร์เครื่องนี้</footer>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const COLS = [["1W","1W"],["1M","1M"],["3M","3M"],["6M","6M"],["1Y","1Y"],["since_rec","ตั้งแต่แนะนำ"]];
+let DATA = null, current = null;
+
+const fmt = (v) => v == null ? "–" : (v > 0 ? "+" : "") + v.toFixed(2) + "%";
+const cls = (v) => v == null ? "" : v >= 0 ? "pos" : "neg";
+const thDate = (iso) => { if (!iso) return "–"; const [y,m,d] = iso.split("-"); return `${d}/${m}/${y}`; };
+
+/* NAV วันเริ่มต้น = NAV ที่ 0% บนกราฟ ถ้าวันแนะนำไม่มี NAV จะเป็นวันทำการถัดไป (บอกวันที่กำกับไว้) */
+const baseDate = (f) => f.base_date || f.recommend_date;
+function startNavText(f) {
+  if (f.base_nav == null) return "";
+  const d = baseDate(f);
+  return ` · NAV วันเริ่มต้น ${f.base_nav.toFixed(4)}` + (d && d !== f.recommend_date ? ` (ณ ${thDate(d)})` : "");
+}
+
+function toast(msg) {
+  const t = $("toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(toast.h); toast.h = setTimeout(() => t.classList.remove("show"), 2200);
+}
+
+function select(name) {
+  const f = DATA.funds.find(x => x.name === name);
+  if (!f) return;
+  current = f;
+  document.querySelectorAll(".chip").forEach(c => c.setAttribute("aria-pressed", c.dataset.name === name));
+  try { history.replaceState(null, "", "#" + encodeURIComponent(name)); } catch (e) {}
+
+  $("panel").hidden = false;
+  $("title").textContent = f.name;
+  const peers = f.peers.length ? " · เทียบกับ " + f.peers.join(", ") : "";
+  $("sub").textContent = `แนะนำเมื่อ ${thDate(f.recommend_date)}` + startNavText(f) + peers;
+
+  if (f.image) {
+    const src = UTFIT_SRC.weekly + f.image + "?v=" + (f.image_ver || DATA.updated);
+    $("img").src = src; $("img").alt = "กราฟ NAV " + f.name;
+    $("copy").disabled = false; $("download").disabled = false; $("img").parentElement.hidden = false;
+  } else {
+    $("img").parentElement.hidden = true; $("copy").disabled = true; $("download").disabled = true;
+  }
+  const canLevels = !!(f.image && f.axes && f.base_nav);
+  $("lv").hidden = !canLevels; $("ov").hidden = !canLevels;
+  if (canLevels) { loadLevels(f); renderLevels(); }
+
+  const r = f.returns || {};
+  $("kpis").innerHTML = COLS.map(([k, label]) =>
+    `<div class="kpi"><div class="k">${label}</div><div class="v ${cls(r[k])}">${fmt(r[k])}</div></div>`).join("");
+
+  const issues = [
+    ...Object.entries(f.missing || {}).map(([n, why]) => `${n}: ${why}`),
+    ...(f.warnings || []),
+  ];
+  $("notice").hidden = !issues.length;
+  $("notice").innerHTML = issues.length ? "ต้องเช็ค<ul>" + issues.map(x => `<li>${x}</li>`).join("") + "</ul>" : "";
+}
+
+async function copyImage() {
+  if (!current || !current.image) return;
+  const btn = $("copy");
+  try {
+    await navigator.clipboard.write([new ClipboardItem({ "image/png": composeBlob() })]);
+    btn.textContent = "Copy แล้ว ✓"; btn.classList.add("done");
+    toast("Copy รูป " + current.name + " แล้ว ไปวางใน PowerPoint ได้เลย");
+    setTimeout(() => { btn.textContent = "Copy รูป"; btn.classList.remove("done"); }, 1800);
+  } catch (e) {
+    toast("เบราว์เซอร์นี้ copy รูปไม่ได้ ใช้ปุ่มดาวน์โหลด PNG แทน");
+  }
+}
+
+/* ───────────── แนวรับ–แนวต้าน ─────────────
+   เส้นเก็บเป็นค่า NAV (ไม่ใช่ %) เพื่อให้ยังถูกตำแหน่งเมื่อกราฟสัปดาห์หน้าขยับสเกล
+   ตำแหน่งกรอบกราฟ (axes) + ช่วงแกน y มาจาก build_charts.py ใน data.json */
+const LV = { lines: [], show: false, edited: false, hover: null, drag: null, down: null, seq: 0 };
+/* ชื่อกองบนกราฟ: ค่าเริ่มต้น = ซ่อน · ตำแหน่ง/ขนาดเท่าที่ build_charts.py เคยวาด (มุมซ้ายบนกรอบกราฟ, 8.5pt @300dpi) */
+const NAME = { show: false };
+/* ฟอนต์บนกราฟ (ติดไปกับรูปตอน Copy): BLS ถ้าเครื่องนี้มี ไม่มีก็ใช้ฟอนต์เดิม */
+function hasLocalFont(fam) {
+  const c = document.createElement("canvas").getContext("2d"), t = "mmmmwwwwlli กขค 0123";
+  return ["monospace", "serif"].some((b) => {
+    c.font = `40px ${b}`; const w0 = c.measureText(t).width;
+    c.font = `40px "${fam}", ${b}`; return c.measureText(t).width !== w0;
+  });
+}
+const NAME_FONT = hasLocalFont("BLS Bold")
+  ? '35px "BLS Bold"' : 'bold 35px "DejaVu Sans", Verdana, Arial, sans-serif';
+const LV_COLOR = { res: "#c62828", sup: "#0f8a4b", add: "#1b3560" };
+const LV_FONT = hasLocalFont("BLS Text")
+  ? '600 27px "BLS Text", "IBM Plex Sans Thai", sans-serif' : '600 27px "IBM Plex Sans Thai", "DejaVu Sans", sans-serif';
+const lvKey = (name) => "wg-levels:" + name;
+const fmtNav = (v) => v.toFixed(4);
+
+function autoLines(f) {
+  return (f.levels || []).map(l => ({ id: ++LV.seq, nav: l.nav, auto: true, touches: l.touches, basis: l.basis }));
+}
+function loadLevels(f) {
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(lvKey(f.name)) || "null"); } catch (e) {}
+  if (saved && Array.isArray(saved.lines)) {
+    LV.lines = saved.lines.filter(l => l.nav > 0).map(l => ({ ...l, id: ++LV.seq }));
+    LV.edited = true;
+  } else {
+    LV.lines = autoLines(f); LV.edited = false;
+  }
+  LV.show = false;   // ค่าเริ่มต้น = ไม่แสดงเส้น (เส้นที่ปรับไว้ยังเก็บอยู่ ติ๊ก "แสดงบนกราฟ" เพื่อเปิด)
+  LV.hover = LV.drag = null;
+}
+function saveLevels() {
+  LV.edited = true;
+  const lines = LV.lines.map(({ nav, auto, touches, basis }) => ({ nav, auto, touches, basis }));
+  try { localStorage.setItem(lvKey(current.name), JSON.stringify({ lines })); } catch (e) {}
+}
+
+const sideOf = (nav) => nav >= current.last_nav ? "res" : "sup";
+const navToPct = (nav) => (nav / current.base_nav - 1) * 100;
+const pctToNav = (p) => current.base_nav * (1 + p / 100);
+function geo(W, H) {
+  const a = current.axes;
+  return { x0: a.left * W, x1: a.right * W, yt: (1 - a.top) * H, yb: (1 - a.bottom) * H, ymin: a.ymin, ymax: a.ymax };
+}
+const yOf = (g, p) => g.yt + (g.ymax - p) / (g.ymax - g.ymin) * (g.yb - g.yt);
+const pOfY = (g, y) => g.ymax - (y - g.yt) / (g.yb - g.yt) * (g.ymax - g.ymin);
+const inRange = (g, nav) => { const p = navToPct(nav); return p >= g.ymin && p <= g.ymax; };
+
+function pill(ctx, g, y, text, color, away, filled) {
+  // ป้ายชิดขวาในกรอบกราฟ วางฝั่งที่ "ห่างจากราคาล่าสุด" (แนวต้าน=เหนือเส้น, แนวรับ=ใต้เส้น) จะได้ไม่ทับเส้น NAV
+  ctx.font = LV_FONT;
+  const w = ctx.measureText(text).width + 22, h = 38, gap = 7;
+  let top = away === "up" ? y - gap - h : y + gap;
+  if (top < g.yt + 2) top = y + gap;
+  if (top + h > g.yb - 2) top = y - gap - h;
+  const x = g.x1 - 12 - w;
+  ctx.save();
+  ctx.setLineDash([]);
+  ctx.beginPath(); ctx.roundRect(x, top, w, h, 9);
+  ctx.fillStyle = filled ? color : "rgba(255,255,255,.92)"; ctx.fill();
+  if (!filled) { ctx.lineWidth = 2; ctx.strokeStyle = color; ctx.stroke(); }
+  ctx.fillStyle = filled ? "#fff" : color; ctx.textBaseline = "middle";
+  ctx.fillText(text, x + 11, top + h / 2 + 1);
+  ctx.restore();
+}
+
+function drawName(ctx, W, H) {
+  if (!NAME.show || !current || !current.axes) return;
+  const g = geo(W, H);
+  ctx.save();
+  ctx.font = NAME_FONT; ctx.fillStyle = "#1b3560"; ctx.textBaseline = "top"; ctx.textAlign = "left";
+  ctx.fillText(current.name, g.x0 + (g.x1 - g.x0) * 0.012, g.yt + (g.yb - g.yt) * 0.025);
+  ctx.restore();
+}
+
+function drawOverlay(ctx, W, H, live, withLevels) {
+  drawName(ctx, W, H);
+  if (withLevels) drawLevels(ctx, W, H, live);
+}
+
+function drawLevels(ctx, W, H, live) {
+  if (!current || !current.axes) return;
+  const g = geo(W, H);
+  if (LV.show) {
+    for (const l of LV.lines) {
+      if (!inRange(g, l.nav)) continue;
+      const y = Math.round(yOf(g, navToPct(l.nav))) + .5, side = sideOf(l.nav), color = LV_COLOR[side];
+      const hot = live && ((LV.drag && LV.drag.id === l.id) || (LV.hover && LV.hover.id === l.id));
+      ctx.save();
+      ctx.beginPath(); ctx.rect(g.x0, g.yt, g.x1 - g.x0, g.yb - g.yt); ctx.clip();
+      ctx.strokeStyle = color; ctx.lineWidth = hot ? 6 : 4; ctx.setLineDash([22, 13]);
+      ctx.beginPath(); ctx.moveTo(g.x0, y); ctx.lineTo(g.x1, y); ctx.stroke();
+      ctx.restore();
+      pill(ctx, g, y, (side === "res" ? "แนวต้าน " : "แนวรับ ") + fmtNav(l.nav), color, side === "res" ? "up" : "down", hot);
+    }
+  }
+  if (live && LV.hover && LV.hover.y != null) {          // เส้นพรีวิวก่อนคลิกเพิ่ม (ไม่ติดไปกับรูป)
+    const y = Math.round(LV.hover.y) + .5;
+    ctx.save();
+    ctx.globalAlpha = .45; ctx.strokeStyle = LV_COLOR.add; ctx.lineWidth = 3; ctx.setLineDash([10, 10]);
+    ctx.beginPath(); ctx.moveTo(g.x0, y); ctx.lineTo(g.x1, y); ctx.stroke();
+    ctx.restore();
+    const nav = pctToNav(pOfY(g, LV.hover.y));
+    pill(ctx, g, y, "+ เพิ่มเส้น " + fmtNav(nav), LV_COLOR.add, nav >= current.last_nav ? "up" : "down", false);
+  }
+}
+
+function redraw() {
+  const cv = $("ov"), img = $("img");
+  if (cv.hidden || !img.naturalWidth) return;
+  if (cv.width !== img.naturalWidth || cv.height !== img.naturalHeight) {
+    cv.width = img.naturalWidth; cv.height = img.naturalHeight;
+  }
+  const ctx = cv.getContext("2d");
+  ctx.clearRect(0, 0, cv.width, cv.height);
+  drawOverlay(ctx, cv.width, cv.height, true, true);
+}
+
+function renderLevels() {
+  redraw();
+  $("lvShow").checked = LV.show;
+  const nAuto = (current.levels || []).length;
+  $("lvState").textContent = LV.edited ? "· ปรับเองแล้ว (บันทึกในเบราว์เซอร์นี้)"
+                                       : nAuto ? "· ระบบเสนอ " + nAuto + " เส้น" : "· ระบบหาแนวไม่พบในช่วงนี้";
+  $("lvReset").disabled = !LV.edited;
+  $("lvClear").disabled = !LV.lines.length;
+  const ae = document.activeElement;
+  if (ae && ae.tagName === "INPUT" && $("lvList").contains(ae)) return;   // อย่ารีเฟรชรายการระหว่างพิมพ์
+  const g = geo(1, 1), last = current.last_nav;
+  const rows = [...LV.lines].sort((a, b) => b.nav - a.nav).map(l => {
+    const side = sideOf(l.nav), d = (l.nav / last - 1) * 100;
+    const src = l.auto
+      ? (l.basis === "high" ? "ระบบเสนอ · จุดสูงสุดของช่วง" : l.basis === "low" ? "ระบบเสนอ · จุดต่ำสุดของช่วง"
+         : "ระบบเสนอ · จุดกลับตัว " + (l.touches || 1) + " ครั้ง")
+      : "เพิ่มเอง";
+    return `<div class="lv-row" data-id="${l.id}">
+      <span class="badge ${side}">${side === "res" ? "แนวต้าน" : "แนวรับ"}</span>
+      <input type="number" step="0.0001" min="0" value="${fmtNav(l.nav)}" aria-label="NAV ของเส้น">
+      <span class="dist">ห่างจาก NAV ล่าสุด <b class="${d >= 0 ? "pos" : "neg"}">${(d > 0 ? "+" : "") + d.toFixed(2)}%</b>${inRange(g, l.nav) ? "" : " <small>(อยู่นอกกรอบกราฟ)</small>"}</span>
+      <span class="src">${src}</span>
+      <button class="x" title="ลบเส้นนี้" aria-label="ลบเส้นนี้">×</button>
+    </div>`;
+  }).join("");
+  $("lvList").innerHTML = rows || `<div class="lv-empty">ยังไม่มีเส้น — คลิกบนกราฟตรงระดับที่ต้องการเพื่อเพิ่ม</div>`;
+}
+
+function pointerInfo(e) {
+  const cv = $("ov"), r = cv.getBoundingClientRect();
+  const sx = cv.width / r.width, sy = cv.height / r.height;
+  const x = (e.clientX - r.left) * sx, y = (e.clientY - r.top) * sy;
+  const g = geo(cv.width, cv.height);
+  const inside = x >= g.x0 && x <= g.x1 && y >= g.yt && y <= g.yb;
+  let hit = null, best = 12 * sy;                       // ระยะจับเส้น ~12px บนจอ
+  if (LV.show) for (const l of LV.lines) {
+    if (!inRange(g, l.nav)) continue;
+    const dy = Math.abs(yOf(g, navToPct(l.nav)) - y);
+    if (dy <= best) { best = dy; hit = l; }
+  }
+  return { x, y, g, inside, hit };
+}
+
+function setupLevels() {
+  const cv = $("ov");
+  $("img").addEventListener("load", redraw);
+
+  cv.addEventListener("pointermove", (e) => {
+    if (!current) return;
+    const p = pointerInfo(e);
+    if (LV.drag) {
+      const yy = Math.min(Math.max(p.y, p.g.yt), p.g.yb);
+      const l = LV.lines.find(x => x.id === LV.drag.id);
+      l.nav = +pctToNav(pOfY(p.g, yy)).toFixed(4); l.auto = false; LV.drag.moved = true;
+      renderLevels(); return;
+    }
+    LV.hover = p.hit ? { id: p.hit.id } : p.inside && e.pointerType === "mouse" ? { y: p.y } : null;
+    cv.classList.toggle("grab", !!p.hit);
+    redraw();
+  });
+  cv.addEventListener("pointerleave", () => { if (!LV.drag) { LV.hover = null; redraw(); } });
+  cv.addEventListener("pointerdown", (e) => {
+    const p = pointerInfo(e);
+    LV.down = { x: e.clientX, y: e.clientY };
+    if (p.hit) { LV.drag = { id: p.hit.id, moved: false }; cv.setPointerCapture(e.pointerId); e.preventDefault(); }
+  });
+  cv.addEventListener("pointerup", (e) => {
+    if (LV.drag) {
+      const moved = LV.drag.moved; LV.drag = null;
+      if (moved) { saveLevels(); renderLevels(); }
+      return;
+    }
+    if (!LV.down || Math.hypot(e.clientX - LV.down.x, e.clientY - LV.down.y) > 6) return;   // เลื่อนจอ ไม่ใช่คลิก
+    LV.down = null;
+    const p = pointerInfo(e);
+    if (!p.inside || p.hit) return;
+    LV.lines.push({ id: ++LV.seq, nav: +pctToNav(pOfY(p.g, p.y)).toFixed(4), auto: false });
+    LV.show = true; LV.hover = null;
+    saveLevels(); renderLevels();
+  });
+  cv.addEventListener("dblclick", (e) => {
+    const p = pointerInfo(e);
+    if (!p.hit) return;
+    LV.lines = LV.lines.filter(l => l.id !== p.hit.id);
+    LV.hover = null; saveLevels(); renderLevels();
+  });
+
+  $("lvList").addEventListener("click", (e) => {
+    const b = e.target.closest(".x"); if (!b) return;
+    const id = +b.closest(".lv-row").dataset.id;
+    LV.lines = LV.lines.filter(l => l.id !== id); saveLevels(); renderLevels();
+  });
+  $("lvList").addEventListener("change", (e) => {
+    if (e.target.tagName !== "INPUT") return;
+    const id = +e.target.closest(".lv-row").dataset.id, v = parseFloat(e.target.value);
+    const l = LV.lines.find(x => x.id === id);
+    if (l && v > 0) { l.nav = +v.toFixed(4); l.auto = false; saveLevels(); }
+    e.target.blur(); renderLevels();
+  });
+  $("lvList").addEventListener("keydown", (e) => { if (e.key === "Enter" && e.target.tagName === "INPUT") e.target.blur(); });
+  $("lvList").addEventListener("focusout", () => setTimeout(() => {
+    if (!$("lvList").contains(document.activeElement)) renderLevels();
+  }, 0));
+
+  $("lvShow").addEventListener("change", (e) => { LV.show = e.target.checked; saveLevels(); renderLevels(); });
+  $("lvClear").addEventListener("click", () => { LV.lines = []; saveLevels(); renderLevels(); });
+  $("lvReset").addEventListener("click", () => {
+    try { localStorage.removeItem(lvKey(current.name)); } catch (e) {}
+    loadLevels(current); renderLevels();
+    toast("กลับไปใช้แนวที่ระบบเสนอแล้ว");
+  });
+
+  $("nameShow").addEventListener("change", (e) => { NAME.show = e.target.checked; redraw(); });
+
+  if (document.fonts && document.fonts.load) document.fonts.load(LV_FONT).then(redraw).catch(() => {});
+}
+
+/* รูปที่ copy / ดาวน์โหลด = กราฟเดิม + เส้นที่แสดงอยู่ (ขนาดเท่ากราฟเดิมทุกพิกเซล) */
+async function composeBlob() {
+  const img = $("img");
+  if (!img.complete || !img.naturalWidth) await new Promise((ok, no) => { img.onload = ok; img.onerror = no; });
+  try { await document.fonts.load(LV_FONT); } catch (e) {}
+  const c = document.createElement("canvas");
+  c.width = img.naturalWidth; c.height = img.naturalHeight;
+  const ctx = c.getContext("2d");
+  ctx.drawImage(img, 0, 0);
+  drawOverlay(ctx, c.width, c.height, false, !$("lv").hidden);
+  return new Promise((ok, no) => c.toBlob(b => b ? ok(b) : no(new Error("toBlob")), "image/png"));
+}
+
+async function downloadImage() {
+  if (!current || !current.image) return;
+  try {
+    const url = URL.createObjectURL(await composeBlob());
+    const a = document.createElement("a");
+    a.href = url; a.download = current.name.replace(/[^A-Za-z0-9]+/g, "-") + ".png";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+  } catch (e) { toast("ดาวน์โหลดไม่สำเร็จ"); }
+}
+
+function renderTable() {
+  const head = "<tr><th>กองทุน</th><th>วันแนะนำ</th>" + COLS.map(c => `<th>${c[1]}</th>`).join("") + "<th>NAV วันเริ่มต้น</th><th>NAV ล่าสุด</th></tr>";
+  const rows = DATA.funds.map(f => {
+    const r = f.returns || {};
+    return `<tr><td><b>${f.name}</b></td><td>${thDate(f.recommend_date)}</td>` +
+      COLS.map(([k]) => `<td class="${cls(r[k])}">${fmt(r[k])}</td>`).join("") +
+      `<td>${f.base_nav != null ? f.base_nav.toFixed(4) : "–"} <small>${thDate(baseDate(f))}</small></td>` +
+      `<td>${r.nav != null ? r.nav.toFixed(4) : "–"} <small>${thDate(r.as_of)}</small></td></tr>`;
+  }).join("");
+  $("tbl").innerHTML = head + rows;
+}
+
+async function copyTable() {
+  const lines = [["กองทุน", "วันแนะนำ", ...COLS.map(c => c[1])].join("\t")];
+  DATA.funds.forEach(f => {
+    const r = f.returns || {};
+    lines.push([f.name, thDate(f.recommend_date), ...COLS.map(([k]) => fmt(r[k]))].join("\t"));
+  });
+  try {
+    await navigator.clipboard.writeText(lines.join("\n"));
+    toast("Copy ตารางแล้ว วางใน PowerPoint / Excel ได้เลย");
+  } catch (e) { toast("copy ไม่สำเร็จ"); }
+}
+
+async function init() {
+  try {
+    const res = await fetch(UTFIT_SRC.weekly + "data.json?t=" + Date.now());
+    DATA = await res.json();
+  } catch (e) {
+    $("asof").textContent = "ยังไม่มีข้อมูล – กด Run workflow ใน GitHub Actions";
+    return;
+  }
+  const asof = DATA.funds.map(f => f.returns && f.returns.as_of).filter(Boolean).sort().pop();
+  $("asof").textContent = `NAV ณ ${thDate(asof)} · อัปเดต ${thDate(DATA.updated)}`;
+
+  $("chips").innerHTML = DATA.funds.map(f => {
+    const warn = Object.keys(f.missing || {}).length || (f.warnings || []).length;
+    const r = f.returns && f.returns.since_rec;
+    const ret = (r == null || !isFinite(r)) ? "" :
+      `<span class="ret ${r >= 0 ? "pos" : "neg"}" title="ผลตอบแทนตั้งแต่แนะนำ">${r >= 0 ? "+" : ""}${r.toFixed(2)}%</span>`;
+    return `<button class="chip" data-name="${f.name}" aria-pressed="false"><span class="nm">${f.name}${warn ? '<span class="dot" title="มีจุดต้องเช็ค"></span>' : ""}</span>${ret}</button>`;
+  }).join("");
+  $("chips").addEventListener("click", e => { const b = e.target.closest(".chip"); if (b) select(b.dataset.name); });
+
+  renderTable();
+  const fromHash = decodeURIComponent(location.hash.slice(1));
+  select(DATA.funds.some(f => f.name === fromHash) ? fromHash : DATA.funds[0].name);
+}
+
+$("copy").addEventListener("click", copyImage);
+$("download").addEventListener("click", downloadImage);
+setupLevels();
+$("copyTable").addEventListener("click", copyTable);
+init();
+</script>
+</body>
+</html>
