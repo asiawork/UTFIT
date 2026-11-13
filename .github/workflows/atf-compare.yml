@@ -1,6 +1,6 @@
 name: ATF compare data
 
-# NAV กองทุนรวมทุกกอง สำหรับหน้า "เปรียบเทียบ Auto Top Funds กับกองทุน" (atf/compare/)
+# NAV กองทุนรวมทุกกอง สำหรับหน้า "Auto Top Funds vs รายกอง" (atf/compare/)
 on:
   schedule:
     # จันทร์–ศุกร์ 06:40 เวลาไทย (23:40 UTC วันก่อนหน้า): NAV ของวันทำการล่าสุด

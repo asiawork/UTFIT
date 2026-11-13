@@ -9,7 +9,7 @@
 | หมวด | เครื่องมือ | โฟลเดอร์ | ข้อมูล |
 |---|---|---|---|
 | **Auto Top Funds** | Wealth Solution Plan | `atf/wealthplan/` | ไฟล์ Model Performance ที่อัปโหลด |
-| | เปรียบเทียบ Auto Top Funds กับกองทุน | `atf/compare/` | ไฟล์ที่อัปโหลด + NAV กองทุนรวมจาก SEC |
+| | Auto Top Funds vs รายกอง | `atf/compare/` | ไฟล์ที่อัปโหลด + NAV กองทุนรวมจาก SEC |
 | **รายกองทุน** | กราฟ Weekly | `funds/weekly/` | SEC (อัปเดตทุกวันจันทร์) |
 | | ค้นหาด้วย Master Fund | `funds/masterfund/` | SEC |
 
@@ -41,7 +41,7 @@
 index.html              หน้าแรก (เลือกหมวด)
 atf/index.html          หมวด Auto Top Funds + อัปโหลดไฟล์
 atf/wealthplan/         Wealth Solution Plan (+ backfill.js)
-atf/compare/            เปรียบเทียบ Auto Top Funds กับกองทุน
+atf/compare/            Auto Top Funds vs รายกอง
 funds/index.html        หมวดรายกองทุน
 funds/weekly/           กราฟ Weekly
 funds/masterfund/       ค้นหาด้วย Master Fund
