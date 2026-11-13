@@ -20,6 +20,7 @@
 
   <div class="cats">
     <a class="cat" href="atf/">
+      <span data-art="portfolio"></span>
       <div class="top"><h2>Auto Top Funds</h2><span class="go" data-i="arrow"></span></div>
       <ul>
         <li>Wealth Solution Plan</li>
@@ -27,6 +28,7 @@
       </ul>
     </a>
     <a class="cat" href="funds/">
+      <span data-art="factsheet"></span>
       <div class="top"><h2>รายกองทุน</h2><span class="go" data-i="arrow"></span></div>
       <ul>
         <li>กราฟ Weekly</li>
@@ -39,6 +41,7 @@
 </main>
 <script>
 document.querySelectorAll("[data-i]").forEach(e => e.innerHTML = UI.icon(e.dataset.i));
+document.querySelectorAll("[data-art]").forEach(e => e.outerHTML = UI.art(e.dataset.art));
 (async () => {
   const [nav, wk, file] = await Promise.all([UI.navIndex(""), UI.weekly(""), UI.atfFile()]);
   const m = [];

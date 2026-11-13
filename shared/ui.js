@@ -14,14 +14,42 @@ window.UI = (() => {
     arrow: '<path d="M5 12h14"/><path d="m13 6 6 6-6 6"/>',
     file: '<path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8l-5-5Z"/><path d="M14 3v5h5"/>',
   };
-  const icon = (n, cls = "ico") => `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[n] || ""}</svg>`;
+  let gid = 0;
+  const GRAD = (id) => `<defs><linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="2" y1="3" x2="22" y2="21"><stop offset="0" stop-color="#1f5eff"/><stop offset=".55" stop-color="#6a5cff"/><stop offset="1" stop-color="#18c4f5"/></linearGradient></defs>`;
+  /** ไอคอนเส้น · grad = เส้นไล่สีน้ำเงิน-ม่วง-ฟ้า */
+  const icon = (n, cls = "ico", grad = false) => {
+    const id = "ug" + (++gid);
+    return `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="${grad ? `url(#${id})` : "currentColor"}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${grad ? GRAD(id) : ""}${P[n] || ""}</svg>`;
+  };
+  /** ภาพประจำหมวด (ไล่สี) */
+  const ART = {
+    // Auto Top Funds: พอร์ต = โดนัทสัดส่วนสินทรัพย์
+    portfolio: (id) => `<svg viewBox="0 0 64 64" class="art" aria-hidden="true">
+      <defs><linearGradient id="${id}a" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1f5eff"/><stop offset="1" stop-color="#6a5cff"/></linearGradient>
+      <linearGradient id="${id}b" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#18c4f5"/><stop offset="1" stop-color="#1f5eff"/></linearGradient>
+      <linearGradient id="${id}c" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a48bff"/><stop offset="1" stop-color="#6a5cff"/></linearGradient></defs>
+      <g fill="none" stroke-width="12" transform="rotate(-90 32 32)">
+        <circle cx="32" cy="32" r="22" stroke="url(#${id}a)" stroke-dasharray="62 138.2"/>
+        <circle cx="32" cy="32" r="22" stroke="url(#${id}b)" stroke-dasharray="41 138.2" stroke-dashoffset="-64"/>
+        <circle cx="32" cy="32" r="22" stroke="url(#${id}c)" stroke-dasharray="29 138.2" stroke-dashoffset="-107"/>
+      </g></svg>`,
+    // รายกองทุน: factsheet ของกองหนึ่งกอง (กราฟ NAV + บรรทัดข้อมูล)
+    factsheet: (id) => `<svg viewBox="0 0 64 64" class="art" aria-hidden="true">
+      <defs><linearGradient id="${id}a" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1f5eff"/><stop offset=".6" stop-color="#6a5cff"/><stop offset="1" stop-color="#18c4f5"/></linearGradient></defs>
+      <rect x="10" y="5" width="44" height="54" rx="9" fill="url(#${id}a)"/>
+      <path d="M18 34l7-7 6 5 9-11 6 5" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="18" y="13" width="16" height="4" rx="2" fill="#fff" opacity=".9"/>
+      <rect x="18" y="43" width="28" height="3.5" rx="1.75" fill="#fff" opacity=".55"/>
+      <rect x="18" y="50" width="18" height="3.5" rx="1.75" fill="#fff" opacity=".55"/></svg>`,
+  };
+  const art = (n) => ART[n] ? ART[n]("ua" + (++gid)) : "";
   const TH = ["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
   const thDate = iso => { if (!iso) return "–"; const [y, m, d] = String(iso).slice(0, 10).split("-"); return `${+d} ${TH[+m - 1]} ${(+y + 543) % 100}`; };
   const pct = v => v == null || !isFinite(v) ? "–" : (v > 0 ? "+" : "") + v.toFixed(2) + "%";
   const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const getJSON = url => fetch(url, { cache: "no-cache" }).then(r => r.ok ? r.json() : null).catch(() => null);
   return {
-    icon, thDate, pct, esc,
+    icon, art, thDate, pct, esc,
     /** {count, navTo, pending} ของ NAV กองทุนรวม (หน้าเปรียบเทียบ) */
     async navIndex(root) { const d = await getJSON(root + "atf/compare/data/index.json"); return d && { count: d.funds.length, navTo: d.nav_to || d.updated, pending: d.pending || 0 }; },
     /** {updated, funds:[{name, since, asOf, rec}]} ของกราฟ Weekly */

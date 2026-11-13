@@ -12,13 +12,14 @@
 </head>
 <body>
 <main class="wrap">
-  <header class="page-h"><h1>รายกองทุน</h1></header>
+  <header class="page-h"><span data-art="factsheet"></span><h1>รายกองทุน</h1></header>
   <div class="tools">
     <a class="tool" href="weekly/"><span class="ic" data-i="chart"></span><b>กราฟ Weekly</b></a>
     <a class="tool" href="masterfund/"><span class="ic" data-i="search"></span><b>ค้นหาด้วย Master Fund</b></a>
   </div>
   <footer class="foot">ข้อมูลกองทุนจาก SEC Open API</footer>
 </main>
-<script>document.querySelectorAll("[data-i]").forEach(e => e.innerHTML = UI.icon(e.dataset.i));</script>
+<script>document.querySelectorAll("[data-i]").forEach(e => e.innerHTML = UI.icon(e.dataset.i, "ico", !e.closest(".drop")));
+document.querySelectorAll("[data-art]").forEach(e => e.outerHTML = UI.art(e.dataset.art));</script>
 </body>
 </html>

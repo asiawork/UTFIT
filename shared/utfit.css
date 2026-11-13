@@ -17,7 +17,10 @@ h1,h2,h3{font-family:var(--head);font-weight:700;margin:0;letter-spacing:-.015em
 .ico{width:22px;height:22px;flex:none}
 
 /* ---------- หัวหน้าแรก (บล็อกสีน้ำเงินทึบ) ---------- */
-.hero{margin-top:24px;border-radius:24px;background:var(--blue);color:#fff;padding:64px 56px 40px;min-height:320px;
+.hero{margin-top:24px;border-radius:24px;color:#fff;
+  background:radial-gradient(55% 90% at 100% 0%,#1fc6ff 0%,rgba(31,198,255,0) 62%),
+             radial-gradient(50% 80% at 78% 105%,#7a5cff 0%,rgba(122,92,255,0) 65%),
+             linear-gradient(115deg,#0a26c9 0%,#1f5eff 48%,#3d6bff 100%);padding:64px 56px 40px;min-height:320px;
   display:flex;flex-direction:column;justify-content:space-between;gap:40px}
 .hero h1{font-size:64px;line-height:1.05;letter-spacing:-.03em;max-width:900px}
 .hero .meta{display:flex;flex-wrap:wrap;gap:6px 28px;font-size:14.5px;color:rgba(255,255,255,.78)}
@@ -35,9 +38,11 @@ h1,h2,h3{font-family:var(--head);font-weight:700;margin:0;letter-spacing:-.015em
 .cat:hover{background:#e9eef8}
 .cat:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
 .cat .top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+.cat .art{width:64px;height:64px;display:block;margin-bottom:18px}
+.page-h .art{width:52px;height:52px;display:block;margin-bottom:16px}
 .cat h2{font-size:32px;line-height:1.15}
 .cat .go{width:44px;height:44px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;flex:none;transition:background .15s,transform .15s}
-.cat:hover .go{background:var(--blue);transform:translateX(3px)}
+.cat:hover .go{background:linear-gradient(135deg,#1f5eff,#6a5cff);transform:translateX(3px)}
 .cat ul{list-style:none;margin:auto 0 0;padding:0;border-top:1px solid var(--line)}
 .cat li{padding:11px 0;border-bottom:1px solid var(--line);font-weight:500;color:var(--ink-2)}
 
@@ -47,8 +52,8 @@ h1,h2,h3{font-family:var(--head);font-weight:700;margin:0;letter-spacing:-.015em
   border:1px solid var(--line);color:inherit;text-decoration:none;transition:border-color .15s,background .15s}
 .tool:hover{border-color:var(--blue);background:var(--blue-50)}
 .tool:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
-.tool .ic{width:44px;height:44px;border-radius:12px;background:var(--blue-50);color:var(--blue);display:grid;place-items:center}
-.tool:hover .ic{background:var(--blue);color:#fff}
+.tool .ic{width:46px;height:46px;border-radius:13px;background:linear-gradient(135deg,#eef3ff,#f1eeff);display:grid;place-items:center}
+.tool .ic .ico{width:24px;height:24px;stroke-width:2.1}
 .tool b{font:700 19px/1.3 var(--head)}
 .tool.dim{opacity:.5}
 h2.sub{font-size:22px;margin-top:44px}
@@ -59,7 +64,7 @@ h2.sub{font-size:22px;margin-top:44px}
 .drop{display:flex;align-items:center;gap:16px;padding:22px;border-radius:18px;border:1.5px dashed #b8c6e6;background:var(--soft);cursor:pointer;transition:border-color .15s,background .15s}
 .drop:hover,.drop.over{border-color:var(--blue);background:var(--blue-50)}
 .drop:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
-.drop .ic{width:44px;height:44px;border-radius:12px;background:var(--blue);color:#fff;display:grid;place-items:center;flex:none}
+.drop .ic{width:46px;height:46px;border-radius:13px;background:linear-gradient(135deg,#1f5eff,#6a5cff 60%,#18c4f5);color:#fff;display:grid;place-items:center;flex:none}
 .drop b{display:block;font:700 17px/1.35 var(--head)}
 .drop .s{font-size:14px;color:var(--mute)}
 .status{padding:18px 22px;border-radius:18px;border:1px solid var(--line);font-size:14.5px}

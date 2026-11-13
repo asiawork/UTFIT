@@ -13,7 +13,7 @@
 </head>
 <body>
 <main class="wrap">
-  <header class="page-h"><h1>Auto Top Funds</h1></header>
+  <header class="page-h"><span data-art="portfolio"></span><h1>Auto Top Funds</h1></header>
 
   <section class="upload">
     <label class="drop" id="drop" tabindex="0">
@@ -37,7 +37,8 @@
 
 <script>
 const $ = id => document.getElementById(id);
-document.querySelectorAll("[data-i]").forEach(e => e.innerHTML = UI.icon(e.dataset.i));
+document.querySelectorAll("[data-i]").forEach(e => e.innerHTML = UI.icon(e.dataset.i, "ico", !e.closest(".drop")));
+document.querySelectorAll("[data-art]").forEach(e => e.outerHTML = UI.art(e.dataset.art));
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const TH_MON = ["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
 const thDate = iso => { const [y, m, d] = iso.split("-"); return `${+d} ${TH_MON[+m - 1]} ${(+y + 543) % 100}`; };
