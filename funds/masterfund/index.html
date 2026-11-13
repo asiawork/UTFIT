@@ -11,6 +11,7 @@
 <script src="../../shared/nav.js" data-section="funds" data-title="ค้นหาด้วย Master Fund"></script>
 <script src="../../shared/ui.js"></script>
 <style>
+  .wrap,.utfit-nav .in{max-width:1280px}
   .mf-h{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;padding:52px 0 0}
   .mf-h h1{font-size:44px;line-height:1.1;letter-spacing:-.03em}
   .mf-h .asof{font-size:13.5px;color:var(--mute);white-space:nowrap}
@@ -65,10 +66,10 @@
   th.on::after{content:" ↓"}
   th.on.asc::after{content:" ↑"}
   th.n,td.n{text-align:right}
-  td{padding:12px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+  td{padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
   tbody tr:hover td{background:var(--p-50)}
   td .nm{font-weight:700;font-size:15.5px}
-  td .th{font-size:12.5px;color:var(--mute);max-width:230px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  td .th{font-size:12.5px;color:var(--mute);max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .tags{display:flex;gap:5px;margin-top:4px}
   .tg{font-size:11.5px;background:var(--p-50);color:var(--ink-2);border-radius:6px;padding:1px 7px;white-space:nowrap}
   .pill{font-size:12.5px;border-radius:7px;padding:2px 9px;white-space:nowrap;background:var(--p-50);color:var(--ink-2)}
@@ -77,8 +78,14 @@
   td.n{font-variant-numeric:tabular-nums;font-weight:600}
   .pos{color:var(--ok)} .neg{color:var(--red)} .na{color:var(--mute);font-weight:400}
   td.mcol{white-space:nowrap;color:var(--ink-2);font-size:14px}
-  .fsl{font-size:11.5px;font-weight:600;color:#2f56ff;text-decoration:none;border:1px solid #d5ddff;border-radius:6px;padding:0 6px;margin-left:4px;vertical-align:2px}
+  .fsl{font-size:12.5px;font-weight:600;color:#2f56ff;text-decoration:none;border:1px solid #d5ddff;border-radius:8px;padding:4px 10px;white-space:nowrap}
   .fsl:hover{background:#eef1ff}
+  td.fsc{text-align:right;padding-left:14px}
+  td.last{padding-right:4px}
+  .cls{font-size:12px;font-weight:500;color:var(--mute);margin-left:8px}
+  td.mg{font-size:14px;color:var(--ink-2)}
+  .ra{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+  .ra .btn-p{padding:8px 16px;font-size:14px}
   tr.focus td{background:#fff8e1}
   tr.grp th{border:0;padding-bottom:0}
   th.gh{text-align:center;color:var(--ink-2);font-weight:600;border-bottom:1px solid var(--line)}
@@ -161,7 +168,7 @@ function csvParse(text) {
 }
 const norm = s => String(s || "").replace(/\s+/g, " ").replace("จัดการกองทุนรวม", "จัดการกองทุน").trim();
 const fxKind = s => { s = s || ""; if (/ไม่ป้องกัน|unhedged/i.test(s)) return "none"; if (/ทั้งหมด|fully/i.test(s)) return "hedged"; if (/ดุลยพินิจ|dynamic/i.test(s)) return "dynamic"; if (/ระดับชนิด/.test(s)) return "class"; return ""; };
-const FX_LABEL = {none: "ไม่ป้องกัน", hedged: "ป้องกันทั้งหมด", dynamic: "ดุลยพินิจ", class: "แยกตาม class", "": "–"};
+const FX_LABEL = {none: "ไม่ป้องกัน", hedged: "ป้องกัน", dynamic: "ดุลยพินิจ", class: "แยกตาม class", "": "–"};
 const FX_CLS = {none: "fx0", hedged: "fx2"};
 const label = t => t.label || (t.kind === "country" ? (TH_COUNTRY[t.v] || t.v) : t.v);
 const KIND_TH = {index: "ดัชนี", country: "ประเทศ", theme: "ธีม", master: "Master fund"};
@@ -296,11 +303,11 @@ function renderQuick() {
 }
 $("quick").addEventListener("click", e => { const b = e.target.closest("button[data-i]"); if (b) addTok(QUICK[+b.dataset.i]); });
 
-const NO_R = {pending: ["กำลังดึงข้อมูล", "ระบบกำลังทยอยดึง NAV ย้อนหลังของกองนี้"], tax: ["ไม่มีข้อมูล", "กองภาษี (RMF/SSF/ThaiESG) ระบบยังไม่ได้เก็บ NAV"], nodata: ["ไม่มีข้อมูล", "ยังมี NAV ไม่ถึง 1 ปี หรือ SEC ไม่มีข้อมูล"]};
+const NO_R = {pending: ["กำลังดึงข้อมูล", "ระบบกำลังทยอยดึง NAV ย้อนหลังของกองนี้"], tax: ["กองภาษี", "ระบบยังไม่ดึงข้อมูลกองภาษี (RMF/SSF/ThaiESG)"], nodata: ["ไม่มีข้อมูล", "ยังมี NAV ไม่ถึง 1 ปี หรือ SEC ไม่มีข้อมูล"]};
 const cell = {
   r1y: f => f.r1y != null ? `<td class="n ${f.r1y >= 0 ? "pos" : "neg"}">${pct(f.r1y)}</td>`
     : `<td class="n"><span class="st ${f.status}" title="${NO_R[f.status][1]}">${NO_R[f.status][0]}</span></td>`,
-  fee: v => v == null ? `<td class="n na">–</td>` : `<td class="n fee">${(+v).toFixed(2)}</td>`,
+  fee: (v, c = "") => v == null ? `<td class="n na ${c}">–</td>` : `<td class="n fee ${c}">${(+v).toFixed(2)}</td>`,
 };
 function sortFunds(arr) {
   const {k, asc} = S.sort, dir = asc ? 1 : -1;
@@ -320,20 +327,20 @@ function renderResults() {
   const short = n => { n = n.replace(/\s+(UCITS\s+)?(ETF|Fund|Trust|Portfolio)(\s+Trust)?$/i, ""); return n.length > 24 ? n.slice(0, 22) + "…" : n; };
   const rows = funds.slice(0, S.show).map(f => `<tr${S.focus === f.name ? ' class="focus"' : ""}>
     <td class="ck"><input type="checkbox" data-n="${esc(f.name)}" ${S.picked.has(f.name) ? "checked" : ""} ${f.status === "ok" ? "" : "disabled title=\"ยังไม่มีข้อมูล NAV ในหน้า Auto Top Funds vs รายกอง\""}></td>
-    <td><div class="nm">${esc(f.name)} <a class="fsl" href="${esc(f.fs)}" target="_blank" rel="noopener" title="Fund factsheet">Factsheet</a></div><div class="th" title="${esc(f.th)}">${esc(f.th)}</div>
-      ${f.ncls > 1 || f.ssf ? `<div class="tags">${f.ncls > 1 ? `<span class="tg">+${f.ncls - 1} class</span>` : ""}${f.ssf ? `<span class="tg">มีกองภาษี</span>` : ""}</div>` : ""}</td>
+    <td><div class="nm">${esc(f.name)}${f.ncls > 1 ? `<span class="cls" title="กองนี้มี ${f.ncls} class">+${f.ncls - 1} class</span>` : ""}</div><div class="th" title="${esc(f.th)}">${esc(f.th)}</div></td>
     ${ms.length > 1 ? `<td class="mcol" title="${esc(f.master)}">${esc(short(f.master))}</td>` : ""}
     <td>${esc(f.amc)}</td>
-    <td>${f.mgmt ? `<span class="pill">${f.mgmt}</span>` : "–"}</td>
+    <td class="mg">${f.mgmt || "–"}</td>
     <td><span class="pill ${FX_CLS[f.fx] || ""}" title="${esc(f.fxFull)}">${FX_LABEL[f.fx]}</span></td>
-    ${cell.r1y(f)}${cell.fee(f.fe)}${cell.fee(f.be)}${cell.fee(f.mg)}${cell.fee(f.ter)}</tr>`).join("");
+    ${cell.r1y(f)}${cell.fee(f.fe)}${cell.fee(f.be)}${cell.fee(f.mg)}${cell.fee(f.ter, "last")}
+    <td class="fsc"><a class="fsl" href="${esc(f.fs)}" target="_blank" rel="noopener" title="เปิด Fund factsheet (PDF)">Factsheet</a></td></tr>`).join("");
   $("res").innerHTML = `<div class="rh"><div><h2>${esc(title)}</h2>
       <div class="ms">${ms.slice(0, 8).map(m => `<span>${esc(m.name)}</span>`).join("")}${ms.length > 8 ? `<span>อีก ${ms.length - 8}</span>` : ""}</div></div>
-      <span class="badge">${funds.length} กองไทย</span></div>
-    ${funds.length ? `<div class="tw"><table><thead><tr class="grp"><th colspan="${ms.length > 1 ? 7 : 6}"></th><th colspan="4" class="gh">ค่าธรรมเนียม (% ต่อปีของ NAV)</th></tr><tr><th></th>${th("name", "กองทุน")}${ms.length > 1 ? th("master", "Master") : ""}${th("amc", "บลจ.")}${th("mgmt", "กลยุทธ์")}${th("fx", "ป้องกันค่าเงิน")}${th("r1y", "ผลตอบแทน 1Y", 1)}${th("fe", "ขาย", 1)}${th("be", "รับซื้อคืน", 1)}${th("mg", "จัดการ", 1)}${th("ter", "รวม", 1)}</tr></thead>
+      <div class="ra"><span class="badge">${funds.length} กองไทย</span><a class="btn-p" id="cmp" aria-disabled="true">เทียบกองที่เลือก</a></div></div>
+    ${funds.length ? `<div class="tw"><table><thead><tr class="grp"><th colspan="${ms.length > 1 ? 7 : 6}"></th><th colspan="4" class="gh">ค่าธรรมเนียม (% ต่อปีของ NAV)</th><th></th></tr><tr><th></th>${th("name", "กองทุน")}${ms.length > 1 ? th("master", "Master") : ""}${th("amc", "บลจ.")}${th("mgmt", "กลยุทธ์")}${th("fx", "ป้องกันค่าเงิน")}${th("r1y", "ผลตอบแทน 1Y", 1)}${th("fe", "ขาย", 1)}${th("be", "รับซื้อคืน", 1)}${th("mg", "จัดการ", 1)}${th("ter", "รวม", 1)}<th></th></tr></thead>
       <tbody>${rows}</tbody></table></div>` : `<div class="empty">ไม่มีกองที่ตรงกับตัวกรอง</div>`}
     <div class="rf"><span>${funds.length > S.show ? `<button class="more" id="more">แสดงเพิ่ม</button> ` : ""}แสดง ${Math.min(S.show, funds.length)} จาก ${funds.length} กอง</span>
-      <a class="btn-p" id="cmp" aria-disabled="${S.picked.size ? "false" : "true"}">เทียบกองที่เลือก${S.picked.size ? ` (${S.picked.size})` : ""}</a></div>`;
+</div>`;
   updCmp();
 }
 function renderMasterList() {
