@@ -247,7 +247,16 @@ function masterMatches(m, t) {
   if (t.kind === "country") return listOf(g, "countries").includes(t.v);
   return false;
 }
-const selMasters = () => [...MASTERS.values()].filter(m => S.toks.some(t => masterMatches(m, t)));
+/* ต่างประเภทกัน = ต้องตรงทุกข้อ (จีน + Technology = เทคจีน)  ประเภทเดียวกัน = ข้อใดข้อหนึ่ง (จีน หรือ อินเดีย)
+   master ที่เลือกตรงๆ จะรวมเข้ามาเสมอ */
+function matchAll(m, toks) {
+  const named = toks.filter(t => t.kind === "master"), rest = toks.filter(t => t.kind !== "master");
+  if (named.some(t => masterMatches(m, t))) return true;
+  if (!rest.length) return false;
+  const kinds = [...new Set(rest.map(t => t.kind))];
+  return kinds.every(k => rest.some(t => t.kind === k && masterMatches(m, t)));
+}
+const selMasters = () => [...MASTERS.values()].filter(m => matchAll(m, S.toks));
 const passFilters = f => (!S.asset || f.asset === S.asset) && (!S.mgmt || f.mgmt === S.mgmt) && (!S.fx || f.fx === S.fx);
 
 /* ---------- ค้นหา ---------- */
@@ -313,9 +322,10 @@ function seg(id, list, key) {
   $(id).onclick = e => { const b = e.target.closest("button"); if (!b) return; S[key] = b.dataset.v; S.show = 30; render(); };
 }
 function renderQuick() {
-  const cnt = t => [...MASTERS.values()].filter(m => masterMatches(m, t)).reduce((a, m) => a + m.funds.length, 0);
+  const cnt = t => [...MASTERS.values()].filter(m => matchAll(m, [...S.toks, t])).reduce((a, m) => a + m.funds.length, 0);
   const lead = S.toks.length ? "เพิ่ม" : "ยอดนิยม";
-  $("quick").innerHTML = `<span class="l">${lead}</span>` + QUICK.filter(t => !S.toks.some(x => x.kind === t.kind && x.v === t.v)).map((t, i) =>
+  const now = S.toks.length ? selMasters().reduce((a, m) => a + m.funds.length, 0) : -1;
+  $("quick").innerHTML = `<span class="l">${lead}</span>` + QUICK.filter(t => !S.toks.some(x => x.kind === t.kind && x.v === t.v) && cnt(t) > 0 && cnt(t) !== now).map((t, i) =>
     `<button class="q" type="button" data-i="${QUICK.indexOf(t)}">${S.toks.length ? "+ " : ""}${esc(label(t))}<small>${cnt(t)}</small></button>`).join("");
 }
 $("quick").addEventListener("click", e => { const b = e.target.closest("button[data-i]"); if (b) addTok(QUICK[+b.dataset.i]); });
@@ -340,7 +350,9 @@ function th(k, t, n, tip) { const on = S.sort.k === k; return `<th data-k="${k}"
 function renderResults() {
   const ms = selMasters();
   const funds = sortFunds(ms.flatMap(m => m.funds).filter(passFilters));
-  const title = S.toks.map(t => (t.kind === "master" ? "" : KIND_TH[t.kind] + " ") + label(t)).join(" + ");
+  const kinds = [...new Set(S.toks.map(t => t.kind))];
+  const title = kinds.map(k => { const ts = S.toks.filter(t => t.kind === k);
+    return (k === "master" ? "" : KIND_TH[k] + " ") + ts.map(label).join(" หรือ "); }).join(" + ");
   const short = n => { n = n.replace(/\s+(UCITS\s+)?(ETF|Fund|Trust|Portfolio)(\s+Trust)?$/i, ""); return n.length > 20 ? n.slice(0, 18) + "…" : n; };
   const rows = funds.slice(0, S.show).map(f => `<tr${S.focus === f.name ? ' class="focus"' : ""}>
     <td class="ck"><input type="checkbox" data-n="${esc(f.name)}" ${S.picked.has(f.name) ? "checked" : ""} ${f.status === "ok" ? "" : "disabled title=\"ยังไม่มีข้อมูล NAV ในหน้า Auto Top Funds vs รายกอง\""}></td>
