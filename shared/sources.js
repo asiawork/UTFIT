@@ -1,8 +1,8 @@
-/* ที่อยู่ข้อมูลของแต่ละเครื่องมือ
-   ตอนนี้ยังอ่านข้อมูลจาก repo เดิม (ระบบอัปเดตข้อมูลอัตโนมัติยังรันอยู่ที่นั่น)
-   ถ้าย้ายข้อมูลมาไว้ใน UTFIT แล้ว แก้ที่นี่ที่เดียว เช่น atfCompare: "../../data/atf-compare/" */
+/* ที่อยู่ข้อมูลของแต่ละเครื่องมือ (นับจากโฟลเดอร์ของหน้านั้น)
+   ข้อมูลอยู่ใน UTFIT แล้ว อัปเดตโดย workflow ใน .github/workflows/
+   "" = โฟลเดอร์เดียวกับหน้าเว็บ เช่น atf/compare/data/ , funds/weekly/data.json */
 window.UTFIT_SRC = {
-  atfCompare: "/autotopfund-vs-fund/docs/",   // NAV กองทุนรวม + แม่แบบ PowerPoint
-  weekly:     "/weekly-graph/docs/",           // data.json + charts/*.png
-  masterfund: "/masterfund-lookup/",           // funds_data.json, amc_abbr.csv, master_tags.csv
+  atfCompare: "",   // atf/compare/data/ + atf/compare/assets/
+  weekly:     "",   // funds/weekly/data.json + charts/
+  masterfund: "",   // funds/masterfund/funds_data.json, amc_abbr.csv, master_tags.csv
 };

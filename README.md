@@ -20,18 +20,20 @@
 - ไฟล์อยู่ในเบราว์เซอร์เครื่องนั้นเท่านั้น (IndexedDB) ไม่ถูกส่งขึ้นเว็บหรือเก็บใน repo
 - จำไว้จนกว่าจะอัปโหลดไฟล์ใหม่หรือกด **ล้างไฟล์ออกจากเครื่องนี้**
 
-## ที่มาของข้อมูล
+## ข้อมูลและการอัปเดตอัตโนมัติ
 
-ตอนนี้ข้อมูล NAV และข้อมูลกองทุนยังอ่านจาก repo เดิม (ระบบอัปเดตอัตโนมัติด้วย GitHub Actions ยังรันอยู่ที่นั่น):
+ข้อมูลทั้งหมดอยู่ใน UTFIT แล้ว อัปเดตด้วย GitHub Actions (ต้องมี Secret `SEC_API_KEY`: Settings → Secrets and variables → Actions)
 
-| เครื่องมือ | อ่านข้อมูลจาก |
-|---|---|
-| เปรียบเทียบ ATF กับกองทุน | `asiawork/autotopfund-vs-fund` (`docs/data/`, `docs/assets/`) |
-| กราฟ Weekly | `asiawork/weekly-graph` (`docs/data.json`, `docs/charts/`) |
-| ค้นหาด้วย Master Fund | `asiawork/masterfund-lookup` (`funds_data.json` ฯลฯ) |
+| Workflow | ใช้กับ | เวลารัน | สคริปต์ / ข้อมูลดิบ | หน้าเว็บอ่านจาก |
+|---|---|---|---|---|
+| **ATF compare data** | เปรียบเทียบ ATF กับกองทุน | จ.–ศ. 06:40 + ทยอยดึงย้อนหลังทุก 2 ชม. จนครบ | `pipelines/atf-compare/` | `atf/compare/data/` |
+| **Weekly charts** | กราฟ Weekly | จันทร์ 06:15 และทุกครั้งที่แก้ `funds.csv` | `pipelines/weekly/` | `funds/weekly/data.json`, `charts/` |
+| **Master fund data** | ค้นหาด้วย Master Fund | กด Run workflow เอง | `pipelines/masterfund/` | `funds/masterfund/` |
 
-ที่อยู่ทั้งหมดอยู่ใน `shared/sources.js` ไฟล์เดียว
-**ห้ามลบ repo เดิมจนกว่าจะย้ายข้อมูลและ workflow มาไว้ใน UTFIT แล้วแก้ `shared/sources.js`**
+- เปลี่ยนกองที่แนะนำในกราฟ Weekly: แก้ `pipelines/weekly/funds.csv` (คอลัมน์ `fund`, `recommend_date`, `compare_with`)
+- เพิ่มกองที่ไม่อยู่ในเกณฑ์ของหน้าเปรียบเทียบ: ใส่ชื่อใน `pipelines/atf-compare/extra_funds.csv` แล้วรัน **ATF compare data** แบบ `full`
+- ที่อยู่ข้อมูลที่หน้าเว็บใช้อยู่ใน `shared/sources.js`
+- `.gitignore` กันไฟล์ `.csv`/`.xlsx` ทุกไฟล์ (กันไฟล์ Model Performance หลุดขึ้น repo) ยกเว้น CSV ที่ระบบใช้ ถ้าเพิ่ม CSV ใหม่ต้องเพิ่มบรรทัด `!` ใน `.gitignore`
 
 ## โครงสร้าง
 
@@ -47,6 +49,8 @@ shared/sources.js       ที่อยู่ข้อมูลของแต�
 shared/atf-store.js     เก็บ/อ่านไฟล์ Model Performance ที่ใช้ร่วมกัน
 shared/nav.js           แถบนำทางด้านบน (UTFIT › หมวด › เครื่องมือ)
 shared/utfit.css        สไตล์ของหน้าแรกและหน้าหมวด
+pipelines/              สคริปต์ดึงข้อมูลจาก SEC + ข้อมูลดิบ (ไม่ได้ใช้บนหน้าเว็บ)
+.github/workflows/      ระบบอัปเดตข้อมูลอัตโนมัติ
 ```
 
 ## เพิ่มเครื่องมือใหม่

@@ -1,0 +1,65 @@
+name: Weekly charts
+
+# กราฟ NAV สำหรับรายงาน Top Funds Weekly Market Recap (funds/weekly/)
+# เปลี่ยนกองที่แนะนำ: แก้ pipelines/weekly/funds.csv แล้วกด Run workflow (หรือรอวันจันทร์)
+on:
+  schedule:
+    # ทุกวันจันทร์ 06:15 เวลาไทย (= อาทิตย์ 23:15 UTC)
+    - cron: "15 23 * * 0"
+  push:
+    paths: ["pipelines/weekly/funds.csv"]
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "update = ดึงข้อมูล+สร้างกราฟ / selftest = พิมพ์ response จริงของ API ออกมาดู (ไม่บันทึก)"
+        type: choice
+        options: [update, selftest]
+        default: update
+
+permissions:
+  contents: write
+
+concurrency:
+  group: weekly-charts
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install
+        run: pip install requests pandas matplotlib
+
+      - name: Self-test SEC API
+        if: ${{ github.event.inputs.mode == 'selftest' }}
+        env:
+          SEC_API_KEY: ${{ secrets.SEC_API_KEY }}
+        run: python pipelines/weekly/scripts/fetch_nav.py --selftest
+
+      - name: Fetch NAV from SEC
+        if: ${{ github.event.inputs.mode != 'selftest' }}
+        env:
+          SEC_API_KEY: ${{ secrets.SEC_API_KEY }}
+        run: python pipelines/weekly/scripts/fetch_nav.py
+
+      - name: Build charts
+        if: ${{ github.event.inputs.mode != 'selftest' }}
+        run: python pipelines/weekly/scripts/build_charts.py
+
+      - name: Commit
+        if: ${{ github.event.inputs.mode != 'selftest' }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add pipelines/weekly/data funds/weekly
+          if ! git diff --staged --quiet; then
+            git commit -m "Weekly charts $(TZ=Asia/Bangkok date '+%Y-%m-%d')"
+            git pull --rebase -X theirs origin main
+            git push
+          fi

@@ -1,0 +1,14 @@
+# ข้อมูล Auto Top Funds จาก Tableau (Model Performance ฯลฯ) ห้ามขึ้น repo — repo เปิดสาธารณะ
+*.csv
+*.xlsx
+# CSV ที่ระบบใช้ (อนุญาตเฉพาะที่นี่)
+!pipelines/atf-compare/extra_funds.csv
+!pipelines/atf-compare/data/nav/*.csv
+!pipelines/weekly/funds.csv
+!pipelines/weekly/data/nav/*.csv
+!pipelines/masterfund/master_aliases.csv
+!funds/masterfund/amc_abbr.csv
+!funds/masterfund/master_tags.csv
+__pycache__/
+*.pyc
+.DS_Store

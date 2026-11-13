@@ -1,0 +1,85 @@
+name: ATF compare data
+
+# NAV กองทุนรวมทุกกอง สำหรับหน้า "เปรียบเทียบ Auto Top Funds กับกองทุน" (atf/compare/)
+on:
+  schedule:
+    # จันทร์–ศุกร์ 06:40 เวลาไทย (23:40 UTC วันก่อนหน้า): NAV ของวันทำการล่าสุด
+    - cron: "40 23 * * 0-4"
+    # ทุก 2 ชั่วโมง: ทยอยดึงย้อนหลังกองที่ยังไม่ครบ รอบละ ~100 นาที (ถ้าครบแล้วจะข้ามเอง)
+    - cron: "10 1-21/2 * * *"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "auto = ปกติ / full = ดึงรายชื่อกอง + ข้อมูลในตาราง + ลิงก์หนังสือชี้ชวนใหม่ / selftest = ทดสอบ API (ไม่บันทึก)"
+        type: choice
+        options: [auto, full, selftest]
+        default: auto
+
+permissions:
+  contents: write
+  actions: write     # ให้รอบนี้สั่งรอบต่อไปได้เองระหว่างดึงย้อนหลัง
+
+concurrency:
+  group: atf-compare-${{ github.event.inputs.mode == 'selftest' && 'test' || 'main' }}
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Skip if nothing to backfill
+        id: gate
+        run: |
+          if [ "${{ github.event.schedule }}" = "10 1-21/2 * * *" ] && [ -f atf/compare/data/index.json ] \
+             && python3 -c "import json,sys; sys.exit(0 if json.load(open('atf/compare/data/index.json')).get('pending',0)==0 else 1)"; then
+            echo "skip=1" >> "$GITHUB_OUTPUT"; echo "ดึงย้อนหลังครบแล้ว ข้ามรอบนี้"
+          fi
+
+      - uses: actions/setup-python@v5
+        if: steps.gate.outputs.skip != '1'
+        with:
+          python-version: "3.11"
+
+      - name: Install
+        if: steps.gate.outputs.skip != '1'
+        run: pip install requests
+
+      - name: Self-test
+        if: steps.gate.outputs.skip != '1' && github.event.inputs.mode == 'selftest'
+        env:
+          SEC_API_KEY: ${{ secrets.SEC_API_KEY }}
+        run: python pipelines/atf-compare/scripts/fetch_funds.py --selftest
+
+      - name: Fetch from SEC
+        if: steps.gate.outputs.skip != '1' && github.event.inputs.mode != 'selftest'
+        env:
+          SEC_API_KEY: ${{ secrets.SEC_API_KEY }}
+          FUNDS_MODE: ${{ github.event.inputs.mode == 'full' && 'full' || '' }}
+          FUNDS_URLS: ${{ github.event.inputs.mode == 'full' && '1' || '' }}
+          TIME_BUDGET_MIN: "100"
+        run: python pipelines/atf-compare/scripts/fetch_funds.py
+
+      - name: Commit
+        if: steps.gate.outputs.skip != '1' && github.event.inputs.mode != 'selftest'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add pipelines/atf-compare/data atf/compare/data
+          if ! git diff --staged --quiet; then
+            git commit -q -m "ATF compare data $(TZ=Asia/Bangkok date '+%Y-%m-%d %H:%M')"
+            git pull --rebase -X theirs origin main
+            git push
+          fi
+
+      # ยังดึงย้อนหลังไม่ครบ: สั่งรอบต่อไปทันที (ไม่ต้องรอตารางเวลาของ GitHub ซึ่งมักเลื่อน/ข้าม)
+      - name: Continue backfill
+        if: steps.gate.outputs.skip != '1' && github.event.inputs.mode != 'selftest'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          left=$(python3 -c "import json; print(json.load(open('atf/compare/data/index.json')).get('pending',0))")
+          echo "ยังเหลือ $left กอง"
+          if [ "$left" -gt 0 ]; then gh workflow run atf-compare.yml -f mode=auto; fi

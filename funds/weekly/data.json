@@ -1,0 +1,390 @@
+{
+ "updated": "2026-11-09",
+ "funds": [
+  {
+   "name": "KKP TECH-H",
+   "recommend_date": "2026-08-11",
+   "peers": [],
+   "missing": {},
+   "warnings": [],
+   "info": {
+    "proj_id": "M0471_2563",
+    "proj_abbr_name": "KKP TECH-H FUND",
+    "fund_class_name": "KKP TECH-H",
+    "proj_name_th": "กองทุนเปิดเคเคพี EXPANDED TECH - HEDGED",
+    "comp_name_th": "บริษัทหลักทรัพย์จัดการกองทุน เกียรตินาคินภัทร จำกัด",
+    "name": "KKP TECH-H",
+    "days": 91,
+    "warning": null
+   },
+   "axes": {
+    "left": 0.015,
+    "right": 0.9,
+    "bottom": 0.1,
+    "top": 0.97,
+    "ymin": -15.64609,
+    "ymax": 10.63162
+   },
+   "base_nav": 26.6359,
+   "base_date": "2026-08-11",
+   "last_nav": 22.8071,
+   "levels": [
+    {
+     "side": "resistance",
+     "nav": 28.4517,
+     "touches": 1,
+     "last_touch": "2026-10-06",
+     "basis": "swing"
+    }
+   ],
+   "image": "charts/KKP-TECH-H.png",
+   "image_ver": "2fe8f7734a",
+   "returns": {
+    "as_of": "2026-11-05",
+    "nav": 22.8071,
+    "1W": -12.544768507511916,
+    "1M": -19.839236319798115,
+    "3M": -14.173195752143119,
+    "6M": null,
+    "1Y": null,
+    "since_rec": -14.374584677071178
+   }
+  },
+  {
+   "name": "K-SEMQ",
+   "recommend_date": "2025-09-09",
+   "peers": [],
+   "missing": {},
+   "warnings": [],
+   "info": {
+    "proj_id": "M0066_2560",
+    "proj_abbr_name": "K-SEMQ",
+    "fund_class_name": "",
+    "proj_name_th": "กองทุนเปิดเค ซีเล็คทีฟ อีเมอร์จิ้ง มาร์เก็ตส์ หุ้นทุน",
+    "comp_name_th": "บริษัทหลักทรัพย์จัดการกองทุน กสิกรไทย จำกัด",
+    "name": "K-SEMQ",
+    "days": 304,
+    "warning": null
+   },
+   "axes": {
+    "left": 0.015,
+    "right": 0.9,
+    "bottom": 0.1,
+    "top": 0.97,
+    "ymin": -3.17657,
+    "ymax": 62.47259
+   },
+   "base_nav": 12.7987,
+   "base_date": "2025-09-09",
+   "last_nav": 15.6793,
+   "levels": [
+    {
+     "side": "support",
+     "nav": 14.1689,
+     "touches": 1,
+     "last_touch": "2026-03-30",
+     "basis": "swing"
+    },
+    {
+     "side": "resistance",
+     "nav": 16.3296,
+     "touches": 1,
+     "last_touch": "2026-02-25",
+     "basis": "swing"
+    }
+   ],
+   "image": "charts/K-SEMQ.png",
+   "image_ver": "56fca2c6ff",
+   "returns": {
+    "as_of": "2026-11-05",
+    "nav": 15.6793,
+    "1W": -6.726353361094583,
+    "1M": -15.213112271935803,
+    "3M": -10.765527093091432,
+    "6M": -11.33723889121363,
+    "1Y": 12.131159264821555,
+    "since_rec": 22.50697336448233
+   }
+  },
+  {
+   "name": "SCBGOLDH",
+   "recommend_date": "2026-08-25",
+   "peers": [],
+   "missing": {},
+   "warnings": [],
+   "info": {
+    "proj_id": "M0856_2553",
+    "proj_abbr_name": "SCBGOLDHFUND",
+    "fund_class_name": "SCBGOLDH",
+    "proj_name_th": "กองทุนเปิดไทยพาณิชย์โกลด์ THB เฮดจ์",
+    "comp_name_th": "บริษัทหลักทรัพย์จัดการกองทุน ไทยพาณิชย์ จำกัด",
+    "name": "SCBGOLDH",
+    "days": 86,
+    "warning": null
+   },
+   "axes": {
+    "left": 0.015,
+    "right": 0.9,
+    "bottom": 0.1,
+    "top": 0.97,
+    "ymin": -17.37164,
+    "ymax": 3.17939
+   },
+   "base_nav": 20.3386,
+   "base_date": "2026-08-25",
+   "last_nav": 17.799,
+   "levels": [
+    {
+     "side": "support",
+     "nav": 17.0077,
+     "touches": 1,
+     "last_touch": "2026-11-03",
+     "basis": "swing"
+    },
+    {
+     "side": "resistance",
+     "nav": 20.3785,
+     "touches": 1,
+     "last_touch": "2026-08-26",
+     "basis": "high"
+    }
+   ],
+   "image": "charts/SCBGOLDH.png",
+   "image_ver": "484d14b53f",
+   "returns": {
+    "as_of": "2026-11-06",
+    "nav": 17.799,
+    "1W": 1.9994154761290739,
+    "1M": -1.4942719574962626,
+    "3M": -6.457427855179554,
+    "6M": null,
+    "1Y": null,
+    "since_rec": -12.486601831001154
+   }
+  },
+  {
+   "name": "ES-GTECH",
+   "recommend_date": "2025-12-23",
+   "peers": [],
+   "missing": {},
+   "warnings": [],
+   "info": {
+    "proj_id": "M0692_2562",
+    "proj_abbr_name": "ES-GTECH",
+    "fund_class_name": "",
+    "proj_name_th": "กองทุนเปิดอีสท์สปริง Global Technology",
+    "comp_name_th": "บริษัทหลักทรัพย์จัดการกองทุน อีสท์สปริง (ประเทศไทย) จำกัด",
+    "name": "ES-GTECH",
+    "days": 227,
+    "warning": null
+   },
+   "axes": {
+    "left": 0.015,
+    "right": 0.9,
+    "bottom": 0.1,
+    "top": 0.97,
+    "ymin": -4.6958,
+    "ymax": 84.0896
+   },
+   "base_nav": 24.0661,
+   "base_date": "2025-12-23",
+   "last_nav": 29.9092,
+   "levels": [
+    {
+     "side": "support",
+     "nav": 28.1337,
+     "touches": 1,
+     "last_touch": "2026-02-25",
+     "basis": "swing"
+    },
+    {
+     "side": "resistance",
+     "nav": 32.2956,
+     "touches": 1,
+     "last_touch": "2026-07-30",
+     "basis": "swing"
+    }
+   ],
+   "image": "charts/ES-GTECH.png",
+   "image_ver": "db9910c81d",
+   "returns": {
+    "as_of": "2026-11-04",
+    "nav": 29.9092,
+    "1W": -10.981344571829943,
+    "1M": -21.53790861846887,
+    "3M": -14.864280183995993,
+    "6M": -17.22034479990924,
+    "1Y": 23.056288134686675,
+    "since_rec": 24.279380539430996
+   }
+  },
+  {
+   "name": "SCBNK225",
+   "recommend_date": "2025-11-11",
+   "peers": [],
+   "missing": {},
+   "warnings": [],
+   "info": {
+    "proj_id": "M0429_2556",
+    "proj_abbr_name": "SCBNKY225",
+    "fund_class_name": "SCBNK225",
+    "proj_name_th": "กองทุนเปิดไทยพาณิชย์หุ้นญี่ปุ่น",
+    "comp_name_th": "บริษัทหลักทรัพย์จัดการกองทุน ไทยพาณิชย์ จำกัด",
+    "name": "SCBNK225",
+    "days": 275,
+    "warning": null
+   },
+   "axes": {
+    "left": 0.015,
+    "right": 0.9,
+    "bottom": 0.1,
+    "top": 0.97,
+    "ymin": -7.24221,
+    "ymax": 51.69438
+   },
+   "base_nav": 39.6156,
+   "base_date": "2025-11-11",
+   "last_nav": 44.9093,
+   "levels": [
+    {
+     "side": "support",
+     "nav": 39.9827,
+     "touches": 1,
+     "last_touch": "2026-03-23",
+     "basis": "swing"
+    },
+    {
+     "side": "resistance",
+     "nav": 48.8651,
+     "touches": 2,
+     "last_touch": "2026-09-15",
+     "basis": "swing"
+    }
+   ],
+   "image": "charts/SCBNK225.png",
+   "image_ver": "ebf1381b1a",
+   "returns": {
+    "as_of": "2026-11-06",
+    "nav": 44.9093,
+    "1W": -8.921973043241948,
+    "1M": -18.161325475531843,
+    "3M": -12.325394795666767,
+    "6M": -8.046233542865322,
+    "1Y": 13.459182100909771,
+    "since_rec": 13.362665212694003
+   }
+  },
+  {
+   "name": "KKP GHC-A",
+   "recommend_date": "2025-11-11",
+   "peers": [],
+   "missing": {},
+   "warnings": [],
+   "info": {
+    "proj_id": "M0109_2551",
+    "proj_abbr_name": "KKP GHC FUND",
+    "fund_class_name": "KKP GHC-A",
+    "proj_name_th": "กองทุนเปิดเคเคพี โกลบอล เฮลธ์แคร์",
+    "comp_name_th": "บริษัทหลักทรัพย์จัดการกองทุน เกียรตินาคินภัทร จำกัด",
+    "name": "KKP GHC-A",
+    "days": 256,
+    "warning": null
+   },
+   "axes": {
+    "left": 0.015,
+    "right": 0.9,
+    "bottom": 0.1,
+    "top": 0.97,
+    "ymin": -5.89983,
+    "ymax": 21.40269
+   },
+   "base_nav": 17.3039,
+   "base_date": "2025-11-12",
+   "last_nav": 19.7126,
+   "levels": [
+    {
+     "side": "support",
+     "nav": 18.3843,
+     "touches": 1,
+     "last_touch": "2026-01-22",
+     "basis": "swing"
+    },
+    {
+     "side": "resistance",
+     "nav": 20.1896,
+     "touches": 1,
+     "last_touch": "2026-08-19",
+     "basis": "swing"
+    }
+   ],
+   "image": "charts/KKP-GHC-A.png",
+   "image_ver": "de9b50f72d",
+   "returns": {
+    "as_of": "2026-11-05",
+    "nav": 19.7126,
+    "1W": -0.2307902541729523,
+    "1M": 7.3127446337095,
+    "3M": 2.6810224034920394,
+    "6M": 14.861234930457234,
+    "1Y": 19.953753004533414,
+    "since_rec": 13.919983356353182
+   }
+  },
+  {
+   "name": "MPDIVMF",
+   "recommend_date": "2026-07-21",
+   "peers": [],
+   "missing": {},
+   "warnings": [],
+   "info": {
+    "proj_id": "M0517_2556",
+    "proj_abbr_name": "M-PROP DIV",
+    "fund_class_name": "MPDIVMF",
+    "proj_name_th": "กองทุนเปิดเอ็มเอฟซี พร็อพเพอร์ตี้ ดิวิเดนด์ ฟันด์",
+    "comp_name_th": "บริษัทหลักทรัพย์จัดการกองทุน เอ็มเอฟซี จำกัด (มหาชน)",
+    "name": "MPDIVMF",
+    "days": 109,
+    "warning": null
+   },
+   "axes": {
+    "left": 0.015,
+    "right": 0.9,
+    "bottom": 0.1,
+    "top": 0.97,
+    "ymin": -7.48569,
+    "ymax": 3.16443
+   },
+   "base_nav": 11.0353,
+   "base_date": "2026-07-21",
+   "last_nav": 10.6685,
+   "levels": [
+    {
+     "side": "support",
+     "nav": 10.2661,
+     "touches": 1,
+     "last_touch": "2026-10-14",
+     "basis": "swing"
+    },
+    {
+     "side": "resistance",
+     "nav": 11.2139,
+     "touches": 1,
+     "last_touch": "2026-09-18",
+     "basis": "high"
+    }
+   ],
+   "image": "charts/MPDIVMF.png",
+   "image_ver": "da7eaa8f55",
+   "returns": {
+    "as_of": "2026-11-06",
+    "nav": 10.6685,
+    "1W": 0.7079813092934373,
+    "1M": -2.365699643085928,
+    "3M": -4.410117644950584,
+    "6M": null,
+    "1Y": null,
+    "since_rec": -3.323878825224502
+   }
+  }
+ ]
+}
