@@ -36,7 +36,7 @@
   header p { margin: 4px 0 0; opacity: .8; font-size: 14px; }
   header a { color: #fff; opacity: .85; font-size: 13px; }
   header .asof { margin-top: 6px; font-size: 12.5px; opacity: .65; }
-  .hdr-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: flex-end; max-width: 620px; }
+  .hdr-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: flex-end; max-width: 620px; margin-bottom: 4px; }
   /* ดาวน์โหลด: หัวข้อด้านบน แล้วแต่ละเวอร์ชันเป็นแถวกว้างเท่ากัน ชื่อชิดซ้าย ปุ่มชิดขวา */
   .dlbox { flex-basis: 100%; display: grid; grid-template-columns: max-content; justify-content: end; gap: 6px; }
   .dlhead { color: #fff; font-family: var(--font-head); font-weight: 700; font-size: 14px; opacity: .85; padding-left: 2px; }
@@ -48,6 +48,13 @@
   .hdrbtn.sm { padding: 6px 10px; font-size: 13px; }
   .hdrbtn small { font-family: var(--font-text); font-weight: 400; font-size: 12px; opacity: .8; }
   .fx-wrap { position: relative; }
+  .dl-wrap { position: relative; }
+  .dl-wrap .caret { width: 10px; height: 10px; margin-left: 2px; opacity: .6; }
+  .dlmenu { position: absolute; right: 0; top: calc(100% + 8px); z-index: 30; background: #fff; border: 1px solid #e3e6ef; border-radius: 16px;
+    box-shadow: 0 12px 32px rgba(15,26,60,.12); padding: 8px; display: grid; gap: 6px; min-width: 380px; }
+  .dlmenu[hidden] { display: none; }
+  .dlmenu .dlgrp { background: #f4f6fb; }
+  .dlmenu .dlname { color: #0f1a3c; }
   .hdrbtn { display: inline-flex; align-items: center; gap: 7px; font-family: var(--font-head); font-weight: 700; font-size: 14px;
             background: #fff; color: var(--navy); border: 0; border-radius: 9px; padding: 8px 14px; cursor: pointer; }
   .hdrbtn:hover { background: #eef2f8; }
@@ -221,7 +228,11 @@
   footer { color: var(--muted); font-size: 12px; padding: 28px 0 40px; }
 
   /* พอร์ตจำลอง */
-  .simbtn { width: 100%; margin-top: 8px; }
+  .simbtn { width: 100%; margin: 10px 0 4px; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 11px 14px;
+    background: #0f1a3c; color: #fff; border: 0; border-radius: 12px; font: 600 14.5px var(--font-head, inherit); cursor: pointer;
+    box-shadow: 0 4px 12px rgba(15,26,60,.18); transition: background .15s, transform .15s; }
+  .simbtn svg { width: 16px; height: 16px; }
+  .simbtn:hover { background: #2f56ff; transform: translateY(-1px); }
   .opt .ed { border: 0; background: none; color: var(--muted); cursor: pointer; font-size: 13px; padding: 0 4px; }
   .opt .ed:hover { color: var(--navy); }
   .opt .nm .meta.sim { white-space: normal; }
@@ -311,7 +322,6 @@
   <div class="wrap">
     <div>
       <h1>Auto Top Funds vs รายกอง</h1>
-      <p>เทียบผลตอบแทนโมเดล Auto Top Funds กับกองทุนรวมทุกประเภท</p>
       <p class="asof" id="asof">กำลังโหลด…</p>
     </div>
     <div class="hdr-right">
@@ -332,8 +342,9 @@
         <button class="btn ghost sm" id="atfClear" hidden>ล้างข้อมูล Auto Top Funds ออกจากเครื่องนี้</button>
       </div>
       </div>
-      <div class="dlbox fxonly" hidden>
-        <div class="dlhead">ดาวน์โหลด</div>
+      <div class="dl-wrap fxonly" hidden>
+        <button class="hdrbtn" id="dlOpen" aria-expanded="false" aria-controls="dlMenu"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v9M6.5 8.5 10 12l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.5 12.5v3h13v-3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>ดาวน์โหลดรายงาน</span><svg class="caret" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 3.5 5 6.5 8 3.5z" fill="currentColor"/></svg></button>
+        <div class="dlmenu" id="dlMenu" hidden>
         <div class="dlgrp" title="Review Portfolio: ปก · กราฟเส้น · กราฟแท่ง · ตารางเทียบ · รายละเอียด FIXEDSP">
           <span class="dlname">Ver. เปรียบเทียบกับรายกอง</span>
           <button class="hdrbtn sm" id="pptx" data-fmt="pptx"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v9M6.5 8.5 10 12l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.5 12.5v3h13v-3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>PowerPoint</span></button>
@@ -343,6 +354,7 @@
           <span class="dlname">Ver. SP Only <small>(สำหรับลูกค้า Bank)</small></span>
           <button class="hdrbtn sm" id="pptxSp" data-fmt="pptx"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v9M6.5 8.5 10 12l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.5 12.5v3h13v-3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>PowerPoint</span></button>
           <button class="hdrbtn sm" id="pdfSp" data-fmt="pdf"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v9M6.5 8.5 10 12l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.5 12.5v3h13v-3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>PDF</span></button>
+        </div>
         </div>
       </div>
     </div>
@@ -358,7 +370,7 @@
         <input type="search" id="q" placeholder="ค้นหาชื่อกองทุน" autocomplete="off" aria-label="ค้นหากองทุน">
         <button id="qClear" type="button" title="ล้างคำค้น" hidden>×</button>
       </div>
-      <button class="btn ghost sm simbtn" id="simNew" title="รวมหลายกอง/โมเดลตามสัดส่วนที่กำหนด แล้วเทียบเป็นอีกเส้น">+ สร้างพอร์ตจำลอง</button>
+      <button class="simbtn" id="simNew" title="รวมหลายกอง/โมเดลตามสัดส่วนที่กำหนด แล้วเทียบเป็นอีกเส้น"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>สร้างพอร์ตจำลอง</button>
       <div id="list"></div>
       <div class="count" id="count"></div>
     </aside>
@@ -788,6 +800,11 @@ function fxPop(open) { $("fxPop").hidden = !open; $("fxOpen").setAttribute("aria
 $("fxOpen").onclick = (e) => { e.stopPropagation(); fxPop($("fxPop").hidden); };
 document.addEventListener("click", (e) => { if (!$("fxPop").hidden && !e.target.closest(".fx-wrap")) fxPop(false); });
 document.addEventListener("keydown", (e) => { if (e.key === "Escape") fxPop(false); });
+function dlMenu(open) { $("dlMenu").hidden = !open; $("dlOpen").setAttribute("aria-expanded", open); }
+$("dlOpen").onclick = (e) => { e.stopPropagation(); fxPop(false); dlMenu($("dlMenu").hidden); };
+$("dlMenu").addEventListener("click", (e) => { if (e.target.closest("button")) setTimeout(() => dlMenu(false), 0); });
+document.addEventListener("click", (e) => { if (!$("dlMenu").hidden && !e.target.closest(".dl-wrap")) dlMenu(false); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") dlMenu(false); });
 function fxStatus() {
   const left = ATF_AT ? Math.max(0, ATF_AT + KEEP_DAYS * 864e5 - Date.now()) : 0;
   $("atfLeft").textContent = "" && left ? `(ข้อมูลนี้จะลบใน ${left > 864e5 ? Math.ceil(left / 864e5) + " วัน" : Math.ceil(left / 36e5) + " ชั่วโมง"})` : "";
