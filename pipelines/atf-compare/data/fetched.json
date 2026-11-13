@@ -63,11 +63,23 @@ null
 "2026-11-13",
 null
 ],
+"A-GSEMI": [
+"2026-11-13",
+null
+],
 "A-HUMANOID": [
 "2026-11-13",
 null
 ],
 "A-JEDI": [
+"2026-11-13",
+null
+],
+"A-RING": [
+"2026-11-13",
+null
+],
+"A-SLVP": [
 "2026-11-13",
 null
 ],
@@ -355,6 +367,10 @@ null
 "2026-11-13",
 null
 ],
+"ASP-EUPROP": [
+"2026-11-13",
+null
+],
 "ASP-EUROPE QUALITY": [
 "2026-11-13",
 null
@@ -427,6 +443,10 @@ null
 "2026-11-13",
 null
 ],
+"ASP-SDAILY": [
+"2026-11-13",
+null
+],
 "ASP-SME-A": [
 "2026-11-13",
 null
@@ -460,6 +480,10 @@ null
 "API ตอบกลับมาแต่ไม่มี NAV ของ class นี้ (ลองรัน selftest ดู field)"
 ],
 "ASP-TOPBRAND-A": [
+"2026-11-13",
+null
+],
+"ASP-USDL": [
 "2026-11-13",
 null
 ],
@@ -652,6 +676,10 @@ null
 null
 ],
 "B-WEALTHB": [
+"2026-11-13",
+null
+],
+"B-WEALTHC": [
 "2026-11-13",
 null
 ],
@@ -907,6 +935,10 @@ null
 "2026-11-13",
 null
 ],
+"DAOL-BOAT": [
+"2026-11-13",
+null
+],
 "DAOL-BRAZILEQ": [
 "2026-11-13",
 null
@@ -1027,6 +1059,10 @@ null
 "2026-11-13",
 null
 ],
+"DAOL-JAPANBANK": [
+"2026-11-13",
+null
+],
 "DAOL-JAPANEQ": [
 "2026-11-13",
 null
@@ -1079,6 +1115,10 @@ null
 "2026-11-13",
 null
 ],
+"DAOL-SPY": [
+"2026-11-13",
+null
+],
 "DAOL-SUPERAI": [
 "2026-11-13",
 null
@@ -1100,6 +1140,10 @@ null
 null
 ],
 "DAOL-USEQG": [
+"2026-11-13",
+null
+],
+"DAOL-USFCF": [
 "2026-11-13",
 null
 ],
@@ -1339,6 +1383,14 @@ null
 "2026-11-13",
 null
 ],
+"ES-GDIV-UH-A": [
+"2026-11-13",
+"API ตอบกลับมาแต่ไม่มี NAV ของ class นี้ (ลองรัน selftest ดู field)"
+],
+"ES-GDIV-UH-D": [
+"2026-11-13",
+"API ตอบกลับมาแต่ไม่มี NAV ของ class นี้ (ลองรัน selftest ดู field)"
+],
 "ES-GENOME": [
 "2026-11-13",
 null
@@ -1427,6 +1479,10 @@ null
 "2026-11-13",
 null
 ],
+"ES-GOLDS": [
+"2026-11-13",
+null
+],
 "ES-GPROP": [
 "2026-11-13",
 null
@@ -1492,6 +1548,10 @@ null
 null
 ],
 "ES-JBPDIV": [
+"2026-11-13",
+null
+],
+"ES-JE": [
 "2026-11-13",
 null
 ],
@@ -1711,6 +1771,10 @@ null
 "2026-11-13",
 "API ตอบกลับมาแต่ไม่มี NAV ของ class นี้ (ลองรัน selftest ดู field)"
 ],
+"FP GLEQ-A": [
+"2026-11-13",
+null
+],
 "FP HCARE-A": [
 "2026-11-13",
 null
@@ -1796,6 +1860,10 @@ null
 null
 ],
 "I-CHIC": [
+"2026-11-13",
+null
+],
+"I-Emerging 10S2": [
 "2026-11-13",
 null
 ],
@@ -1900,6 +1968,10 @@ null
 null
 ],
 "K-CHINA-A(D)": [
+"2026-11-13",
+null
+],
+"K-CHX": [
 "2026-11-13",
 null
 ],
@@ -2088,6 +2160,10 @@ null
 null
 ],
 "K-INDX": [
+"2026-11-13",
+null
+],
+"K-JP-A(D)": [
 "2026-11-13",
 null
 ],
@@ -2331,6 +2407,14 @@ null
 "2026-11-13",
 null
 ],
+"KF-GDIV-USD": [
+"2026-11-13",
+null
+],
+"KF-GEI-A": [
+"2026-11-13",
+null
+],
 "KF-GOLD": [
 "2026-11-13",
 null
@@ -2343,11 +2427,19 @@ null
 "2026-11-13",
 null
 ],
+"KF-HJAPAND": [
+"2026-11-13",
+null
+],
 "KF-HSHARE-INDX": [
 "2026-11-13",
 null
 ],
 "KF-HSMUS": [
+"2026-11-13",
+null
+],
+"KF-INCOME": [
 "2026-11-13",
 null
 ],
@@ -2410,6 +2502,14 @@ null
 "KF-SP500MFX": [
 "2026-11-13",
 null
+],
+"KF-US-PLUS-A": [
+"2026-11-13",
+null
+],
+"KF-US-PLUS-D": [
+"2026-11-13",
+"API ตอบกลับมาแต่ไม่มี NAV ของ class นี้ (ลองรัน selftest ดู field)"
 ],
 "KF-WORLD-INDFX-A": [
 "2026-11-13",
@@ -2590,6 +2690,10 @@ null
 "KFGDB-D": [
 "2026-11-13",
 "API ตอบกลับมาแต่ไม่มี NAV ของ class นี้ (ลองรัน selftest ดู field)"
+],
+"KFGDC": [
+"2026-11-13",
+null
 ],
 "KFGDIV-A": [
 "2026-11-13",
@@ -2863,6 +2967,10 @@ null
 "2026-11-13",
 null
 ],
+"KKP AAA CLO-USD": [
+"2026-11-13",
+null
+],
 "KKP ACT EQ-A": [
 "2026-11-13",
 null
@@ -2872,6 +2980,10 @@ null
 null
 ],
 "KKP ACT FIXED": [
+"2026-11-13",
+null
+],
+"KKP ADVINCOME": [
 "2026-11-13",
 null
 ],
@@ -2916,6 +3028,10 @@ null
 null
 ],
 "KKP EMXCN-UH": [
+"2026-11-13",
+null
+],
+"KKP ESG US500-UH": [
 "2026-11-13",
 null
 ],
@@ -3080,6 +3196,10 @@ null
 null
 ],
 "KKP US500-UH": [
+"2026-11-13",
+null
+],
+"KKP VIETNAM": [
 "2026-11-13",
 null
 ],
@@ -3383,6 +3503,30 @@ null
 "2026-11-13",
 null
 ],
+"KT-GWA-A": [
+"2026-11-13",
+null
+],
+"KT-GWA-D": [
+"2026-11-13",
+"API ตอบกลับมาแต่ไม่มี NAV ของ class นี้ (ลองรัน selftest ดู field)"
+],
+"KT-GWB-A": [
+"2026-11-13",
+null
+],
+"KT-GWB-D": [
+"2026-11-13",
+"API ตอบกลับมาแต่ไม่มี NAV ของ class นี้ (ลองรัน selftest ดู field)"
+],
+"KT-GWG-A": [
+"2026-11-13",
+null
+],
+"KT-GWG-D": [
+"2026-11-13",
+"API ตอบกลับมาแต่ไม่มี NAV ของ class นี้ (ลองรัน selftest ดู field)"
+],
 "KT-HEALTHCARE-A": [
 "2026-11-13",
 null
@@ -3490,6 +3634,14 @@ null
 "KT-MINING": [
 "2026-11-13",
 null
+],
+"KT-NASDAQ-A": [
+"2026-11-13",
+null
+],
+"KT-NASDAQ-D": [
+"2026-11-13",
+"API ตอบกลับมาแต่ไม่มี NAV ของ class นี้ (ลองรัน selftest ดู field)"
 ],
 "KT-OIL": [
 "2026-11-13",
@@ -3599,6 +3751,14 @@ null
 "2026-11-13",
 "API ตอบกลับมาแต่ไม่มี NAV ของ class นี้ (ลองรัน selftest ดู field)"
 ],
+"KT-US-A": [
+"2026-11-13",
+null
+],
+"KT-US-D": [
+"2026-11-13",
+"API ตอบกลับมาแต่ไม่มี NAV ของ class นี้ (ลองรัน selftest ดู field)"
+],
 "KT-USDDAILY-A": [
 "2026-11-13",
 null
@@ -3642,6 +3802,22 @@ null
 "KT-WISLAMIC-A": [
 "2026-11-13",
 null
+],
+"KT-WQUALITY-A": [
+"2026-11-13",
+null
+],
+"KT-WQUALITY-D": [
+"2026-11-13",
+"API ตอบกลับมาแต่ไม่มี NAV ของ class นี้ (ลองรัน selftest ดู field)"
+],
+"KT-WQUALITY-UHA": [
+"2026-11-13",
+"API ตอบกลับมาแต่ไม่มี NAV ของ class นี้ (ลองรัน selftest ดู field)"
+],
+"KT-WQUALITY-USD-A": [
+"2026-11-13",
+"API ตอบกลับมาแต่ไม่มี NAV ของ class นี้ (ลองรัน selftest ดู field)"
 ],
 "KT-WTAI-A": [
 "2026-11-13",
@@ -4028,6 +4204,14 @@ null
 null
 ],
 "LHGBLOCK-D": [
+"2026-11-13",
+null
+],
+"LHGDEFENSE-A": [
+"2026-11-13",
+null
+],
+"LHGDEFENSE-D": [
 "2026-11-13",
 null
 ],
@@ -4419,6 +4603,10 @@ null
 "2026-11-13",
 null
 ],
+"M-FLEX": [
+"2026-11-13",
+null
+],
 "M-FOCUS": [
 "2026-11-13",
 null
@@ -4435,6 +4623,10 @@ null
 "2026-11-13",
 null
 ],
+"M-HD": [
+"2026-11-13",
+null
+],
 "M-IslamicEQL": [
 "2026-11-13",
 null
@@ -4446,6 +4638,10 @@ null
 "M-JEPI-UH-AC": [
 "2026-11-13",
 "API ตอบกลับมาแต่ไม่มี NAV ของ class นี้ (ลองรัน selftest ดู field)"
+],
+"M-JEPQ": [
+"2026-11-13",
+null
 ],
 "M-MEGA-A": [
 "2026-11-13",
@@ -4767,6 +4963,10 @@ null
 "2026-11-13",
 "API ตอบกลับมาแต่ไม่มี NAV ของ class นี้ (ลองรัน selftest ดู field)"
 ],
+"MSILVER": [
+"2026-11-13",
+null
+],
 "MTOP2": [
 "2026-11-13",
 null
@@ -4951,6 +5151,10 @@ null
 "2026-11-13",
 null
 ],
+"ONE-RAREEARTH": [
+"2026-11-13",
+null
+],
 "ONE-S-RD": [
 "2026-11-13",
 "API ตอบกลับมาแต่ไม่มี NAV ของ class นี้ (ลองรัน selftest ดู field)"
@@ -5055,6 +5259,10 @@ null
 "2026-11-13",
 null
 ],
+"PRINCIPAL DPLUS-A": [
+"2026-11-13",
+null
+],
 "PRINCIPAL EEF-A": [
 "2026-11-13",
 null
@@ -5151,6 +5359,10 @@ null
 "2026-11-13",
 null
 ],
+"PRINCIPAL GLEADER-D": [
+"2026-11-13",
+"API ตอบกลับมาแต่ไม่มี NAV ของ class นี้ (ลองรัน selftest ดู field)"
+],
 "PRINCIPAL GOPP-A": [
 "2026-11-13",
 null
@@ -5174,6 +5386,14 @@ null
 "PRINCIPAL INDIAEQ-D": [
 "2026-11-13",
 null
+],
+"PRINCIPAL INXUS-A": [
+"2026-11-13",
+null
+],
+"PRINCIPAL INXUS-D": [
+"2026-11-13",
+"API ตอบกลับมาแต่ไม่มี NAV ของ class นี้ (ลองรัน selftest ดู field)"
 ],
 "PRINCIPAL JEQ-A": [
 "2026-11-13",
@@ -5476,6 +5696,14 @@ null
 null
 ],
 "SCBCA-GROWTH": [
+"2026-11-13",
+null
+],
+"SCBCA-LIGHT": [
+"2026-11-13",
+null
+],
+"SCBCA-MODERATE": [
 "2026-11-13",
 null
 ],
@@ -5819,6 +6047,14 @@ null
 "2026-11-13",
 null
 ],
+"SCBGMCORE(A)": [
+"2026-11-13",
+null
+],
+"SCBGMCORE(D)": [
+"2026-11-13",
+"API ตอบกลับมาแต่ไม่มี NAV ของ class นี้ (ลองรัน selftest ดู field)"
+],
 "SCBGMHEAVY(A)": [
 "2026-11-13",
 null
@@ -6094,6 +6330,14 @@ null
 "SCBMPLUSD": [
 "2026-11-13",
 null
+],
+"SCBMSE": [
+"2026-11-13",
+null
+],
+"SCBMSED": [
+"2026-11-13",
+"API ตอบกลับมาแต่ไม่มี NAV ของ class นี้ (ลองรัน selftest ดู field)"
 ],
 "SCBNDQ(A)": [
 "2026-11-13",
@@ -6415,7 +6659,23 @@ null
 "2026-11-13",
 null
 ],
+"SCBUSDGMCORE": [
+"2026-11-13",
+null
+],
+"SCBUSDGOLD": [
+"2026-11-13",
+null
+],
 "SCBUSDINC": [
+"2026-11-13",
+null
+],
+"SCBUSDS&P500": [
+"2026-11-13",
+null
+],
+"SCBUSDSEMI": [
 "2026-11-13",
 null
 ],
@@ -6423,9 +6683,21 @@ null
 "2026-11-13",
 null
 ],
+"SCBUSDUSFOCUS": [
+"2026-11-13",
+null
+],
 "SCBUSDYIELD": [
 "2026-11-13",
 null
+],
+"SCBUSFOCUS(A)": [
+"2026-11-13",
+null
+],
+"SCBUSFOCUS(D)": [
+"2026-11-13",
+"API ตอบกลับมาแต่ไม่มี NAV ของ class นี้ (ลองรัน selftest ดู field)"
 ],
 "SCBUSHYA": [
 "2026-11-13",
@@ -6535,6 +6807,18 @@ null
 "2026-11-13",
 null
 ],
+"SIGNATURE GINGRO-A": [
+"2026-11-13",
+"API ตอบกลับมาแต่ไม่มี NAV ของ class นี้ (ลองรัน selftest ดู field)"
+],
+"SIGNATURE GINGRO-D": [
+"2026-11-13",
+"API ตอบกลับมาแต่ไม่มี NAV ของ class นี้ (ลองรัน selftest ดู field)"
+],
+"SIGNATURE GINGRO-USD-A": [
+"2026-11-13",
+"API ตอบกลับมาแต่ไม่มี NAV ของ class นี้ (ลองรัน selftest ดู field)"
+],
 "SMART-PLUS": [
 "2026-11-13",
 null
@@ -6620,6 +6904,10 @@ null
 null
 ],
 "TCHNEWENGY": [
+"2026-11-13",
+null
+],
+"TCHSTARP": [
 "2026-11-13",
 null
 ],
@@ -6720,6 +7008,10 @@ null
 null
 ],
 "TGOLD": [
+"2026-11-13",
+null
+],
+"TGOLD-UH": [
 "2026-11-13",
 null
 ],
@@ -6863,11 +7155,19 @@ null
 "2026-11-13",
 null
 ],
+"TJREIT": [
+"2026-11-13",
+null
+],
 "TLA-GEQ": [
 "2026-11-13",
 null
 ],
 "TLA-GFIX": [
+"2026-11-13",
+null
+],
+"TLALLWEALTH-X": [
 "2026-11-13",
 null
 ],
@@ -7015,6 +7315,14 @@ null
 "2026-11-13",
 null
 ],
+"TLWORLDBOND-H-X": [
+"2026-11-13",
+null
+],
+"TLWORLDBOND-UH-X": [
+"2026-11-13",
+null
+],
 "TLWORLDHD": [
 "2026-11-13",
 null
@@ -7051,7 +7359,15 @@ null
 "2026-11-13",
 null
 ],
+"TOP11VNM": [
+"2026-11-13",
+null
+],
 "TRAREEARTH": [
+"2026-11-13",
+null
+],
+"TROBOTICS": [
 "2026-11-13",
 null
 ],
@@ -7084,6 +7400,10 @@ null
 null
 ],
 "TUSBOND-A": [
+"2026-11-13",
+null
+],
+"TUSENGY": [
 "2026-11-13",
 null
 ],
@@ -7212,6 +7532,14 @@ null
 null
 ],
 "UGD": [
+"2026-11-13",
+null
+],
+"UGDIVP": [
+"2026-11-13",
+null
+],
+"UGDIVP-USD": [
 "2026-11-13",
 null
 ],
@@ -7374,6 +7702,10 @@ null
 "UOBSG-N": [
 "2026-11-13",
 null
+],
+"UOBSGA-N": [
+"2026-11-13",
+"API ตอบกลับมาแต่ไม่มี NAV ของ class นี้ (ลองรัน selftest ดู field)"
 ],
 "UOBSGC": [
 "2026-11-13",
@@ -7544,6 +7876,10 @@ null
 null
 ],
 "X-DAILY": [
+"2026-11-13",
+null
+],
+"X-DATACENEQ": [
 "2026-11-13",
 null
 ],
