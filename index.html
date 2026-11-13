@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>UTFIT · เครื่องมือทีม Mutual Fund</title>
+<title>UTFIT</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="shared/utfit.css">
@@ -14,88 +14,38 @@
 <body>
 <main class="wrap">
   <section class="hero">
-    <div>
-      <span class="eyebrow"><i></i>Mutual Fund Team</span>
-      <h1>เครื่องมือทีม<br><em>Mutual Fund</em></h1>
-      <p>รวมเครื่องมือ Auto Top Funds และข้อมูลรายกองทุนไว้ที่เดียว ข้อมูลกองทุนอัปเดตจาก SEC อัตโนมัติ</p>
-    </div>
-    <div class="float" id="float" aria-live="polite"></div>
+    <h1>เครื่องมือทีม Mutual Fund</h1>
+    <div class="meta" id="meta"></div>
   </section>
 
-  <section class="sec">
-    <div class="sec-h"><div><h2>เลือกหมวด</h2><p>กดที่การ์ดเพื่อเข้าไปดูเครื่องมือในหมวด</p></div></div>
-    <div class="grid two">
-      <a class="card cat" href="atf/">
-        <span class="badge-ico v" data-i="pie"></span>
-        <h3>Auto Top Funds</h3>
-        <p class="d">อัปโหลดไฟล์ Model Performance ครั้งเดียว ใช้ได้ทุกเครื่องมือในหมวด</p>
-        <ul class="tools">
-          <li data-li="stack">Wealth Solution Plan</li>
-          <li data-li="compare">เปรียบเทียบ Auto Top Funds กับกองทุน</li>
-        </ul>
-        <div class="chips" id="atfChip"></div>
-        <span class="more">เข้าหมวด <span data-i="arrow"></span></span>
-      </a>
-      <a class="card cat" href="funds/">
-        <span class="badge-ico" data-i="db"></span>
-        <h3>รายกองทุน</h3>
-        <p class="d">ข้อมูลกองทุนรวมจาก SEC ไม่ต้องอัปโหลดไฟล์</p>
-        <ul class="tools">
-          <li data-li="chart">กราฟ Weekly</li>
-          <li data-li="search">ค้นหาด้วย Master Fund</li>
-        </ul>
-        <div class="chips" id="fundsChip"></div>
-        <span class="more">เข้าหมวด <span data-i="arrow"></span></span>
-      </a>
-    </div>
-  </section>
+  <div class="cats">
+    <a class="cat" href="atf/">
+      <div class="top"><h2>Auto Top Funds</h2><span class="go" data-i="arrow"></span></div>
+      <ul>
+        <li>Wealth Solution Plan</li>
+        <li>เปรียบเทียบ Auto Top Funds กับกองทุน</li>
+      </ul>
+    </a>
+    <a class="cat" href="funds/">
+      <div class="top"><h2>รายกองทุน</h2><span class="go" data-i="arrow"></span></div>
+      <ul>
+        <li>กราฟ Weekly</li>
+        <li>ค้นหาด้วย Master Fund</li>
+      </ul>
+    </a>
+  </div>
 
-  <section class="sec">
-    <div class="sec-h"><div><h2>สถานะข้อมูล</h2><p>ข้อมูลล่าสุดที่เครื่องมือแต่ละตัวใช้อยู่</p></div></div>
-    <div class="grid four">
-      <div class="card stat"><div class="k" data-k="file">ไฟล์ Model Performance</div><div class="v" id="sFile">–</div><div class="s" id="sFileS">&nbsp;</div></div>
-      <div class="card stat"><div class="k" data-k="db">NAV กองทุนรวม</div><div class="v" id="sNav">–</div><div class="s" id="sNavS">&nbsp;</div></div>
-      <div class="card stat"><div class="k" data-k="chart">กราฟ Weekly</div><div class="v" id="sWk">–</div><div class="s" id="sWkS">&nbsp;</div></div>
-      <div class="card stat"><div class="k" data-k="search">Master Fund</div><div class="v">ทุกเดือน</div><div class="s">อัปเดตอัตโนมัติวันที่ 5</div></div>
-    </div>
-  </section>
-
-  <footer class="foot">UTFIT · ใช้ภายในทีม · ข้อมูลกองทุนจาก SEC Open API (สำนักงาน ก.ล.ต.)</footer>
+  <footer class="foot">UTFIT</footer>
 </main>
-
 <script>
-const $ = id => document.getElementById(id);
 document.querySelectorAll("[data-i]").forEach(e => e.innerHTML = UI.icon(e.dataset.i));
-document.querySelectorAll("[data-li]").forEach(e => e.insertAdjacentHTML("afterbegin", UI.icon(e.dataset.li)));
-document.querySelectorAll("[data-k]").forEach(e => e.insertAdjacentHTML("afterbegin", UI.icon(e.dataset.k)));
-
 (async () => {
   const [nav, wk, file] = await Promise.all([UI.navIndex(""), UI.weekly(""), UI.atfFile()]);
-  const glass = [];
-  if (nav) {
-    $("sNav").textContent = nav.count.toLocaleString() + " กอง";
-    $("sNavS").textContent = `ถึง ${UI.thDate(nav.navTo)}` + (nav.pending ? ` · กำลังดึงเพิ่มอีก ${nav.pending.toLocaleString()} กอง` : "");
-    glass.push(`<div class="glass"><div class="k">NAV กองทุนรวมล่าสุด</div><div class="v">${UI.thDate(nav.navTo)}</div><div class="s">${nav.count.toLocaleString()} กอง</div></div>`);
-  }
-  if (wk) {
-    const up = wk.funds.filter(f => f.since > 0).length;
-    $("sWk").textContent = wk.funds.length + " กอง";
-    $("sWkS").textContent = `บวก ${up} · ลบ ${wk.funds.length - up} ตั้งแต่แนะนำ`;
-    const best = wk.funds.slice().sort((a, b) => (b.since ?? -1e9) - (a.since ?? -1e9))[0];
-    if (best) glass.push(`<div class="glass"><div class="k">Weekly · ดีที่สุดตั้งแต่แนะนำ</div><div class="v">${UI.esc(best.name)} <span style="color:#7dffc4">${UI.pct(best.since)}</span></div><div class="s">ข้อมูล ณ ${UI.thDate(best.asOf)}</div></div>`);
-    $("fundsChip").innerHTML = `<span class="chip ok">กราฟ Weekly อัปเดต ${UI.thDate(wk.updated)}</span>`;
-  }
-  if (file) {
-    $("sFile").textContent = "พร้อมใช้";
-    $("sFileS").textContent = "อัปโหลดเมื่อ " + UI.thDate(new Date(file.savedAt).toISOString());
-    $("atfChip").innerHTML = `<span class="chip ok">ไฟล์ Model Performance พร้อมใช้</span>`;
-    glass.push(`<div class="glass"><div class="k">ไฟล์ Model Performance</div><div class="v">พร้อมใช้ ✓</div><div class="s">ในเบราว์เซอร์เครื่องนี้</div></div>`);
-  } else {
-    $("sFile").textContent = "ยังไม่มี";
-    $("sFileS").textContent = "อัปโหลดได้ที่หมวด Auto Top Funds";
-    $("atfChip").innerHTML = `<span class="chip warn">ยังไม่ได้อัปโหลดไฟล์ในเครื่องนี้</span>`;
-  }
-  $("float").innerHTML = glass.join("");
+  const m = [];
+  if (nav) m.push(`NAV ล่าสุด <b>${UI.thDate(nav.navTo)}</b>`);
+  if (wk) m.push(`กราฟ Weekly <b>${UI.thDate(wk.updated)}</b>`);
+  m.push(file ? `ไฟล์ Model Performance <b>พร้อมใช้</b>` : `ไฟล์ Model Performance <b>ยังไม่มีในเครื่องนี้</b>`);
+  document.getElementById("meta").innerHTML = m.map(x => `<span>${x}</span>`).join("");
 })();
 </script>
 </body>
