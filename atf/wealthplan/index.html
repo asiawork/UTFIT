@@ -780,7 +780,8 @@ async function handleFiles(files){
     try{
       const text = await f.text();
       DATA = {csv: WP.parseModelCSV(text), csvName: f.name, savedAt: new Date().toISOString()};
-      save(); UTFIT_ATF.set(text, f.name);   // ใช้ร่วมกับเครื่องมืออื่นในหมวด Auto Top Funds prepare(); setPeriod(state.period || 'all'); state.view = 'input';
+      save(); prepare(); setPeriod(state.period || 'all'); state.view = 'input';
+      UTFIT_ATF.set(text, f.name);   // ใช้ร่วมกับเครื่องมืออื่นในหมวด Auto Top Funds
     }catch(e){ err = e.message; }
   }
   render(err);
