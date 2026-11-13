@@ -95,6 +95,7 @@
   tr.grp th{border:0;padding-bottom:0}
   th.gh{text-align:center;color:var(--ink-2);font-weight:600;border-bottom:1px solid var(--line)}
   td.fee{font-weight:500;color:var(--ink-2)}
+  td.ter{font-weight:600;color:var(--ink)}
   .st{font-size:12px;font-weight:500;border-radius:6px;padding:2px 8px;white-space:nowrap;cursor:help}
   .st.pending{background:#eef3ff;color:#2f56ff}
   .st.tax,.st.nodata{background:var(--p-50);color:var(--mute)}
@@ -323,7 +324,7 @@ function sortFunds(arr) {
     return (typeof x === "number" ? x - y : String(x).localeCompare(String(y))) * dir || a.name.localeCompare(b.name);
   });
 }
-function th(k, t, n) { const on = S.sort.k === k; return `<th data-k="${k}" class="${n ? "n " : ""}${on ? "on" + (S.sort.asc ? " asc" : "") : ""}">${t}</th>`; }
+function th(k, t, n, tip) { const on = S.sort.k === k; return `<th data-k="${k}" class="${n ? "n " : ""}${on ? "on" + (S.sort.asc ? " asc" : "") : ""}"${tip ? ` title="${tip}"` : ""}>${t}</th>`; }
 
 function renderResults() {
   const ms = selMasters();
@@ -336,12 +337,12 @@ function renderResults() {
       <div class="sub2">${esc(f.amc)}${f.mgmt ? `<span>${f.mgmt}</span>` : ""}</div></td>
     ${ms.length > 1 ? `<td class="mcol"><button type="button" class="mlink" data-master="${esc(f.master)}" title="${esc(f.master)}">${esc(short(f.master))}</button></td>` : ""}
     <td><span class="pill ${FX_CLS[f.fx] || ""}" title="${esc(f.fxFull)}">${FX_LABEL[f.fx]}</span></td>
-    ${cell.r1y(f)}${cell.fee(f.fe)}${cell.fee(f.be)}${cell.fee(f.mg)}${cell.fee(f.ter, "last")}
+    ${cell.r1y(f)}${cell.fee(f.fe)}${cell.fee(f.be)}${cell.fee(f.ter, "last ter")}
     <td class="fsc"><a class="fsl" href="${esc(f.fs)}" target="_blank" rel="noopener" title="เปิด Fund factsheet (PDF)" aria-label="Factsheet ${esc(f.name)}"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8l-5-5Z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/></svg></a></td></tr>`).join("");
   $("res").innerHTML = `<div class="rh"><div><h2>${esc(title)}</h2>
       <div class="ms">${ms.slice(0, 8).map(m => `<span>${esc(m.name)}</span>`).join("")}${ms.length > 8 ? `<span>อีก ${ms.length - 8}</span>` : ""}</div></div>
       <div class="ra"><span class="badge">${funds.length} กองไทย</span><a class="btn-p" id="cmp" aria-disabled="true">เทียบกองที่เลือก</a></div></div>
-    ${funds.length ? `<div class="tw"><table><thead><tr class="grp"><th colspan="${ms.length > 1 ? 5 : 4}"></th><th colspan="4" class="gh" title="% ต่อปีของ NAV">ค่าธรรมเนียม (%)</th><th></th></tr><tr><th></th>${th("name", "กองทุน")}${ms.length > 1 ? th("master", "Master") : ""}${th("fx", "ค่าเงิน")}${th("r1y", "ผลตอบแทน 1Y", 1)}${th("fe", "ขาย", 1)}${th("be", "รับซื้อคืน", 1)}${th("mg", "จัดการ", 1)}${th("ter", "รวม", 1)}<th></th></tr></thead>
+    ${funds.length ? `<div class="tw"><table><thead><tr class="grp"><th colspan="${ms.length > 1 ? 5 : 4}"></th><th colspan="3" class="gh">ค่าธรรมเนียม (%)</th><th></th></tr><tr><th></th>${th("name", "กองทุน")}${ms.length > 1 ? th("master", "Master") : ""}${th("fx", "ค่าเงิน")}${th("r1y", "ผลตอบแทน 1Y", 1)}${th("fe", "ขาย", 1, "เก็บครั้งเดียวตอนซื้อ คิดเป็น % ของเงินที่ซื้อ (Front-end fee)")}${th("be", "รับซื้อคืน", 1, "เก็บครั้งเดียวตอนขายคืน คิดเป็น % ของเงินที่ขาย (Back-end fee)")}${th("ter", "รวมต่อปี", 1, "ค่าใช้จ่ายรวมที่เก็บจากกองทุนทุกปี (การจัดการ ผู้ดูแลผลประโยชน์ นายทะเบียน และอื่น ๆ) คิดเป็น % ต่อปีของ NAV (Total Expense Ratio)")}<th></th></tr></thead>
       <tbody>${rows}</tbody></table></div>` : `<div class="empty">ไม่มีกองที่ตรงกับตัวกรอง</div>`}
     <div class="rf"><span>${funds.length > S.show ? `<button class="more" id="more">แสดงเพิ่ม</button> ` : ""}แสดง ${Math.min(S.show, funds.length)} จาก ${funds.length} กอง</span>
 </div>`;
