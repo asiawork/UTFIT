@@ -34,6 +34,7 @@
   .dd .o[aria-selected=true]{background:var(--p-50)}
   .dd .o b{font-weight:600}
   .dd .o span{color:var(--mute);font-size:13.5px;white-space:nowrap}
+  .dd .o small.en{font-weight:400;color:var(--mute);margin-left:6px}
   .dd .none{padding:14px 18px;color:var(--mute)}
   mark{background:#ffe9a8;color:inherit;border-radius:3px}
 
@@ -153,7 +154,12 @@ let BE_READY = true;
 const ASSET = [["", "ทุกประเภท"], ["Equity", "หุ้น"], ["Fixed Income", "ตราสารหนี้"], ["Commodity", "ทองคำ/สินค้าโภคภัณฑ์"], ["Multi-Asset", "ผสม"], ["Real Estate", "อสังหาฯ"], ["Alternative", "ทางเลือก"]];
 const MGMT = [["", "ทุกกลยุทธ์"], ["Active", "Active"], ["Passive", "Passive"]];
 const FX = [["", "ทุกแบบ"], ["hedged", "ป้องกันทั้งหมด"], ["dynamic", "ดุลยพินิจ"], ["none", "ไม่ป้องกัน"]];
-const TH_COUNTRY = {"United States": "สหรัฐฯ", "Japan": "ญี่ปุ่น", "China": "จีน", "India": "อินเดีย", "Vietnam": "เวียดนาม", "Taiwan": "ไต้หวัน", "Korea": "เกาหลีใต้", "South Korea": "เกาหลีใต้", "Indonesia": "อินโดนีเซีย", "Hong Kong": "ฮ่องกง", "Germany": "เยอรมนี", "United Kingdom": "อังกฤษ", "Europe": "ยุโรป", "Brazil": "บราซิล"};
+const TH_COUNTRY = {"United States": "สหรัฐฯ", "Japan": "ญี่ปุ่น", "China": "จีน", "India": "อินเดีย", "Vietnam": "เวียดนาม", "Taiwan": "ไต้หวัน",
+  "South Korea": "เกาหลีใต้", "Indonesia": "อินโดนีเซีย", "Hong Kong": "ฮ่องกง", "Germany": "เยอรมนี", "United Kingdom": "อังกฤษ", "Brazil": "บราซิล",
+  "Australia": "ออสเตรเลีย", "Bangladesh": "บังกลาเทศ", "Cambodia": "กัมพูชา", "Canada": "แคนาดา", "France": "ฝรั่งเศส", "Italy": "อิตาลี", "Macau": "มาเก๊า",
+  "Malaysia": "มาเลเซีย", "Myanmar": "เมียนมา", "New Zealand": "นิวซีแลนด์", "Pakistan": "ปากีสถาน", "Singapore": "สิงคโปร์", "Sri Lanka": "ศรีลังกา", "Thailand": "ไทย"};
+/* ชื่อเรียกอื่นที่พิมพ์ค้นหาได้ */
+const ALIAS = {"United States": "USA US America อเมริกา", "United Kingdom": "UK Britain England", "South Korea": "Korea เกาหลี", "Vietnam": "Viet Nam", "Hong Kong": "HK"};
 const QUICK = [
   {kind: "index", v: "S&P 500"}, {kind: "index", v: "Nasdaq-100"}, {kind: "index", v: "MSCI ACWI"}, {kind: "index", v: "Gold spot (LBMA)", label: "ทองคำ"},
   {kind: "country", v: "India"}, {kind: "country", v: "Vietnam"}, {kind: "country", v: "Japan"}, {kind: "country", v: "China"},
@@ -256,7 +262,7 @@ function suggest(q) {
     for (const v of listOf(m.tags, "countries")) ctry.set(v, (ctry.get(v) || 0) + m.funds.length);
     for (const v of [...listOf(m.tags, "theme"), ...listOf(m.tags, "sector")]) thm.set(v, (thm.get(v) || 0) + m.funds.length);
   }
-  const pick = (map, kind) => [...map].filter(([v]) => has(v) || has(kind === "country" ? TH_COUNTRY[v] : "")).sort((a, b) => b[1] - a[1]).slice(0, 4).map(([v, c]) => ({kind, v, c}));
+  const pick = (map, kind) => [...map].filter(([v]) => has(v) || (kind === "country" && (has(TH_COUNTRY[v]) || has(ALIAS[v])))).sort((a, b) => b[1] - a[1]).slice(0, 4).map(([v, c]) => ({kind, v, c}));
   const add = (g, arr) => { if (arr.length) groups.push([g, arr]); };
   add("กองทุนไทย", FUNDS.filter(f => has(f.name) || has(f.abbr) || has(f.th)).slice(0, 6).map(f => ({kind: "master", v: f.master, c: null, fund: f.name})));
   add("ดัชนี", pick(idx, "index"));
@@ -272,7 +278,8 @@ function renderDD() {
   if (!q.trim()) { dd.hidden = true; $("q").setAttribute("aria-expanded", "false"); return; }
   dd.innerHTML = groups.length ? groups.map(([g, arr]) => `<div class="g">${g}</div>` + arr.map(o => {
     const i = opts.push(o) - 1;
-    const main = o.fund ? hl(o.fund, q) : hl(label(o), q);
+    let main = o.fund ? hl(o.fund, q) : hl(label(o), q);
+    if (o.kind === "country" && TH_COUNTRY[o.v]) main += ` <small class="en">${hl(o.v, q)}</small>`;   // แสดงชื่ออังกฤษคู่กัน
     const sub = o.fund ? esc(o.v) : o.c != null ? `${o.c} กองไทย` : "";
     return `<div class="o" role="option" data-i="${i}"><b>${main}</b><span>${sub}</span></div>`;
   }).join("")).join("") : `<div class="none">ไม่พบ "${esc(q)}"</div>`;
