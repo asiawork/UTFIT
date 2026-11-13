@@ -316,6 +316,15 @@ def fetch_nav(info, start, today):
     return warn
 
 
+# วันที่ดึง NAV ล่าสุดของแต่ละกอง (+ คำเตือนจากรอบนั้น) ใช้ข้ามกองที่ดึงไปแล้ววันนี้
+FETCHED_PATH = DATA / "fetched.json"
+FETCHED = json.loads(FETCHED_PATH.read_text()) if FETCHED_PATH.exists() else {}
+
+
+def save_fetched():
+    FETCHED_PATH.write_text(json.dumps(FETCHED, ensure_ascii=False, indent=0, sort_keys=True))
+
+
 def save_backfill(names):
     keep = {k: v for k, v in BACKFILL.items() if k in names}
     BACKFILL_PATH.write_text(json.dumps(keep, ensure_ascii=False, indent=0, sort_keys=True))
@@ -483,7 +492,8 @@ def main():
     done = [f for f in funds if BACKFILL.get(f["name"], "9999") <= START.isoformat()]
     done_names = {f["name"] for f in done}
     todo = [f for f in funds if f["name"] not in done_names]
-    print(f"อัปเดต NAV {len(done)} กอง · รอดึงย้อนหลัง {len(todo)} กอง · เวลา {BUDGET / 60:.0f} นาที")
+    n_today = sum(1 for f in done if FETCHED.get(f["name"], [None])[0] == today.isoformat())
+    print(f"อัปเดต NAV {len(done)} กอง (ดึงไปแล้ววันนี้ {n_today} กอง ข้าม) · รอดึงย้อนหลัง {len(todo)} กอง · เวลา {BUDGET / 60:.0f} นาที")
     FUND_OUT.mkdir(parents=True, exist_ok=True)
     pending, n_ok = [], 0
     for i, f in enumerate(done + todo):
@@ -493,7 +503,15 @@ def main():
             continue
         if i % 50 == 0:
             print(f"  [{i}/{len(funds)}] {f['name']} ({time.time() - T0:.0f}s)")
-        cache, series, warn = nav_series(info, START, today)
+        if f["name"] in done_names and FETCHED.get(f["name"], [None])[0] == today.isoformat():
+            # ดึง NAV ของกองนี้ไปแล้ววันนี้ (รอบก่อนหน้า) ไม่เรียก API ซ้ำ เหลือเวลาไว้ดึงย้อนหลังกองที่ยังไม่ครบ
+            cache = fn.NAV_DIR / f"{fn.slug(info['name'])}.csv"
+            series, warn = fn.read_cache(cache), FETCHED[f["name"]][1]
+        else:
+            cache, series, warn = nav_series(info, START, today)
+            FETCHED[f["name"]] = [today.isoformat(), warn]
+            if i % 50 == 0:
+                save_fetched()
         packed, days = pack(series, START)
         if days and warn and warn.startswith("API ตอบกลับมาแต่ไม่มี NAV"):
             warn = None
@@ -540,6 +558,10 @@ def main():
             if p.stem not in keep:
                 p.unlink()
     save_backfill({f["name"] for f in funds})
+    names = {f["name"] for f in funds}
+    for k in [k for k in FETCHED if k not in names]:
+        del FETCHED[k]
+    save_fetched()
     print(f"เขียนข้อมูล {n_ok} กอง · ยังรอดึงย้อนหลัง {len(pending)} กอง (รอบต่อไปทำต่อ) · ใช้เวลา {(time.time() - T0) / 60:.1f} นาที")
 
 
