@@ -58,7 +58,7 @@
   .badge{white-space:nowrap;background:#e8edff;color:#2f56ff;border-radius:11px;padding:6px 14px;font-weight:700}
   html[data-theme=dark] .badge{background:#16214a;color:#9cc6ff}
   .tw{overflow-x:auto;margin-top:16px}
-  table{width:100%;border-collapse:collapse;min-width:980px}
+  table{width:100%;border-collapse:collapse}
   th{font-size:13px;font-weight:500;color:var(--mute);text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
   th[data-k]{cursor:pointer;user-select:none}
   th[data-k]:hover{color:var(--ink)}
@@ -78,7 +78,12 @@
   td.n{font-variant-numeric:tabular-nums;font-weight:600}
   .pos{color:var(--ok)} .neg{color:var(--red)} .na{color:var(--mute);font-weight:400}
   td.mcol{white-space:nowrap;color:var(--ink-2);font-size:14px}
-  .fsl{font-size:12.5px;font-weight:600;color:#2f56ff;text-decoration:none;border:1px solid #d5ddff;border-radius:8px;padding:4px 10px;white-space:nowrap}
+  .fsl{display:inline-grid;place-items:center;width:34px;height:34px;color:#2f56ff;border:1px solid #d5ddff;border-radius:10px}
+  .sub2{font-size:12.5px;color:var(--mute);margin-top:1px;white-space:nowrap}
+  .sub2 span{margin-left:8px;padding-left:8px;border-left:1px solid var(--line)}
+  .mlink{font:inherit;font-size:14px;color:var(--ink-2);background:none;border:0;padding:0;cursor:pointer;text-align:left;white-space:nowrap}
+  .mlink:hover{color:#2f56ff;text-decoration:underline}
+  td,th{white-space:nowrap}
   .fsl:hover{background:#eef1ff}
   td.fsc{text-align:right;padding-left:14px}
   td.last{padding-right:4px}
@@ -324,20 +329,19 @@ function renderResults() {
   const ms = selMasters();
   const funds = sortFunds(ms.flatMap(m => m.funds).filter(passFilters));
   const title = S.toks.map(t => (t.kind === "master" ? "" : KIND_TH[t.kind] + " ") + label(t)).join(" + ");
-  const short = n => { n = n.replace(/\s+(UCITS\s+)?(ETF|Fund|Trust|Portfolio)(\s+Trust)?$/i, ""); return n.length > 24 ? n.slice(0, 22) + "…" : n; };
+  const short = n => { n = n.replace(/\s+(UCITS\s+)?(ETF|Fund|Trust|Portfolio)(\s+Trust)?$/i, ""); return n.length > 20 ? n.slice(0, 18) + "…" : n; };
   const rows = funds.slice(0, S.show).map(f => `<tr${S.focus === f.name ? ' class="focus"' : ""}>
     <td class="ck"><input type="checkbox" data-n="${esc(f.name)}" ${S.picked.has(f.name) ? "checked" : ""} ${f.status === "ok" ? "" : "disabled title=\"ยังไม่มีข้อมูล NAV ในหน้า Auto Top Funds vs รายกอง\""}></td>
-    <td><div class="nm">${esc(f.name)}${f.ncls > 1 ? `<span class="cls" title="กองนี้มี ${f.ncls} class">+${f.ncls - 1} class</span>` : ""}</div><div class="th" title="${esc(f.th)}">${esc(f.th)}</div></td>
-    ${ms.length > 1 ? `<td class="mcol" title="${esc(f.master)}">${esc(short(f.master))}</td>` : ""}
-    <td>${esc(f.amc)}</td>
-    <td class="mg">${f.mgmt || "–"}</td>
+    <td><div class="nm" title="${esc(f.th)}">${esc(f.name)}${f.ncls > 1 ? `<span class="cls" title="กองนี้มี ${f.ncls} class">+${f.ncls - 1} class</span>` : ""}</div>
+      <div class="sub2">${esc(f.amc)}${f.mgmt ? `<span>${f.mgmt}</span>` : ""}</div></td>
+    ${ms.length > 1 ? `<td class="mcol"><button type="button" class="mlink" data-master="${esc(f.master)}" title="${esc(f.master)}">${esc(short(f.master))}</button></td>` : ""}
     <td><span class="pill ${FX_CLS[f.fx] || ""}" title="${esc(f.fxFull)}">${FX_LABEL[f.fx]}</span></td>
     ${cell.r1y(f)}${cell.fee(f.fe)}${cell.fee(f.be)}${cell.fee(f.mg)}${cell.fee(f.ter, "last")}
-    <td class="fsc"><a class="fsl" href="${esc(f.fs)}" target="_blank" rel="noopener" title="เปิด Fund factsheet (PDF)">Factsheet</a></td></tr>`).join("");
+    <td class="fsc"><a class="fsl" href="${esc(f.fs)}" target="_blank" rel="noopener" title="เปิด Fund factsheet (PDF)" aria-label="Factsheet ${esc(f.name)}"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8l-5-5Z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/></svg></a></td></tr>`).join("");
   $("res").innerHTML = `<div class="rh"><div><h2>${esc(title)}</h2>
       <div class="ms">${ms.slice(0, 8).map(m => `<span>${esc(m.name)}</span>`).join("")}${ms.length > 8 ? `<span>อีก ${ms.length - 8}</span>` : ""}</div></div>
       <div class="ra"><span class="badge">${funds.length} กองไทย</span><a class="btn-p" id="cmp" aria-disabled="true">เทียบกองที่เลือก</a></div></div>
-    ${funds.length ? `<div class="tw"><table><thead><tr class="grp"><th colspan="${ms.length > 1 ? 7 : 6}"></th><th colspan="4" class="gh">ค่าธรรมเนียม (% ต่อปีของ NAV)</th><th></th></tr><tr><th></th>${th("name", "กองทุน")}${ms.length > 1 ? th("master", "Master") : ""}${th("amc", "บลจ.")}${th("mgmt", "กลยุทธ์")}${th("fx", "ป้องกันค่าเงิน")}${th("r1y", "ผลตอบแทน 1Y", 1)}${th("fe", "ขาย", 1)}${th("be", "รับซื้อคืน", 1)}${th("mg", "จัดการ", 1)}${th("ter", "รวม", 1)}<th></th></tr></thead>
+    ${funds.length ? `<div class="tw"><table><thead><tr class="grp"><th colspan="${ms.length > 1 ? 5 : 4}"></th><th colspan="4" class="gh" title="% ต่อปีของ NAV">ค่าธรรมเนียม (%)</th><th></th></tr><tr><th></th>${th("name", "กองทุน")}${ms.length > 1 ? th("master", "Master") : ""}${th("fx", "ค่าเงิน")}${th("r1y", "ผลตอบแทน 1Y", 1)}${th("fe", "ขาย", 1)}${th("be", "รับซื้อคืน", 1)}${th("mg", "จัดการ", 1)}${th("ter", "รวม", 1)}<th></th></tr></thead>
       <tbody>${rows}</tbody></table></div>` : `<div class="empty">ไม่มีกองที่ตรงกับตัวกรอง</div>`}
     <div class="rf"><span>${funds.length > S.show ? `<button class="more" id="more">แสดงเพิ่ม</button> ` : ""}แสดง ${Math.min(S.show, funds.length)} จาก ${funds.length} กอง</span>
 </div>`;
@@ -366,6 +370,8 @@ $("res").addEventListener("click", e => {
   const h = e.target.closest("th[data-k]");
   if (h) { const k = h.dataset.k; S.sort = {k, asc: S.sort.k === k ? !S.sort.asc : !["r1y"].includes(k)}; renderResults(); return; }
   if (e.target.id === "more") { S.show += 50; render(); return; }
+  const ml = e.target.closest("button[data-master]");
+  if (ml) { S.toks = [{kind: "master", v: ml.dataset.master}]; S.focus = null; S.show = 200; render(); window.scrollTo({top: 0, behavior: "smooth"}); return; }
   const r = e.target.closest("tr[data-m]");
   if (r) addTok({kind: "master", v: r.dataset.m});
 });
