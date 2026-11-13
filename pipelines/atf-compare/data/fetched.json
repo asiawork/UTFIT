@@ -1,0 +1,5390 @@
+{
+"1AMSET50-RA": [
+"2026-11-13",
+null
+],
+"1AMSET50-RD": [
+"2026-11-13",
+null
+],
+"1AMSET50-RU": [
+"2026-11-13",
+null
+],
+"1DIV": [
+"2026-11-13",
+null
+],
+"1GLOBALBOND": [
+"2026-11-13",
+null
+],
+"1I01BSET50": [
+"2026-11-13",
+null
+],
+"1US-OPP": [
+"2026-11-13",
+null
+],
+"1VAL-RA": [
+"2026-11-13",
+null
+],
+"1VAL-RD": [
+"2026-11-13",
+null
+],
+"2I01BSET50": [
+"2026-11-13",
+null
+],
+"2X01BSET50": [
+"2026-11-13",
+null
+],
+"A-AIRR": [
+"2026-11-13",
+null
+],
+"A-ASEMI": [
+"2026-11-13",
+null
+],
+"A-GRID": [
+"2026-11-13",
+null
+],
+"A-HUMANOID": [
+"2026-11-13",
+null
+],
+"A-JEDI": [
+"2026-11-13",
+null
+],
+"ABCA-A": [
+"2026-11-13",
+null
+],
+"ABCA-D": [
+"2026-11-13",
+null
+],
+"ABCG": [
+"2026-11-13",
+null
+],
+"ABEG": [
+"2026-11-13",
+null
+],
+"ABFTH": [
+"2026-11-13",
+null
+],
+"ABG": [
+"2026-11-13",
+null
+],
+"ABGDD-A": [
+"2026-11-13",
+null
+],
+"ABGEM": [
+"2026-11-13",
+null
+],
+"ABGS-A": [
+"2026-11-13",
+null
+],
+"ABGS-D": [
+"2026-11-13",
+null
+],
+"ABIG": [
+"2026-11-13",
+null
+],
+"ABINNO-A": [
+"2026-11-13",
+null
+],
+"ABINNO-D": [
+"2026-11-13",
+null
+],
+"ABJO": [
+"2026-11-13",
+null
+],
+"ABMIX70": [
+"2026-11-13",
+null
+],
+"ABSL": [
+"2026-11-13",
+null
+],
+"ABSM": [
+"2026-11-13",
+null
+],
+"ABTED": [
+"2026-11-13",
+null
+],
+"ABV": [
+"2026-11-13",
+null
+],
+"ABV-D": [
+"2026-11-13",
+null
+],
+"ABWOOF": [
+"2026-11-13",
+null
+],
+"AEOB": [
+"2026-11-13",
+null
+],
+"AFMOAT-HA": [
+"2026-11-13",
+null
+],
+"AFMOAT-HD": [
+"2026-11-13",
+null
+],
+"AGF": [
+"2026-11-13",
+null
+],
+"AIA-DFI": [
+"2026-11-13",
+null
+],
+"AIA-ES50": [
+"2026-11-13",
+null
+],
+"AIA-GAA": [
+"2026-11-13",
+null
+],
+"AIA-GAA-UH": [
+"2026-11-13",
+null
+],
+"AIA-GAIF": [
+"2026-11-13",
+null
+],
+"AIA-GCA": [
+"2026-11-13",
+null
+],
+"AIA-GMA": [
+"2026-11-13",
+null
+],
+"AIA-IAA": [
+"2026-11-13",
+null
+],
+"AIA-IC": [
+"2026-11-13",
+null
+],
+"AIA-ICA": [
+"2026-11-13",
+null
+],
+"AIA-IMA": [
+"2026-11-13",
+null
+],
+"AIA-SEL": [
+"2026-11-13",
+null
+],
+"AIA-ST": [
+"2026-11-13",
+null
+],
+"AIA-TAA": [
+"2026-11-13",
+null
+],
+"AIA-TCA": [
+"2026-11-13",
+null
+],
+"AIA-TEQ": [
+"2026-11-13",
+null
+],
+"AIA-THDIS": [
+"2026-11-13",
+null
+],
+"AIA-TMA": [
+"2026-11-13",
+null
+],
+"AIA-US500": [
+"2026-11-13",
+null
+],
+"ASIA-E": [
+"2026-11-13",
+null
+],
+"ASP": [
+"2026-11-13",
+null
+],
+"ASP-AAA-A": [
+"2026-11-13",
+null
+],
+"ASP-AIEQ": [
+"2026-11-13",
+null
+],
+"ASP-ASIAN": [
+"2026-11-13",
+null
+],
+"ASP-BIC": [
+"2026-11-13",
+null
+],
+"ASP-CHINA": [
+"2026-11-13",
+null
+],
+"ASP-CHINABOND-A": [
+"2026-11-13",
+null
+],
+"ASP-DGOV-R": [
+"2026-11-13",
+null
+],
+"ASP-DIGIBLOC": [
+"2026-11-13",
+null
+],
+"ASP-DISRUPT": [
+"2026-11-13",
+null
+],
+"ASP-EVOCHINA": [
+"2026-11-13",
+null
+],
+"ASP-FFPLUSA": [
+"2026-11-13",
+null
+],
+"ASP-FLEXPLUS": [
+"2026-11-13",
+null
+],
+"ASP-GFEQ": [
+"2026-11-13",
+null
+],
+"ASP-GOLD": [
+"2026-11-13",
+null
+],
+"ASP-HSI": [
+"2026-11-13",
+null
+],
+"ASP-IHEALTH": [
+"2026-11-13",
+null
+],
+"ASP-INDIA-A": [
+"2026-11-13",
+null
+],
+"ASP-JPSMALL": [
+"2026-11-13",
+null
+],
+"ASP-NCLR": [
+"2026-11-13",
+null
+],
+"ASP-NGF": [
+"2026-11-13",
+null
+],
+"ASP-OIL": [
+"2026-11-13",
+null
+],
+"ASP-S&P500-A": [
+"2026-11-13",
+null
+],
+"ASP-SME-A": [
+"2026-11-13",
+null
+],
+"ASP-T12": [
+"2026-11-13",
+null
+],
+"ASP-THEQ": [
+"2026-11-13",
+null
+],
+"ASP-THGEQ-A": [
+"2026-11-13",
+null
+],
+"ASP-TOPBRAND-A": [
+"2026-11-13",
+null
+],
+"ASP-X": [
+"2026-11-13",
+null
+],
+"ASPGIPLUS-A": [
+"2026-11-13",
+null
+],
+"B-ACTIVE": [
+"2026-11-13",
+null
+],
+"B-ASEAN": [
+"2026-11-13",
+null
+],
+"B-BASICPLUS": [
+"2026-11-13",
+null
+],
+"B-BHARATA": [
+"2026-11-13",
+null
+],
+"B-CNA500P": [
+"2026-11-13",
+null
+],
+"B-DYNAMIC BOND": [
+"2026-11-13",
+null
+],
+"B-ENHANCED": [
+"2026-11-13",
+null
+],
+"B-EUPASSIVE": [
+"2026-11-13",
+null
+],
+"B-FINTECH": [
+"2026-11-13",
+null
+],
+"B-FLEX": [
+"2026-11-13",
+null
+],
+"B-FUTURE": [
+"2026-11-13",
+null
+],
+"B-GLOB-INFRA": [
+"2026-11-13",
+null
+],
+"B-GLOBAL": [
+"2026-11-13",
+null
+],
+"B-GTO": [
+"2026-11-13",
+null
+],
+"B-INCOME": [
+"2026-11-13",
+null
+],
+"B-INFRA": [
+"2026-11-13",
+null
+],
+"B-IR-FOF": [
+"2026-11-13",
+null
+],
+"B-MIXED75": [
+"2026-11-13",
+null
+],
+"B-SIP": [
+"2026-11-13",
+null
+],
+"B-SMEQ": [
+"2026-11-13",
+null
+],
+"B-ST": [
+"2026-11-13",
+null
+],
+"B-THAICG": [
+"2026-11-13",
+null
+],
+"B-TOPTEN": [
+"2026-11-13",
+null
+],
+"B-TREASURY": [
+"2026-11-13",
+null
+],
+"B-US2000P": [
+"2026-11-13",
+null
+],
+"B-USALPHA": [
+"2026-11-13",
+null
+],
+"B-USPASSIVE": [
+"2026-11-13",
+null
+],
+"B-VIETNAM": [
+"2026-11-13",
+null
+],
+"B-WEALTHB": [
+"2026-11-13",
+null
+],
+"B-WEALTHD": [
+"2026-11-13",
+null
+],
+"B-WEALTHG": [
+"2026-11-13",
+null
+],
+"B-WEALTHM": [
+"2026-11-13",
+null
+],
+"BBASIC": [
+"2026-11-13",
+null
+],
+"BCAP": [
+"2026-11-13",
+null
+],
+"BCAP-CTECH": [
+"2026-11-13",
+null
+],
+"BCAP-DHSL": [
+"2026-11-13",
+null
+],
+"BCAP-GFIO": [
+"2026-11-13",
+null
+],
+"BCAP-GMA": [
+"2026-11-13",
+null
+],
+"BCAP-GMA PLUS": [
+"2026-11-13",
+null
+],
+"BCAP-GTAC": [
+"2026-11-13",
+null
+],
+"BCAP-GW10": [
+"2026-11-13",
+null
+],
+"BCAP-GW25": [
+"2026-11-13",
+null
+],
+"BCAP-GW50": [
+"2026-11-13",
+null
+],
+"BCAP-GW75": [
+"2026-11-13",
+null
+],
+"BCAP-GW90": [
+"2026-11-13",
+null
+],
+"BCAP-MFIX": [
+"2026-11-13",
+null
+],
+"BCAP-MONEY": [
+"2026-11-13",
+null
+],
+"BCAP-MSCITH": [
+"2026-11-13",
+null
+],
+"BCAP-USL": [
+"2026-11-13",
+null
+],
+"BCAP-USND100": [
+"2026-11-13",
+null
+],
+"BCAP-XDIGI": [
+"2026-11-13",
+null
+],
+"BCARE": [
+"2026-11-13",
+null
+],
+"BFIXED": [
+"2026-11-13",
+null
+],
+"BGOLD": [
+"2026-11-13",
+null
+],
+"BIC": [
+"2026-11-13",
+null
+],
+"BKA": [
+"2026-11-13",
+null
+],
+"BKA2": [
+"2026-11-13",
+null
+],
+"BKD": [
+"2026-11-13",
+null
+],
+"BKIND": [
+"2026-11-13",
+null
+],
+"BMAPS100": [
+"2026-11-13",
+null
+],
+"BMAPS25": [
+"2026-11-13",
+null
+],
+"BMAPS55": [
+"2026-11-13",
+null
+],
+"BMBF": [
+"2026-11-13",
+null
+],
+"BMSCITH": [
+"2026-11-13",
+null
+],
+"BSET100": [
+"2026-11-13",
+null
+],
+"BTK": [
+"2026-11-13",
+null
+],
+"BTP": [
+"2026-11-13",
+null
+],
+"BYOU-COREPORT-A": [
+"2026-11-13",
+null
+],
+"BYOU-COREPORT-D": [
+"2026-11-13",
+null
+],
+"DAOL-AGRI": [
+"2026-11-13",
+null
+],
+"DAOL-ALPHABONDS": [
+"2026-11-13",
+null
+],
+"DAOL-AQUA": [
+"2026-11-13",
+null
+],
+"DAOL-BHARAT": [
+"2026-11-13",
+null
+],
+"DAOL-BRAZILEQ": [
+"2026-11-13",
+null
+],
+"DAOL-CANAB": [
+"2026-11-13",
+null
+],
+"DAOL-CHIG": [
+"2026-11-13",
+null
+],
+"DAOL-CHINABIO": [
+"2026-11-13",
+null
+],
+"DAOL-CHINATECH": [
+"2026-11-13",
+null
+],
+"DAOL-COPPER": [
+"2026-11-13",
+null
+],
+"DAOL-CYBER": [
+"2026-11-13",
+null
+],
+"DAOL-CYBERSECURE": [
+"2026-11-13",
+null
+],
+"DAOL-DAPP": [
+"2026-11-13",
+null
+],
+"DAOL-DEWORLD": [
+"2026-11-13",
+null
+],
+"DAOL-ENERGY": [
+"2026-11-13",
+null
+],
+"DAOL-EUROPE": [
+"2026-11-13",
+null
+],
+"DAOL-EVOSEMI": [
+"2026-11-13",
+null
+],
+"DAOL-GAS": [
+"2026-11-13",
+null
+],
+"DAOL-GEDUCATION": [
+"2026-11-13",
+null
+],
+"DAOL-GIHEALTH": [
+"2026-11-13",
+null
+],
+"DAOL-GOLD": [
+"2026-11-13",
+null
+],
+"DAOL-GOLDXJ": [
+"2026-11-13",
+null
+],
+"DAOL-GTECH": [
+"2026-11-13",
+null
+],
+"DAOL-HYDROGEN": [
+"2026-11-13",
+null
+],
+"DAOL-JAPANEQ": [
+"2026-11-13",
+null
+],
+"DAOL-KOREAEQ": [
+"2026-11-13",
+null
+],
+"DAOL-KOREAX": [
+"2026-11-13",
+null
+],
+"DAOL-MONEY-R": [
+"2026-11-13",
+null
+],
+"DAOL-NUCLEAR": [
+"2026-11-13",
+null
+],
+"DAOL-OSHOP": [
+"2026-11-13",
+null
+],
+"DAOL-PLAY": [
+"2026-11-13",
+null
+],
+"DAOL-THAIEQ": [
+"2026-11-13",
+null
+],
+"DAOL-TRBOND-A": [
+"2026-11-13",
+null
+],
+"DAOL-TRBOND-D": [
+"2026-11-13",
+null
+],
+"DAOL-VIETGROWTH": [
+"2026-11-13",
+null
+],
+"DAOL-VOLT": [
+"2026-11-13",
+null
+],
+"DAOL-XPROP-D": [
+"2026-11-13",
+null
+],
+"DE-1": [
+"2026-11-13",
+null
+],
+"EHD": [
+"2026-11-13",
+null
+],
+"ES-AALF-A": [
+"2026-11-13",
+null
+],
+"ES-AALF-D": [
+"2026-11-13",
+null
+],
+"ES-AAMF-A": [
+"2026-11-13",
+null
+],
+"ES-AAMF-D": [
+"2026-11-13",
+null
+],
+"ES-AASF-A": [
+"2026-11-13",
+null
+],
+"ES-AASF-D": [
+"2026-11-13",
+null
+],
+"ES-ALOVE-UH": [
+"2026-11-13",
+null
+],
+"ES-ALPHABONDS": [
+"2026-11-13",
+null
+],
+"ES-APLUS": [
+"2026-11-13",
+null
+],
+"ES-APPF": [
+"2026-11-13",
+null
+],
+"ES-ASIA-A": [
+"2026-11-13",
+null
+],
+"ES-ASIA-D": [
+"2026-11-13",
+null
+],
+"ES-AUTOMATION": [
+"2026-11-13",
+null
+],
+"ES-CHCHALLENGE#1": [
+"2026-11-13",
+null
+],
+"ES-CHEQ": [
+"2026-11-13",
+null
+],
+"ES-CHILL": [
+"2026-11-13",
+null
+],
+"ES-CHINAA-A": [
+"2026-11-13",
+null
+],
+"ES-CHINAA-D": [
+"2026-11-13",
+null
+],
+"ES-CONBOND": [
+"2026-11-13",
+null
+],
+"ES-CSD": [
+"2026-11-13",
+null
+],
+"ES-DIV": [
+"2026-11-13",
+null
+],
+"ES-DMIXED": [
+"2026-11-13",
+null
+],
+"ES-EAE": [
+"2026-11-13",
+null
+],
+"ES-EBF": [
+"2026-11-13",
+null
+],
+"ES-EG-A": [
+"2026-11-13",
+null
+],
+"ES-EG-D": [
+"2026-11-13",
+null
+],
+"ES-EMEQ": [
+"2026-11-13",
+null
+],
+"ES-EQUITY": [
+"2026-11-13",
+null
+],
+"ES-FINTECH": [
+"2026-11-13",
+null
+],
+"ES-GCG-A": [
+"2026-11-13",
+null
+],
+"ES-GCG-D": [
+"2026-11-13",
+null
+],
+"ES-GCORE": [
+"2026-11-13",
+null
+],
+"ES-GDIV-Acc": [
+"2026-11-13",
+null
+],
+"ES-GENOME": [
+"2026-11-13",
+null
+],
+"ES-GER": [
+"2026-11-13",
+null
+],
+"ES-GGREEN": [
+"2026-11-13",
+null
+],
+"ES-GINCOME-A": [
+"2026-11-13",
+null
+],
+"ES-GINCOME-D": [
+"2026-11-13",
+null
+],
+"ES-GINCOME-UH-A": [
+"2026-11-13",
+null
+],
+"ES-GINCOME-UH-D": [
+"2026-11-13",
+null
+],
+"ES-GINFRA-A": [
+"2026-11-13",
+null
+],
+"ES-GINFRA-D": [
+"2026-11-13",
+null
+],
+"ES-GINNO-A": [
+"2026-11-13",
+null
+],
+"ES-GINNO-D": [
+"2026-11-13",
+null
+],
+"ES-GLOBALEQ": [
+"2026-11-13",
+null
+],
+"ES-GLOBALESG": [
+"2026-11-13",
+null
+],
+"ES-GLOBALVALUE": [
+"2026-11-13",
+null
+],
+"ES-GQG": [
+"2026-11-13",
+null
+],
+"ES-GQG-UH": [
+"2026-11-13",
+null
+],
+"ES-GRID": [
+"2026-11-13",
+null
+],
+"ES-HEALTHCARE": [
+"2026-11-13",
+null
+],
+"ES-HEALTHPLUS": [
+"2026-11-13",
+null
+],
+"ES-IALLO": [
+"2026-11-13",
+null
+],
+"ES-INDAE": [
+"2026-11-13",
+null
+],
+"ES-INDONESIA": [
+"2026-11-13",
+null
+],
+"ES-INTERNET": [
+"2026-11-13",
+null
+],
+"ES-IPLUS": [
+"2026-11-13",
+null
+],
+"ES-JB25": [
+"2026-11-13",
+null
+],
+"ES-JPNAE-A": [
+"2026-11-13",
+null
+],
+"ES-JPNAE-D": [
+"2026-11-13",
+null
+],
+"ES-LOWBETADIV": [
+"2026-11-13",
+null
+],
+"ES-MF": [
+"2026-11-13",
+null
+],
+"ES-MULTIINCOME": [
+"2026-11-13",
+null
+],
+"ES-NDQPIN-A": [
+"2026-11-13",
+null
+],
+"ES-NDQPIN-D": [
+"2026-11-13",
+null
+],
+"ES-NDQPIN-UH-A": [
+"2026-11-13",
+null
+],
+"ES-NDQPIN-UH-D": [
+"2026-11-13",
+null
+],
+"ES-OIL": [
+"2026-11-13",
+null
+],
+"ES-PIPF": [
+"2026-11-13",
+null
+],
+"ES-PPSD": [
+"2026-11-13",
+null
+],
+"ES-PREMIUMBRAND": [
+"2026-11-13",
+null
+],
+"ES-PROPINFRAFLEX": [
+"2026-11-13",
+null
+],
+"ES-SET50-A": [
+"2026-11-13",
+null
+],
+"ES-SET50-D": [
+"2026-11-13",
+null
+],
+"ES-SET50ACC2": [
+"2026-11-13",
+null
+],
+"ES-SET50DV": [
+"2026-11-13",
+null
+],
+"ES-SMARTBETA": [
+"2026-11-13",
+null
+],
+"ES-SMCAP": [
+"2026-11-13",
+null
+],
+"ES-SMCAP2": [
+"2026-11-13",
+null
+],
+"ES-SPlus": [
+"2026-11-13",
+null
+],
+"ES-STARTECH": [
+"2026-11-13",
+null
+],
+"ES-STSD": [
+"2026-11-13",
+null
+],
+"ES-THAICG": [
+"2026-11-13",
+null
+],
+"ES-TM": [
+"2026-11-13",
+null
+],
+"ES-TSARN": [
+"2026-11-13",
+null
+],
+"ES-TSB": [
+"2026-11-13",
+null
+],
+"ES-TTW": [
+"2026-11-13",
+null
+],
+"ES-USBLUECHIP": [
+"2026-11-13",
+null
+],
+"ES-USBLUECHIP-UH": [
+"2026-11-13",
+null
+],
+"ES-USDPRIME": [
+"2026-11-13",
+null
+],
+"ES-USTECH": [
+"2026-11-13",
+null
+],
+"ES-VIETNAM": [
+"2026-11-13",
+null
+],
+"ES-WDEQ": [
+"2026-11-13",
+null
+],
+"FCF": [
+"2026-11-13",
+null
+],
+"FLEXAR": [
+"2026-11-13",
+null
+],
+"FP APREIT-A": [
+"2026-11-13",
+null
+],
+"FP DRAGON": [
+"2026-11-13",
+null
+],
+"FP EE EURO": [
+"2026-11-13",
+null
+],
+"FP HCARE-A": [
+"2026-11-13",
+null
+],
+"FP HCARE-D": [
+"2026-11-13",
+null
+],
+"FP IGFIXED-A": [
+"2026-11-13",
+null
+],
+"FP INDIA-A": [
+"2026-11-13",
+null
+],
+"FP INDIA-D": [
+"2026-11-13",
+null
+],
+"FP LARGEA": [
+"2026-11-13",
+null
+],
+"FP MONEY": [
+"2026-11-13",
+null
+],
+"FP QUANT-A": [
+"2026-11-13",
+null
+],
+"FP SENERGY-A": [
+"2026-11-13",
+null
+],
+"FP THEQ": [
+"2026-11-13",
+null
+],
+"FP USBANK-A": [
+"2026-11-13",
+null
+],
+"FP USBANK-D": [
+"2026-11-13",
+null
+],
+"GC": [
+"2026-11-13",
+null
+],
+"HAPPY D5": [
+"2026-11-13",
+null
+],
+"HIDIV-D": [
+"2026-11-13",
+null
+],
+"HIDIVEQL": [
+"2026-11-13",
+null
+],
+"HIDIVPLUSG": [
+"2026-11-13",
+null
+],
+"I-20": [
+"2026-11-13",
+null
+],
+"I-ASEAN STAR 10": [
+"2026-11-13",
+null
+],
+"I-SMART": [
+"2026-11-13",
+null
+],
+"IREITG": [
+"2026-11-13",
+null
+],
+"K-2520": [
+"2026-11-13",
+null
+],
+"K-2530": [
+"2026-11-13",
+null
+],
+"K-AB22B": [
+"2026-11-13",
+null
+],
+"K-AEC": [
+"2026-11-13",
+null
+],
+"K-AGRI": [
+"2026-11-13",
+null
+],
+"K-AHY": [
+"2026-11-13",
+null
+],
+"K-ALLBASIC": [
+"2026-11-13",
+null
+],
+"K-ASIA": [
+"2026-11-13",
+null
+],
+"K-ASIACV-A(A)": [
+"2026-11-13",
+null
+],
+"K-ASIAX": [
+"2026-11-13",
+null
+],
+"K-ATECH": [
+"2026-11-13",
+null
+],
+"K-BANKING": [
+"2026-11-13",
+null
+],
+"K-CBOND-A": [
+"2026-11-13",
+null
+],
+"K-CCTV-A(A)": [
+"2026-11-13",
+null
+],
+"K-CHANGE-A(A)": [
+"2026-11-13",
+null
+],
+"K-ENERGY": [
+"2026-11-13",
+null
+],
+"K-EQD-A(A)": [
+"2026-11-13",
+null
+],
+"K-EQD-A(D)": [
+"2026-11-13",
+null
+],
+"K-EQD-T(A)": [
+"2026-11-13",
+null
+],
+"K-EQD-T(D)": [
+"2026-11-13",
+null
+],
+"K-EQUITY": [
+"2026-11-13",
+null
+],
+"K-ESGSI-A": [
+"2026-11-13",
+null
+],
+"K-EUROPE-A(A)": [
+"2026-11-13",
+null
+],
+"K-EUROPE-A(D)": [
+"2026-11-13",
+null
+],
+"K-EUSMALL": [
+"2026-11-13",
+null
+],
+"K-FEQ": [
+"2026-11-13",
+null
+],
+"K-FITL": [
+"2026-11-13",
+null
+],
+"K-FITM": [
+"2026-11-13",
+null
+],
+"K-FITXL": [
+"2026-11-13",
+null
+],
+"K-FIXED-A": [
+"2026-11-13",
+null
+],
+"K-FIXEDPLUS-A": [
+"2026-11-13",
+null
+],
+"K-FIXEDPRO": [
+"2026-11-13",
+null
+],
+"K-GA-A(A)": [
+"2026-11-13",
+null
+],
+"K-GA-A(D)": [
+"2026-11-13",
+null
+],
+"K-GB-A(D)": [
+"2026-11-13",
+null
+],
+"K-GDBOND-A(A)": [
+"2026-11-13",
+null
+],
+"K-GINCOME-A(A)": [
+"2026-11-13",
+null
+],
+"K-GLOBE": [
+"2026-11-13",
+null
+],
+"K-GNEXT-A(A)": [
+"2026-11-13",
+null
+],
+"K-GOLD-A(A)": [
+"2026-11-13",
+null
+],
+"K-GOLD-A(D)": [
+"2026-11-13",
+null
+],
+"K-GPIN-A(A)": [
+"2026-11-13",
+null
+],
+"K-GPINUH-A(A)": [
+"2026-11-13",
+null
+],
+"K-GPROP-A(A)": [
+"2026-11-13",
+null
+],
+"K-GPROP-A(D)": [
+"2026-11-13",
+null
+],
+"K-GSELECT": [
+"2026-11-13",
+null
+],
+"K-GSF(USD)": [
+"2026-11-13",
+null
+],
+"K-ICT": [
+"2026-11-13",
+null
+],
+"K-INDIA-A(A)": [
+"2026-11-13",
+null
+],
+"K-INDIA-A(D)": [
+"2026-11-13",
+null
+],
+"K-INDX": [
+"2026-11-13",
+null
+],
+"K-JPX-A(A)": [
+"2026-11-13",
+null
+],
+"K-MIDSMALL": [
+"2026-11-13",
+null
+],
+"K-MONEY": [
+"2026-11-13",
+null
+],
+"K-OIL": [
+"2026-11-13",
+null
+],
+"K-PLANET-A(A)": [
+"2026-11-13",
+null
+],
+"K-S50-A(A)": [
+"2026-11-13",
+null
+],
+"K-S50-T(A)": [
+"2026-11-13",
+null
+],
+"K-SELECT-A(A)": [
+"2026-11-13",
+null
+],
+"K-SELECT-A(D)": [
+"2026-11-13",
+null
+],
+"K-SEMQ": [
+"2026-11-13",
+null
+],
+"K-SET50": [
+"2026-11-13",
+null
+],
+"K-SF-A": [
+"2026-11-13",
+null
+],
+"K-SFIXED": [
+"2026-11-13",
+null
+],
+"K-SFPLUS-A": [
+"2026-11-13",
+null
+],
+"K-SGM": [
+"2026-11-13",
+null
+],
+"K-STAR-A(A)": [
+"2026-11-13",
+null
+],
+"K-US500X-A(A)": [
+"2026-11-13",
+null
+],
+"K-USA-A(A)": [
+"2026-11-13",
+null
+],
+"K-USA-A(D)": [
+"2026-11-13",
+null
+],
+"K-USXNDQ-A(A)": [
+"2026-11-13",
+null
+],
+"K-USXNDQ-A(D)": [
+"2026-11-13",
+null
+],
+"K-VALUE-A(A)": [
+"2026-11-13",
+null
+],
+"K-VALUE-A(D)": [
+"2026-11-13",
+null
+],
+"K-VALUE-P(A)": [
+"2026-11-13",
+null
+],
+"K-VALUE-P(D)": [
+"2026-11-13",
+null
+],
+"K-VIETNAM": [
+"2026-11-13",
+null
+],
+"K-WPBALANCED": [
+"2026-11-13",
+null
+],
+"K-WPLIFETIME(A)": [
+"2026-11-13",
+null
+],
+"K-WPLIGHT": [
+"2026-11-13",
+null
+],
+"K-WPSPARK": [
+"2026-11-13",
+null
+],
+"K-WPSPEEDUP": [
+"2026-11-13",
+null
+],
+"K-WPULTIMATE": [
+"2026-11-13",
+null
+],
+"KAF": [
+"2026-11-13",
+null
+],
+"KF-AINCOME-A": [
+"2026-11-13",
+null
+],
+"KF-ATECH": [
+"2026-11-13",
+null
+],
+"KF-ATECH-USD": [
+"2026-11-13",
+null
+],
+"KF-BIC": [
+"2026-11-13",
+null
+],
+"KF-CSINCOME": [
+"2026-11-13",
+null
+],
+"KF-DB70-D": [
+"2026-11-13",
+null
+],
+"KF-EMXCN-A": [
+"2026-11-13",
+null
+],
+"KF-EMXCN-D": [
+"2026-11-13",
+null
+],
+"KF-EUROPE": [
+"2026-11-13",
+null
+],
+"KF-GB70-D": [
+"2026-11-13",
+null
+],
+"KF-GCHINAD": [
+"2026-11-13",
+null
+],
+"KF-GOLD": [
+"2026-11-13",
+null
+],
+"KF-HGOLD": [
+"2026-11-13",
+null
+],
+"KF-HSHARE-INDX": [
+"2026-11-13",
+null
+],
+"KF-HSMUS": [
+"2026-11-13",
+null
+],
+"KF-JPSCAPD": [
+"2026-11-13",
+null
+],
+"KF-LATAM": [
+"2026-11-13",
+null
+],
+"KF-MINCOME-A": [
+"2026-11-13",
+null
+],
+"KF-OIL": [
+"2026-11-13",
+null
+],
+"KF-ORTFLEX": [
+"2026-11-13",
+null
+],
+"KF-QUALITY-A": [
+"2026-11-13",
+null
+],
+"KF-QUALITY-D": [
+"2026-11-13",
+null
+],
+"KF-QUALITY-ID": [
+"2026-11-13",
+null
+],
+"KF-SINCOME": [
+"2026-11-13",
+null
+],
+"KF-SINCOME-FX-A": [
+"2026-11-13",
+null
+],
+"KF-SMCAPD": [
+"2026-11-13",
+null
+],
+"KF-WORLD-INDFX-A": [
+"2026-11-13",
+null
+],
+"KF-WORLD-INDFX-D": [
+"2026-11-13",
+null
+],
+"KFAFIX-A": [
+"2026-11-13",
+null
+],
+"KFAHYBON-A": [
+"2026-11-13",
+null
+],
+"KFAHYBON-D": [
+"2026-11-13",
+null
+],
+"KFCASHPLUS": [
+"2026-11-13",
+null
+],
+"KFCHINA-T10PLUS-A": [
+"2026-11-13",
+null
+],
+"KFCHINA-T10PLUS-D": [
+"2026-11-13",
+null
+],
+"KFCLIMA-A": [
+"2026-11-13",
+null
+],
+"KFCLIMA-D": [
+"2026-11-13",
+null
+],
+"KFCMEGA-A": [
+"2026-11-13",
+null
+],
+"KFCMEGA-D": [
+"2026-11-13",
+null
+],
+"KFCORE": [
+"2026-11-13",
+null
+],
+"KFCSI300-A": [
+"2026-11-13",
+null
+],
+"KFCSI300-D": [
+"2026-11-13",
+null
+],
+"KFCYBER-A": [
+"2026-11-13",
+null
+],
+"KFCYBER-D": [
+"2026-11-13",
+null
+],
+"KFDIVERS-A": [
+"2026-11-13",
+null
+],
+"KFDNM-D": [
+"2026-11-13",
+null
+],
+"KFDYNAMIC": [
+"2026-11-13",
+null
+],
+"KFDYNAMIC2-A": [
+"2026-11-13",
+null
+],
+"KFDYNAMIC2-D": [
+"2026-11-13",
+null
+],
+"KFENS50-A": [
+"2026-11-13",
+null
+],
+"KFESG-A": [
+"2026-11-13",
+null
+],
+"KFESG-D": [
+"2026-11-13",
+null
+],
+"KFFAST-D": [
+"2026-11-13",
+null
+],
+"KFFIN-D": [
+"2026-11-13",
+null
+],
+"KFFLEX": [
+"2026-11-13",
+null
+],
+"KFFLEX-D": [
+"2026-11-13",
+null
+],
+"KFFUTUREGEN-A": [
+"2026-11-13",
+null
+],
+"KFFUTUREGEN-D": [
+"2026-11-13",
+null
+],
+"KFGDIV-A": [
+"2026-11-13",
+null
+],
+"KFGDIV-D": [
+"2026-11-13",
+null
+],
+"KFGG-A": [
+"2026-11-13",
+null
+],
+"KFGG-D": [
+"2026-11-13",
+null
+],
+"KFGLOBAL-A": [
+"2026-11-13",
+null
+],
+"KFGLOBAL-D": [
+"2026-11-13",
+null
+],
+"KFGLOBFX-A": [
+"2026-11-13",
+null
+],
+"KFGLOBFX-D": [
+"2026-11-13",
+null
+],
+"KFGOOD": [
+"2026-11-13",
+null
+],
+"KFGPROP-A": [
+"2026-11-13",
+null
+],
+"KFGPROP-D": [
+"2026-11-13",
+null
+],
+"KFGROWTH-A": [
+"2026-11-13",
+null
+],
+"KFGROWTH-D": [
+"2026-11-13",
+null
+],
+"KFHAPPY-A": [
+"2026-11-13",
+null
+],
+"KFHASIA-A": [
+"2026-11-13",
+null
+],
+"KFHASIA-D": [
+"2026-11-13",
+null
+],
+"KFHEALTH-A": [
+"2026-11-13",
+null
+],
+"KFHEALTH-D": [
+"2026-11-13",
+null
+],
+"KFHHCARE-A": [
+"2026-11-13",
+null
+],
+"KFHHCARE-D": [
+"2026-11-13",
+null
+],
+"KFHTECH-A": [
+"2026-11-13",
+null
+],
+"KFHTECH-D": [
+"2026-11-13",
+null
+],
+"KFINDIA-A": [
+"2026-11-13",
+null
+],
+"KFINDIA-D": [
+"2026-11-13",
+null
+],
+"KFINNO-A": [
+"2026-11-13",
+null
+],
+"KFINNO-D": [
+"2026-11-13",
+null
+],
+"KFJPINDX-A": [
+"2026-11-13",
+null
+],
+"KFJPSCAP-A": [
+"2026-11-13",
+null
+],
+"KFMTFI-D": [
+"2026-11-13",
+null
+],
+"KFMX2TM": [
+"2026-11-13",
+null
+],
+"KFNDQ-A": [
+"2026-11-13",
+null
+],
+"KFNDQ-D": [
+"2026-11-13",
+null
+],
+"KFS100-A": [
+"2026-11-13",
+null
+],
+"KFSDIV": [
+"2026-11-13",
+null
+],
+"KFSEQ-D": [
+"2026-11-13",
+null
+],
+"KFSEQ2-A": [
+"2026-11-13",
+null
+],
+"KFSMART-A": [
+"2026-11-13",
+null
+],
+"KFSMUL": [
+"2026-11-13",
+null
+],
+"KFSPLUS-A": [
+"2026-11-13",
+null
+],
+"KFSUPER": [
+"2026-11-13",
+null
+],
+"KFTHAICG": [
+"2026-11-13",
+null
+],
+"KFTSTAR-A": [
+"2026-11-13",
+null
+],
+"KFTSTAR-D": [
+"2026-11-13",
+null
+],
+"KFTSTAR2-D": [
+"2026-11-13",
+null
+],
+"KFUS-A": [
+"2026-11-13",
+null
+],
+"KFUSINDX-A": [
+"2026-11-13",
+null
+],
+"KFUSINDX-D": [
+"2026-11-13",
+null
+],
+"KFVALUE-A": [
+"2026-11-13",
+null
+],
+"KFVIET-A": [
+"2026-11-13",
+null
+],
+"KFVIET-D": [
+"2026-11-13",
+null
+],
+"KFYENJAI-A": [
+"2026-11-13",
+null
+],
+"KFYENJAI-D": [
+"2026-11-13",
+null
+],
+"KKF": [
+"2026-11-13",
+null
+],
+"KKP ACT FIXED": [
+"2026-11-13",
+null
+],
+"KKP CASH": [
+"2026-11-13",
+null
+],
+"KKP CHINA-H": [
+"2026-11-13",
+null
+],
+"KKP CorePath Balanced": [
+"2026-11-13",
+null
+],
+"KKP CorePath Extra": [
+"2026-11-13",
+null
+],
+"KKP CorePath Light": [
+"2026-11-13",
+null
+],
+"KKP DIVIDEND": [
+"2026-11-13",
+null
+],
+"KKP EMXCN-H": [
+"2026-11-13",
+null
+],
+"KKP EMXCN-UH": [
+"2026-11-13",
+null
+],
+"KKP EUROPE-H": [
+"2026-11-13",
+null
+],
+"KKP EUROPE-UH": [
+"2026-11-13",
+null
+],
+"KKP G-UBOND-H": [
+"2026-11-13",
+null
+],
+"KKP GHC-A": [
+"2026-11-13",
+null
+],
+"KKP GHC-D": [
+"2026-11-13",
+null
+],
+"KKP GIMPACT-H": [
+"2026-11-13",
+null
+],
+"KKP GNP-H": [
+"2026-11-13",
+null
+],
+"KKP GVALUE-H": [
+"2026-11-13",
+null
+],
+"KKP GVALUE-UH": [
+"2026-11-13",
+null
+],
+"KKP INCOME-H": [
+"2026-11-13",
+null
+],
+"KKP INDIA-H": [
+"2026-11-13",
+null
+],
+"KKP INDIA-UH": [
+"2026-11-13",
+null
+],
+"KKP MP": [
+"2026-11-13",
+null
+],
+"KKP NDQ100-H": [
+"2026-11-13",
+null
+],
+"KKP PGE-H": [
+"2026-11-13",
+null
+],
+"KKP PGE-UH": [
+"2026-11-13",
+null
+],
+"KKP PLUS": [
+"2026-11-13",
+null
+],
+"KKP PROP-D": [
+"2026-11-13",
+null
+],
+"KKP S-PLUS": [
+"2026-11-13",
+null
+],
+"KKP SEMICON-H": [
+"2026-11-13",
+null
+],
+"KKP SET50 ESG": [
+"2026-11-13",
+null
+],
+"KKP SIB-USD": [
+"2026-11-13",
+null
+],
+"KKP SM CAP": [
+"2026-11-13",
+null
+],
+"KKP SMART MV": [
+"2026-11-13",
+null
+],
+"KKP TECH-H": [
+"2026-11-13",
+null
+],
+"KKP US500-H": [
+"2026-11-13",
+null
+],
+"KKP US500-UH": [
+"2026-11-13",
+null
+],
+"KKP WIN-UH": [
+"2026-11-13",
+null
+],
+"KPLUS": [
+"2026-11-13",
+null
+],
+"KPLUS2": [
+"2026-11-13",
+null
+],
+"KT-AASIA-A": [
+"2026-11-13",
+null
+],
+"KT-AASIA-D": [
+"2026-11-13",
+null
+],
+"KT-AGRIANDFOOD": [
+"2026-11-13",
+null
+],
+"KT-ARB-A": [
+"2026-11-13",
+null
+],
+"KT-ARB-D": [
+"2026-11-13",
+null
+],
+"KT-ARE": [
+"2026-11-13",
+null
+],
+"KT-ASEAN-A": [
+"2026-11-13",
+null
+],
+"KT-ASEAN-D": [
+"2026-11-13",
+null
+],
+"KT-ASIAG-A": [
+"2026-11-13",
+null
+],
+"KT-ASIAG-D": [
+"2026-11-13",
+null
+],
+"KT-Ashares-A": [
+"2026-11-13",
+null
+],
+"KT-Ashares-D": [
+"2026-11-13",
+null
+],
+"KT-BLOCKCHAIN-A": [
+"2026-11-13",
+null
+],
+"KT-BLOCKCHAIN-D": [
+"2026-11-13",
+null
+],
+"KT-BRAIN-A": [
+"2026-11-13",
+null
+],
+"KT-BRAIN-D": [
+"2026-11-13",
+null
+],
+"KT-CARE-A": [
+"2026-11-13",
+null
+],
+"KT-CARE-D": [
+"2026-11-13",
+null
+],
+"KT-CHINA-A": [
+"2026-11-13",
+null
+],
+"KT-CHINA-D": [
+"2026-11-13",
+null
+],
+"KT-CHINABOND-A": [
+"2026-11-13",
+null
+],
+"KT-CHINABOND-D": [
+"2026-11-13",
+null
+],
+"KT-CLIMATE-A": [
+"2026-11-13",
+null
+],
+"KT-CLIMATE-D": [
+"2026-11-13",
+null
+],
+"KT-CSBOND-A": [
+"2026-11-13",
+null
+],
+"KT-CSBOND-D": [
+"2026-11-13",
+null
+],
+"KT-DHINCOME-A": [
+"2026-11-13",
+null
+],
+"KT-DHINCOME-D": [
+"2026-11-13",
+null
+],
+"KT-EMEQ-A": [
+"2026-11-13",
+null
+],
+"KT-EMEQ-D": [
+"2026-11-13",
+null
+],
+"KT-ENERGY-A": [
+"2026-11-13",
+null
+],
+"KT-ENERGY-D": [
+"2026-11-13",
+null
+],
+"KT-ENERGY-USD-A": [
+"2026-11-13",
+null
+],
+"KT-EPIC-A": [
+"2026-11-13",
+null
+],
+"KT-EPIC-D": [
+"2026-11-13",
+null
+],
+"KT-EURO50-A": [
+"2026-11-13",
+null
+],
+"KT-EURO50-D": [
+"2026-11-13",
+null
+],
+"KT-EUROTECH-A": [
+"2026-11-13",
+null
+],
+"KT-EUROTECH-D": [
+"2026-11-13",
+null
+],
+"KT-GEQ-A": [
+"2026-11-13",
+null
+],
+"KT-GEQ-D": [
+"2026-11-13",
+null
+],
+"KT-GEQ-UHA": [
+"2026-11-13",
+null
+],
+"KT-GEQ-USD-A": [
+"2026-11-13",
+null
+],
+"KT-GESG-A": [
+"2026-11-13",
+null
+],
+"KT-GESG-D": [
+"2026-11-13",
+null
+],
+"KT-GFO-A": [
+"2026-11-13",
+null
+],
+"KT-GFO-D": [
+"2026-11-13",
+null
+],
+"KT-GMO-A": [
+"2026-11-13",
+null
+],
+"KT-GMO-D": [
+"2026-11-13",
+null
+],
+"KT-GOLDUH-A": [
+"2026-11-13",
+null
+],
+"KT-GOLDUH-D": [
+"2026-11-13",
+null
+],
+"KT-GOLDUH-USD-A": [
+"2026-11-13",
+null
+],
+"KT-IGF-A": [
+"2026-11-13",
+null
+],
+"KT-IGF-D": [
+"2026-11-13",
+null
+],
+"KT-JAPANALL-A": [
+"2026-11-13",
+null
+],
+"KT-JAPANALL-D": [
+"2026-11-13",
+null
+],
+"KT-JAPANSM-A": [
+"2026-11-13",
+null
+],
+"KT-JAPANSM-D": [
+"2026-11-13",
+null
+],
+"KT-JPFUND-A": [
+"2026-11-13",
+null
+],
+"KT-JPFUND-D": [
+"2026-11-13",
+null
+],
+"KT-KOREA": [
+"2026-11-13",
+null
+],
+"KT-LUXURY-A": [
+"2026-11-13",
+null
+],
+"KT-LUXURY-D": [
+"2026-11-13",
+null
+],
+"KT-MAB-A": [
+"2026-11-13",
+null
+],
+"KT-MAB-D": [
+"2026-11-13",
+null
+],
+"KT-MFB-A": [
+"2026-11-13",
+null
+],
+"KT-MFB-D": [
+"2026-11-13",
+null
+],
+"KT-MFE-A": [
+"2026-11-13",
+null
+],
+"KT-MFE-D": [
+"2026-11-13",
+null
+],
+"KT-MINING": [
+"2026-11-13",
+null
+],
+"KT-OIL": [
+"2026-11-13",
+null
+],
+"KT-PIF-A": [
+"2026-11-13",
+null
+],
+"KT-PIF-D": [
+"2026-11-13",
+null
+],
+"KT-PROPERTY-A": [
+"2026-11-13",
+null
+],
+"KT-PROPERTY-D": [
+"2026-11-13",
+null
+],
+"KT-SAGA-A": [
+"2026-11-13",
+null
+],
+"KT-SAGA-D": [
+"2026-11-13",
+null
+],
+"KT-SHARIAH-A": [
+"2026-11-13",
+null
+],
+"KT-SMARTTHEQ-A": [
+"2026-11-13",
+null
+],
+"KT-USDDAILY-A": [
+"2026-11-13",
+null
+],
+"KT-USSM-A": [
+"2026-11-13",
+null
+],
+"KT-USSM-D": [
+"2026-11-13",
+null
+],
+"KT-VIETNAM-A": [
+"2026-11-13",
+null
+],
+"KT-VIETNAM-D": [
+"2026-11-13",
+null
+],
+"KT-WTAI-A": [
+"2026-11-13",
+null
+],
+"KT-WTAI-D": [
+"2026-11-13",
+null
+],
+"KT-mai": [
+"2026-11-13",
+null
+],
+"KT25/75-A": [
+"2026-11-13",
+null
+],
+"KT25/75-D": [
+"2026-11-13",
+null
+],
+"KT70/30-A": [
+"2026-11-13",
+null
+],
+"KTBTHAICG-A": [
+"2026-11-13",
+null
+],
+"KTBTHAICG-D": [
+"2026-11-13",
+null
+],
+"KTEF": [
+"2026-11-13",
+null
+],
+"KTF19": [
+"2026-11-13",
+null
+],
+"KTF20": [
+"2026-11-13",
+null
+],
+"KTF23": [
+"2026-11-13",
+null
+],
+"KTF24": [
+"2026-11-13",
+null
+],
+"KTFIXPLUS-A": [
+"2026-11-13",
+null
+],
+"KTFIXPLUS-D": [
+"2026-11-13",
+null
+],
+"KTHH": [
+"2026-11-13",
+null
+],
+"KTILF": [
+"2026-11-13",
+null
+],
+"KTMEE-A": [
+"2026-11-13",
+null
+],
+"KTMEE-D": [
+"2026-11-13",
+null
+],
+"KTMSEQ": [
+"2026-11-13",
+null
+],
+"KTMUNG-A": [
+"2026-11-13",
+null
+],
+"KTMUNG-D": [
+"2026-11-13",
+null
+],
+"KTPLUS": [
+"2026-11-13",
+null
+],
+"KTSE": [
+"2026-11-13",
+null
+],
+"KTSET50FF-A": [
+"2026-11-13",
+null
+],
+"KTSF": [
+"2026-11-13",
+null
+],
+"KTSRI-A": [
+"2026-11-13",
+null
+],
+"KTSRI-D": [
+"2026-11-13",
+null
+],
+"KTSTPLUS-A": [
+"2026-11-13",
+null
+],
+"KTSTPLUS-D": [
+"2026-11-13",
+null
+],
+"KTSUK-A": [
+"2026-11-13",
+null
+],
+"KTSUK-D": [
+"2026-11-13",
+null
+],
+"KTSV-A": [
+"2026-11-13",
+null
+],
+"KTWC-DEFENSIVE-A": [
+"2026-11-13",
+null
+],
+"KTWC-DEFENSIVE-D": [
+"2026-11-13",
+null
+],
+"KTWC-GROWTH-A": [
+"2026-11-13",
+null
+],
+"KTWC-GROWTH-D": [
+"2026-11-13",
+null
+],
+"KTWC-INCOME-A": [
+"2026-11-13",
+null
+],
+"KTWC-INCOME-D": [
+"2026-11-13",
+null
+],
+"KTWC-MODERATE-A": [
+"2026-11-13",
+null
+],
+"KTWC-MODERATE-D": [
+"2026-11-13",
+null
+],
+"KTWG-A": [
+"2026-11-13",
+null
+],
+"KTWG-D": [
+"2026-11-13",
+null
+],
+"KTWP-A": [
+"2026-11-13",
+null
+],
+"KTWP-D": [
+"2026-11-13",
+null
+],
+"LHASIASEMICON": [
+"2026-11-13",
+null
+],
+"LHCHINA-A": [
+"2026-11-13",
+null
+],
+"LHCHINA-D": [
+"2026-11-13",
+null
+],
+"LHCOPPER": [
+"2026-11-13",
+null
+],
+"LHCYBER-A": [
+"2026-11-13",
+null
+],
+"LHCYBER-D": [
+"2026-11-13",
+null
+],
+"LHDEBT-A": [
+"2026-11-13",
+null
+],
+"LHDEBT-D": [
+"2026-11-13",
+null
+],
+"LHDIGITAL-A": [
+"2026-11-13",
+null
+],
+"LHDIGITAL-D": [
+"2026-11-13",
+null
+],
+"LHEME-A": [
+"2026-11-13",
+null
+],
+"LHEME-D": [
+"2026-11-13",
+null
+],
+"LHEQD-A": [
+"2026-11-13",
+null
+],
+"LHEQD-D": [
+"2026-11-13",
+null
+],
+"LHEQDPLUS-A": [
+"2026-11-13",
+null
+],
+"LHEQDPLUS-D": [
+"2026-11-13",
+null
+],
+"LHESPORT-A": [
+"2026-11-13",
+null
+],
+"LHESPORT-D": [
+"2026-11-13",
+null
+],
+"LHEUROPE-A": [
+"2026-11-13",
+null
+],
+"LHEUROPE-D": [
+"2026-11-13",
+null
+],
+"LHFL": [
+"2026-11-13",
+null
+],
+"LHGALPHA": [
+"2026-11-13",
+null
+],
+"LHGAS": [
+"2026-11-13",
+null
+],
+"LHGBLOCK-A": [
+"2026-11-13",
+null
+],
+"LHGBLOCK-D": [
+"2026-11-13",
+null
+],
+"LHGDIV-A": [
+"2026-11-13",
+null
+],
+"LHGDIV-D": [
+"2026-11-13",
+null
+],
+"LHGDYNAMIC-A": [
+"2026-11-13",
+null
+],
+"LHGDYNAMIC-D": [
+"2026-11-13",
+null
+],
+"LHGENHANCED-A": [
+"2026-11-13",
+null
+],
+"LHGENHANCED-D": [
+"2026-11-13",
+null
+],
+"LHGEQ-A": [
+"2026-11-13",
+null
+],
+"LHGEQ-D": [
+"2026-11-13",
+null
+],
+"LHGEQP-A": [
+"2026-11-13",
+null
+],
+"LHGEQP-D": [
+"2026-11-13",
+null
+],
+"LHGIGO-A": [
+"2026-11-13",
+null
+],
+"LHGIGO-D": [
+"2026-11-13",
+null
+],
+"LHGINCOME-A": [
+"2026-11-13",
+null
+],
+"LHGINCOME-D": [
+"2026-11-13",
+null
+],
+"LHGLIFEE-A": [
+"2026-11-13",
+null
+],
+"LHGLIFEE-D": [
+"2026-11-13",
+null
+],
+"LHGOLD-A": [
+"2026-11-13",
+null
+],
+"LHGOLD-D": [
+"2026-11-13",
+null
+],
+"LHGREEN-A": [
+"2026-11-13",
+null
+],
+"LHGREEN-D": [
+"2026-11-13",
+null
+],
+"LHGRID": [
+"2026-11-13",
+null
+],
+"LHGROWTH-A": [
+"2026-11-13",
+null
+],
+"LHGROWTH-D": [
+"2026-11-13",
+null
+],
+"LHHEALTH-A": [
+"2026-11-13",
+null
+],
+"LHHEALTH-D": [
+"2026-11-13",
+null
+],
+"LHHUMANOID": [
+"2026-11-13",
+null
+],
+"LHIP-A": [
+"2026-11-13",
+null
+],
+"LHIP-D": [
+"2026-11-13",
+null
+],
+"LHLONGEVITY": [
+"2026-11-13",
+null
+],
+"LHMEGA-A": [
+"2026-11-13",
+null
+],
+"LHMEGA-D": [
+"2026-11-13",
+null
+],
+"LHMOBILITY-A": [
+"2026-11-13",
+null
+],
+"LHMOBILITY-D": [
+"2026-11-13",
+null
+],
+"LHMSFL-A": [
+"2026-11-13",
+null
+],
+"LHMSFL-D": [
+"2026-11-13",
+null
+],
+"LHPHOTONICS": [
+"2026-11-13",
+null
+],
+"LHPROP-I": [
+"2026-11-13",
+null
+],
+"LHPROPIA-A": [
+"2026-11-13",
+null
+],
+"LHPROPIA-D": [
+"2026-11-13",
+null
+],
+"LHPROPINFRA-D": [
+"2026-11-13",
+null
+],
+"LHQTUM-A": [
+"2026-11-13",
+null
+],
+"LHQTUM-D": [
+"2026-11-13",
+null
+],
+"LHSELECT-A": [
+"2026-11-13",
+null
+],
+"LHSELECT-D": [
+"2026-11-13",
+null
+],
+"LHSEMICON-A": [
+"2026-11-13",
+null
+],
+"LHSEMICON-D": [
+"2026-11-13",
+null
+],
+"LHSMART-A": [
+"2026-11-13",
+null
+],
+"LHSMART-D": [
+"2026-11-13",
+null
+],
+"LHSMARTMIX": [
+"2026-11-13",
+null
+],
+"LHSOLAR": [
+"2026-11-13",
+null
+],
+"LHSPACE-A": [
+"2026-11-13",
+null
+],
+"LHSPACE-D": [
+"2026-11-13",
+null
+],
+"LHSTPLUS-A": [
+"2026-11-13",
+null
+],
+"LHSTRATEGY-A": [
+"2026-11-13",
+null
+],
+"LHSTRATEGY-D": [
+"2026-11-13",
+null
+],
+"LHTOPPICK-A": [
+"2026-11-13",
+null
+],
+"LHTOPPICK-D": [
+"2026-11-13",
+null
+],
+"LHTPROP": [
+"2026-11-13",
+null
+],
+"LHTREASURY-A": [
+"2026-11-13",
+null
+],
+"LHUSFIN-A": [
+"2026-11-13",
+null
+],
+"LHUSFIN-D": [
+"2026-11-13",
+null
+],
+"LHVN-A": [
+"2026-11-13",
+null
+],
+"LHVN-D": [
+"2026-11-13",
+null
+],
+"LHWPLUS-A": [
+"2026-11-13",
+null
+],
+"LHWPLUS-D": [
+"2026-11-13",
+null
+],
+"M-ACTIVE": [
+"2026-11-13",
+null
+],
+"M-CTECH": [
+"2026-11-13",
+null
+],
+"M-EDGE": [
+"2026-11-13",
+null
+],
+"M-EM": [
+"2026-11-13",
+null
+],
+"M-EUBANK": [
+"2026-11-13",
+null
+],
+"M-FOCUS": [
+"2026-11-13",
+null
+],
+"M-FREEDOM": [
+"2026-11-13",
+null
+],
+"M-Global Islamic": [
+"2026-11-13",
+null
+],
+"M-IslamicEQL": [
+"2026-11-13",
+null
+],
+"M-MEGA-A": [
+"2026-11-13",
+null
+],
+"M-MEGA-D": [
+"2026-11-13",
+null
+],
+"M-META": [
+"2026-11-13",
+null
+],
+"M-MIDSMALL-A": [
+"2026-11-13",
+null
+],
+"M-MIDSMALL-D": [
+"2026-11-13",
+null
+],
+"M-MULTI-A": [
+"2026-11-13",
+null
+],
+"M-MULTI-D": [
+"2026-11-13",
+null
+],
+"M-S50-G": [
+"2026-11-13",
+null
+],
+"M-SELECTCG": [
+"2026-11-13",
+null
+],
+"M-SMART INCOME-AC": [
+"2026-11-13",
+null
+],
+"M-SUKUK": [
+"2026-11-13",
+null
+],
+"M-US500H": [
+"2026-11-13",
+null
+],
+"M-USEQH": [
+"2026-11-13",
+null
+],
+"M-USEQUH": [
+"2026-11-13",
+null
+],
+"M-VI": [
+"2026-11-13",
+null
+],
+"MATECH-A": [
+"2026-11-13",
+null
+],
+"MATECH-D": [
+"2026-11-13",
+null
+],
+"MBT-G": [
+"2026-11-13",
+null
+],
+"MCANN": [
+"2026-11-13",
+null
+],
+"MCBOND": [
+"2026-11-13",
+null
+],
+"MCHEVO": [
+"2026-11-13",
+null
+],
+"MCHINAGA": [
+"2026-11-13",
+null
+],
+"MCHINAGD": [
+"2026-11-13",
+null
+],
+"MCMIDSMALL": [
+"2026-11-13",
+null
+],
+"MCONT": [
+"2026-11-13",
+null
+],
+"MCONVERT": [
+"2026-11-13",
+null
+],
+"MDIVA-A": [
+"2026-11-13",
+null
+],
+"MDIVA-D": [
+"2026-11-13",
+null
+],
+"MDIVA-U": [
+"2026-11-13",
+null
+],
+"MEGA10AI-A": [
+"2026-11-13",
+null
+],
+"MEGA10AICHINA-A": [
+"2026-11-13",
+null
+],
+"MEGA10EURO-A": [
+"2026-11-13",
+null
+],
+"MEGA10HEALTH-A": [
+"2026-11-13",
+null
+],
+"MFF": [
+"2026-11-13",
+null
+],
+"MFTECH": [
+"2026-11-13",
+null
+],
+"MFX": [
+"2026-11-13",
+null
+],
+"MGCOREL": [
+"2026-11-13",
+null
+],
+"MGFGA": [
+"2026-11-13",
+null
+],
+"MGFGD": [
+"2026-11-13",
+null
+],
+"MGMVOL": [
+"2026-11-13",
+null
+],
+"MGPROP-AC": [
+"2026-11-13",
+null
+],
+"MGS": [
+"2026-11-13",
+null
+],
+"MGTECH": [
+"2026-11-13",
+null
+],
+"MHEALTHG": [
+"2026-11-13",
+null
+],
+"MIDSMALLEQL": [
+"2026-11-13",
+null
+],
+"MINDIA": [
+"2026-11-13",
+null
+],
+"MINFRA": [
+"2026-11-13",
+null
+],
+"MIPLUS-G": [
+"2026-11-13",
+null
+],
+"MIX-D1585": [
+"2026-11-13",
+null
+],
+"MJAPAN": [
+"2026-11-13",
+null
+],
+"MMM-PLUS": [
+"2026-11-13",
+null
+],
+"MPDIVMF": [
+"2026-11-13",
+null
+],
+"MPII-A": [
+"2026-11-13",
+null
+],
+"MPII-D": [
+"2026-11-13",
+null
+],
+"MPII-U": [
+"2026-11-13",
+null
+],
+"MRENEW-A": [
+"2026-11-13",
+null
+],
+"MRENEW-D": [
+"2026-11-13",
+null
+],
+"MTOP2": [
+"2026-11-13",
+null
+],
+"MVEQL": [
+"2026-11-13",
+null
+],
+"MVIET": [
+"2026-11-13",
+null
+],
+"ONE-ACT-RA": [
+"2026-11-13",
+null
+],
+"ONE-ACT-RD": [
+"2026-11-13",
+null
+],
+"ONE-ACTIVE6/2": [
+"2026-11-13",
+null
+],
+"ONE-ALLCHINA-RA": [
+"2026-11-13",
+null
+],
+"ONE-ALLCHINA-RD": [
+"2026-11-13",
+null
+],
+"ONE-APACESG": [
+"2026-11-13",
+null
+],
+"ONE-APACPROP-RA": [
+"2026-11-13",
+null
+],
+"ONE-APACPROP-RD": [
+"2026-11-13",
+null
+],
+"ONE-DELIGHT-RA": [
+"2026-11-13",
+null
+],
+"ONE-DELIGHT-RD": [
+"2026-11-13",
+null
+],
+"ONE-DI": [
+"2026-11-13",
+null
+],
+"ONE-ELITE11-RA": [
+"2026-11-13",
+null
+],
+"ONE-EQ": [
+"2026-11-13",
+null
+],
+"ONE-EUROEQ": [
+"2026-11-13",
+null
+],
+"ONE-FAR": [
+"2026-11-13",
+null
+],
+"ONE-FAS": [
+"2026-11-13",
+null
+],
+"ONE-FLEX": [
+"2026-11-13",
+null
+],
+"ONE-G": [
+"2026-11-13",
+null
+],
+"ONE-GECOM": [
+"2026-11-13",
+null
+],
+"ONE-GLOBHY-I": [
+"2026-11-13",
+null
+],
+"ONE-GOLD-X-H": [
+"2026-11-13",
+null
+],
+"ONE-HOSPITAL": [
+"2026-11-13",
+null
+],
+"ONE-MEDTECH": [
+"2026-11-13",
+null
+],
+"ONE-METAVERSE": [
+"2026-11-13",
+null
+],
+"ONE-MIDSMALL": [
+"2026-11-13",
+null
+],
+"ONE-OPPORTUNITY6/2": [
+"2026-11-13",
+null
+],
+"ONE-POWER-D": [
+"2026-11-13",
+null
+],
+"ONE-POWER-ND": [
+"2026-11-13",
+null
+],
+"ONE-PREMIER": [
+"2026-11-13",
+null
+],
+"ONE-SETHD": [
+"2026-11-13",
+null
+],
+"ONE-SG-RA": [
+"2026-11-13",
+null
+],
+"ONE-SINGEQ-H": [
+"2026-11-13",
+null
+],
+"ONE-UB 3": [
+"2026-11-13",
+null
+],
+"ONE-UJE-RA": [
+"2026-11-13",
+null
+],
+"ONE-ULTRA": [
+"2026-11-13",
+null
+],
+"ONE-USAV": [
+"2026-11-13",
+null
+],
+"ONE-VIETNAM-RA": [
+"2026-11-13",
+null
+],
+"ONE-VIETNAM-RD": [
+"2026-11-13",
+null
+],
+"ONEPROP-RD": [
+"2026-11-13",
+null
+],
+"P-CGREEN": [
+"2026-11-13",
+null
+],
+"PCASH": [
+"2026-11-13",
+null
+],
+"PGOLD": [
+"2026-11-13",
+null
+],
+"PMIX": [
+"2026-11-13",
+null
+],
+"PRINCIPAL CHEQ-A": [
+"2026-11-13",
+null
+],
+"PRINCIPAL CHTECH-A": [
+"2026-11-13",
+null
+],
+"PRINCIPAL CHTECH-D": [
+"2026-11-13",
+null
+],
+"PRINCIPAL DEF": [
+"2026-11-13",
+null
+],
+"PRINCIPAL EEF-A": [
+"2026-11-13",
+null
+],
+"PRINCIPAL EEF-D": [
+"2026-11-13",
+null
+],
+"PRINCIPAL EPIF": [
+"2026-11-13",
+null
+],
+"PRINCIPAL EUEQ-A": [
+"2026-11-13",
+null
+],
+"PRINCIPAL GCLEAN-A": [
+"2026-11-13",
+null
+],
+"PRINCIPAL GCLEAN-D": [
+"2026-11-13",
+null
+],
+"PRINCIPAL GCLOUD-A": [
+"2026-11-13",
+null
+],
+"PRINCIPAL GCLOUD-D": [
+"2026-11-13",
+null
+],
+"PRINCIPAL GEF-A": [
+"2026-11-13",
+null
+],
+"PRINCIPAL GESG-A": [
+"2026-11-13",
+null
+],
+"PRINCIPAL GESG-D": [
+"2026-11-13",
+null
+],
+"PRINCIPAL GINNO-A": [
+"2026-11-13",
+null
+],
+"PRINCIPAL GINNO-D": [
+"2026-11-13",
+null
+],
+"PRINCIPAL GOPP-A": [
+"2026-11-13",
+null
+],
+"PRINCIPAL GQE-A": [
+"2026-11-13",
+null
+],
+"PRINCIPAL GQE-D": [
+"2026-11-13",
+null
+],
+"PRINCIPAL GREITs": [
+"2026-11-13",
+null
+],
+"PRINCIPAL INDIAEQ-A": [
+"2026-11-13",
+null
+],
+"PRINCIPAL INDIAEQ-D": [
+"2026-11-13",
+null
+],
+"PRINCIPAL MAGLOBAL-A": [
+"2026-11-13",
+null
+],
+"PRINCIPAL MAGLOBAL-D": [
+"2026-11-13",
+null
+],
+"PRINCIPAL MAINCOME-A": [
+"2026-11-13",
+null
+],
+"PRINCIPAL NDQ15-A": [
+"2026-11-13",
+null
+],
+"PRINCIPAL NDQ15-D": [
+"2026-11-13",
+null
+],
+"PRINCIPAL SET50-A": [
+"2026-11-13",
+null
+],
+"PRINCIPAL TEQAF-A": [
+"2026-11-13",
+null
+],
+"PRINCIPAL TREASURY": [
+"2026-11-13",
+null
+],
+"PRINCIPAL USEQ-A": [
+"2026-11-13",
+null
+],
+"PRINCIPAL USEQ-D": [
+"2026-11-13",
+null
+],
+"PRINCIPAL VNEI-A": [
+"2026-11-13",
+null
+],
+"PRINCIPAL VNEI-D": [
+"2026-11-13",
+null
+],
+"PRINCIPAL VNEQ-A": [
+"2026-11-13",
+null
+],
+"PRINCIPAL VNEQ-USD-A": [
+"2026-11-13",
+null
+],
+"PRINCIPAL VTOPP-A": [
+"2026-11-13",
+null
+],
+"PRINCIPAL VTOPP-D": [
+"2026-11-13",
+null
+],
+"PRINCIPAL iDAILY-A": [
+"2026-11-13",
+null
+],
+"PRINCIPAL iDAILY-D": [
+"2026-11-13",
+null
+],
+"PRINCIPAL iDIV-A": [
+"2026-11-13",
+null
+],
+"PRINCIPAL iDIV-D": [
+"2026-11-13",
+null
+],
+"PRINCIPAL iPROPPLUS": [
+"2026-11-13",
+null
+],
+"PRINCIPALMAINCOME-D": [
+"2026-11-13",
+null
+],
+"PWIN": [
+"2026-11-13",
+null
+],
+"Q-PORT": [
+"2026-11-13",
+null
+],
+"RKBC": [
+"2026-11-13",
+null
+],
+"RKF4": [
+"2026-11-13",
+null
+],
+"RPF2": [
+"2026-11-13",
+null
+],
+"RRF1": [
+"2026-11-13",
+null
+],
+"SAN": [
+"2026-11-13",
+null
+],
+"SCBAAA": [
+"2026-11-13",
+null
+],
+"SCBAAD": [
+"2026-11-13",
+null
+],
+"SCBABOND(A)": [
+"2026-11-13",
+null
+],
+"SCBABOND(D)": [
+"2026-11-13",
+null
+],
+"SCBABS": [
+"2026-11-13",
+null
+],
+"SCBABSAP(A)": [
+"2026-11-13",
+null
+],
+"SCBABSAP(D)": [
+"2026-11-13",
+null
+],
+"SCBABSD": [
+"2026-11-13",
+null
+],
+"SCBAEM": [
+"2026-11-13",
+null
+],
+"SCBAEMD": [
+"2026-11-13",
+null
+],
+"SCBAEMHA": [
+"2026-11-13",
+null
+],
+"SCBAEMHD": [
+"2026-11-13",
+null
+],
+"SCBAOA": [
+"2026-11-13",
+null
+],
+"SCBAOD": [
+"2026-11-13",
+null
+],
+"SCBASHARES(A)": [
+"2026-11-13",
+null
+],
+"SCBASHARES(D)": [
+"2026-11-13",
+null
+],
+"SCBAUD": [
+"2026-11-13",
+null
+],
+"SCBAUDD": [
+"2026-11-13",
+null
+],
+"SCBAUTO(A)": [
+"2026-11-13",
+null
+],
+"SCBAUTO(D)": [
+"2026-11-13",
+null
+],
+"SCBAXJ(A)": [
+"2026-11-13",
+null
+],
+"SCBAXJ(D)": [
+"2026-11-13",
+null
+],
+"SCBBLN": [
+"2026-11-13",
+null
+],
+"SCBBLNA": [
+"2026-11-13",
+null
+],
+"SCBBLOC(A)": [
+"2026-11-13",
+null
+],
+"SCBBLOC(D)": [
+"2026-11-13",
+null
+],
+"SCBCEH": [
+"2026-11-13",
+null
+],
+"SCBCEHD": [
+"2026-11-13",
+null
+],
+"SCBCHA": [
+"2026-11-13",
+null
+],
+"SCBCHAA": [
+"2026-11-13",
+null
+],
+"SCBCHEQA": [
+"2026-11-13",
+null
+],
+"SCBCHEQD": [
+"2026-11-13",
+null
+],
+"SCBCHINA": [
+"2026-11-13",
+null
+],
+"SCBCHIND": [
+"2026-11-13",
+null
+],
+"SCBCIO(A)": [
+"2026-11-13",
+null
+],
+"SCBCIO(D)": [
+"2026-11-13",
+null
+],
+"SCBCLASSICA": [
+"2026-11-13",
+null
+],
+"SCBCLASSICD": [
+"2026-11-13",
+null
+],
+"SCBCLEANA": [
+"2026-11-13",
+null
+],
+"SCBCLEAND": [
+"2026-11-13",
+null
+],
+"SCBCLIMATE(A)": [
+"2026-11-13",
+null
+],
+"SCBCLIMATE(D)": [
+"2026-11-13",
+null
+],
+"SCBCTECHA": [
+"2026-11-13",
+null
+],
+"SCBCTECHD": [
+"2026-11-13",
+null
+],
+"SCBDA": [
+"2026-11-13",
+null
+],
+"SCBDAD": [
+"2026-11-13",
+null
+],
+"SCBDIGI": [
+"2026-11-13",
+null
+],
+"SCBDIGID": [
+"2026-11-13",
+null
+],
+"SCBDJI(A)": [
+"2026-11-13",
+null
+],
+"SCBDJI(D)": [
+"2026-11-13",
+null
+],
+"SCBDLITE(A)": [
+"2026-11-13",
+null
+],
+"SCBDM": [
+"2026-11-13",
+null
+],
+"SCBDM2": [
+"2026-11-13",
+null
+],
+"SCBDPLUSA": [
+"2026-11-13",
+null
+],
+"SCBDPLUSD": [
+"2026-11-13",
+null
+],
+"SCBDV": [
+"2026-11-13",
+null
+],
+"SCBDVA": [
+"2026-11-13",
+null
+],
+"SCBEMBOND": [
+"2026-11-13",
+null
+],
+"SCBEMBOND(A)": [
+"2026-11-13",
+null
+],
+"SCBEQUALA": [
+"2026-11-13",
+null
+],
+"SCBEQUALD": [
+"2026-11-13",
+null
+],
+"SCBEUEQ": [
+"2026-11-13",
+null
+],
+"SCBEUEQA": [
+"2026-11-13",
+null
+],
+"SCBEUROPE(A)": [
+"2026-11-13",
+null
+],
+"SCBEUROPE(D)": [
+"2026-11-13",
+null
+],
+"SCBEUSM": [
+"2026-11-13",
+null
+],
+"SCBEUSMD": [
+"2026-11-13",
+null
+],
+"SCBEV(A)": [
+"2026-11-13",
+null
+],
+"SCBEV(D)": [
+"2026-11-13",
+null
+],
+"SCBFINA": [
+"2026-11-13",
+null
+],
+"SCBFIND": [
+"2026-11-13",
+null
+],
+"SCBFINTECH(A)": [
+"2026-11-13",
+null
+],
+"SCBFINTECH(D)": [
+"2026-11-13",
+null
+],
+"SCBFIXEDA": [
+"2026-11-13",
+null
+],
+"SCBFIXEDD": [
+"2026-11-13",
+null
+],
+"SCBFLX": [
+"2026-11-13",
+null
+],
+"SCBFP": [
+"2026-11-13",
+null
+],
+"SCBFPD": [
+"2026-11-13",
+null
+],
+"SCBGA(A)": [
+"2026-11-13",
+null
+],
+"SCBGA(D)": [
+"2026-11-13",
+null
+],
+"SCBGEARA": [
+"2026-11-13",
+null
+],
+"SCBGEARD": [
+"2026-11-13",
+null
+],
+"SCBGEESGA": [
+"2026-11-13",
+null
+],
+"SCBGEESGD": [
+"2026-11-13",
+null
+],
+"SCBGENOME(A)": [
+"2026-11-13",
+null
+],
+"SCBGENOME(D)": [
+"2026-11-13",
+null
+],
+"SCBGEX(A)": [
+"2026-11-13",
+null
+],
+"SCBGEX(D)": [
+"2026-11-13",
+null
+],
+"SCBGHC": [
+"2026-11-13",
+null
+],
+"SCBGHCA": [
+"2026-11-13",
+null
+],
+"SCBGIFA": [
+"2026-11-13",
+null
+],
+"SCBGIFD": [
+"2026-11-13",
+null
+],
+"SCBGMLA": [
+"2026-11-13",
+null
+],
+"SCBGMLD": [
+"2026-11-13",
+null
+],
+"SCBGOFIX(A)": [
+"2026-11-13",
+null
+],
+"SCBGOLD": [
+"2026-11-13",
+null
+],
+"SCBGOLDD": [
+"2026-11-13",
+null
+],
+"SCBGPROP": [
+"2026-11-13",
+null
+],
+"SCBGPROPA": [
+"2026-11-13",
+null
+],
+"SCBGQUAL(A)": [
+"2026-11-13",
+null
+],
+"SCBGQUAL(D)": [
+"2026-11-13",
+null
+],
+"SCBGVALUE(A)": [
+"2026-11-13",
+null
+],
+"SCBGVALUE(D)": [
+"2026-11-13",
+null
+],
+"SCBIHEALTH(A)": [
+"2026-11-13",
+null
+],
+"SCBIHEALTH(D)": [
+"2026-11-13",
+null
+],
+"SCBINDEQ(A)": [
+"2026-11-13",
+null
+],
+"SCBINDEQ(D)": [
+"2026-11-13",
+null
+],
+"SCBINDIA": [
+"2026-11-13",
+null
+],
+"SCBINDIAA": [
+"2026-11-13",
+null
+],
+"SCBINDO(A)": [
+"2026-11-13",
+null
+],
+"SCBINDO(D)": [
+"2026-11-13",
+null
+],
+"SCBINNO(A)": [
+"2026-11-13",
+null
+],
+"SCBINNO(D)": [
+"2026-11-13",
+null
+],
+"SCBJAPAN(A)": [
+"2026-11-13",
+null
+],
+"SCBJAPAN(D)": [
+"2026-11-13",
+null
+],
+"SCBJPSMA": [
+"2026-11-13",
+null
+],
+"SCBJPSMD": [
+"2026-11-13",
+null
+],
+"SCBLARGEA": [
+"2026-11-13",
+null
+],
+"SCBLARGED": [
+"2026-11-13",
+null
+],
+"SCBLOWBETA(A)": [
+"2026-11-13",
+null
+],
+"SCBLOWBETA(D)": [
+"2026-11-13",
+null
+],
+"SCBLT3": [
+"2026-11-13",
+null
+],
+"SCBLT4": [
+"2026-11-13",
+null
+],
+"SCBLTS": [
+"2026-11-13",
+null
+],
+"SCBLTSEA": [
+"2026-11-13",
+null
+],
+"SCBLTSEA-2020": [
+"2026-11-13",
+null
+],
+"SCBLTSED": [
+"2026-11-13",
+null
+],
+"SCBLTSED-2020": [
+"2026-11-13",
+null
+],
+"SCBLTSETA": [
+"2026-11-13",
+null
+],
+"SCBLTSETA-2020": [
+"2026-11-13",
+null
+],
+"SCBLTSETD": [
+"2026-11-13",
+null
+],
+"SCBLTSETD-2020": [
+"2026-11-13",
+null
+],
+"SCBLTT": [
+"2026-11-13",
+null
+],
+"SCBMEGA(A)": [
+"2026-11-13",
+null
+],
+"SCBMEGA(D)": [
+"2026-11-13",
+null
+],
+"SCBMILDA": [
+"2026-11-13",
+null
+],
+"SCBMILDD": [
+"2026-11-13",
+null
+],
+"SCBMLCAA": [
+"2026-11-13",
+null
+],
+"SCBMLCAD": [
+"2026-11-13",
+null
+],
+"SCBMLTA": [
+"2026-11-13",
+null
+],
+"SCBMLTD": [
+"2026-11-13",
+null
+],
+"SCBMOMENTA": [
+"2026-11-13",
+null
+],
+"SCBMPLUSA": [
+"2026-11-13",
+null
+],
+"SCBMPLUSD": [
+"2026-11-13",
+null
+],
+"SCBNDQ(A)": [
+"2026-11-13",
+null
+],
+"SCBNDQ(D)": [
+"2026-11-13",
+null
+],
+"SCBNDQPIN(A)": [
+"2026-11-13",
+null
+],
+"SCBNDQPIN(D)": [
+"2026-11-13",
+null
+],
+"SCBNEXT(A)": [
+"2026-11-13",
+null
+],
+"SCBNEXT(D)": [
+"2026-11-13",
+null
+],
+"SCBNK225": [
+"2026-11-13",
+null
+],
+"SCBNK225D": [
+"2026-11-13",
+null
+],
+"SCBOIL": [
+"2026-11-13",
+null
+],
+"SCBOILD": [
+"2026-11-13",
+null
+],
+"SCBOPPA": [
+"2026-11-13",
+null
+],
+"SCBOPPD": [
+"2026-11-13",
+null
+],
+"SCBPGF": [
+"2026-11-13",
+null
+],
+"SCBPGFD": [
+"2026-11-13",
+null
+],
+"SCBPINA": [
+"2026-11-13",
+null
+],
+"SCBPIND": [
+"2026-11-13",
+null
+],
+"SCBPMO": [
+"2026-11-13",
+null
+],
+"SCBPMOA": [
+"2026-11-13",
+null
+],
+"SCBPOPA": [
+"2026-11-13",
+null
+],
+"SCBPOPD": [
+"2026-11-13",
+null
+],
+"SCBQUALITYA": [
+"2026-11-13",
+null
+],
+"SCBQUALITYD": [
+"2026-11-13",
+null
+],
+"SCBRAAA": [
+"2026-11-13",
+null
+],
+"SCBRAAD": [
+"2026-11-13",
+null
+],
+"SCBRARE(A)": [
+"2026-11-13",
+null
+],
+"SCBRARE(D)": [
+"2026-11-13",
+null
+],
+"SCBRF": [
+"2026-11-13",
+null
+],
+"SCBROBOA": [
+"2026-11-13",
+null
+],
+"SCBROBOD": [
+"2026-11-13",
+null
+],
+"SCBRS2000(A)": [
+"2026-11-13",
+null
+],
+"SCBRS2000(D)": [
+"2026-11-13",
+null
+],
+"SCBSE": [
+"2026-11-13",
+null
+],
+"SCBSEA": [
+"2026-11-13",
+null
+],
+"SCBSEMI(A)": [
+"2026-11-13",
+null
+],
+"SCBSEMI(D)": [
+"2026-11-13",
+null
+],
+"SCBSET": [
+"2026-11-13",
+null
+],
+"SCBSETD": [
+"2026-11-13",
+null
+],
+"SCBSFF": [
+"2026-11-13",
+null
+],
+"SCBSMART2": [
+"2026-11-13",
+null
+],
+"SCBSMART2A": [
+"2026-11-13",
+null
+],
+"SCBSMART3": [
+"2026-11-13",
+null
+],
+"SCBSMART3A": [
+"2026-11-13",
+null
+],
+"SCBSMART4": [
+"2026-11-13",
+null
+],
+"SCBSMART4A": [
+"2026-11-13",
+null
+],
+"SCBSPACE(A)": [
+"2026-11-13",
+null
+],
+"SCBSPACE(D)": [
+"2026-11-13",
+null
+],
+"SCBSPICYA": [
+"2026-11-13",
+null
+],
+"SCBSPICYD": [
+"2026-11-13",
+null
+],
+"SCBSPLUSA": [
+"2026-11-13",
+null
+],
+"SCBSPLUSD": [
+"2026-11-13",
+null
+],
+"SCBST555B": [
+"2026-11-13",
+null
+],
+"SCBTEQ": [
+"2026-11-13",
+null
+],
+"SCBTEQD": [
+"2026-11-13",
+null
+],
+"SCBTHAICGA": [
+"2026-11-13",
+null
+],
+"SCBTHAICGD": [
+"2026-11-13",
+null
+],
+"SCBTMF": [
+"2026-11-13",
+null
+],
+"SCBTMFPLUS-A": [
+"2026-11-13",
+null
+],
+"SCBTRAVEL(A)": [
+"2026-11-13",
+null
+],
+"SCBTRAVEL(D)": [
+"2026-11-13",
+null
+],
+"SCBUSAA": [
+"2026-11-13",
+null
+],
+"SCBUSAD": [
+"2026-11-13",
+null
+],
+"SCBUSDYIELD": [
+"2026-11-13",
+null
+],
+"SCBUSHYA": [
+"2026-11-13",
+null
+],
+"SCBUSHYD": [
+"2026-11-13",
+null
+],
+"SCBVALUEA": [
+"2026-11-13",
+null
+],
+"SCBVALUED": [
+"2026-11-13",
+null
+],
+"SCBVIET(A)": [
+"2026-11-13",
+null
+],
+"SCBVIET(D)": [
+"2026-11-13",
+null
+],
+"SCBWINA": [
+"2026-11-13",
+null
+],
+"SCBWIND": [
+"2026-11-13",
+null
+],
+"SCBWIPA": [
+"2026-11-13",
+null
+],
+"SCBWIPD": [
+"2026-11-13",
+null
+],
+"SCBWORLD(A)": [
+"2026-11-13",
+null
+],
+"SCBWORLD(D)": [
+"2026-11-13",
+null
+],
+"SCDF": [
+"2026-11-13",
+null
+],
+"SCIF": [
+"2026-11-13",
+null
+],
+"SCIF2": [
+"2026-11-13",
+null
+],
+"SF4": [
+"2026-11-13",
+null
+],
+"SF5": [
+"2026-11-13",
+null
+],
+"SF7": [
+"2026-11-13",
+null
+],
+"SF8": [
+"2026-11-13",
+null
+],
+"SI5A4": [
+"2026-11-13",
+null
+],
+"SIGNATURE GINCOME-A": [
+"2026-11-13",
+null
+],
+"SIGNATURE GINCOME-D": [
+"2026-11-13",
+null
+],
+"SIGNATURE GINCOME-USD-A": [
+"2026-11-13",
+null
+],
+"SMARTA": [
+"2026-11-13",
+null
+],
+"SPOT33S10": [
+"2026-11-13",
+null
+],
+"SPOT33S11": [
+"2026-11-13",
+null
+],
+"SPOT33S14": [
+"2026-11-13",
+null
+],
+"SPOT33S15": [
+"2026-11-13",
+null
+],
+"SPOT33S7": [
+"2026-11-13",
+null
+],
+"SPOT33S8": [
+"2026-11-13",
+null
+],
+"SSB": [
+"2026-11-13",
+null
+],
+"STD": [
+"2026-11-13",
+null
+],
+"STD2": [
+"2026-11-13",
+null
+],
+"SW-A": [
+"2026-11-13",
+null
+],
+"SYRUS-M": [
+"2026-11-13",
+null
+],
+"TAREIT": [
+"2026-11-13",
+null
+],
+"TBF": [
+"2026-11-13",
+null
+],
+"TBIOTECH": [
+"2026-11-13",
+null
+],
+"TBRAND": [
+"2026-11-13",
+null
+],
+"TCHNEWENGY": [
+"2026-11-13",
+null
+],
+"TCHSTRATEGY": [
+"2026-11-13",
+null
+],
+"TCHTECH-A": [
+"2026-11-13",
+null
+],
+"TCIEZERO": [
+"2026-11-13",
+null
+],
+"TCLOUD": [
+"2026-11-13",
+null
+],
+"TCMF": [
+"2026-11-13",
+null
+],
+"TCMFENJOY": [
+"2026-11-13",
+null
+],
+"TCYBER": [
+"2026-11-13",
+null
+],
+"TDEFENSE": [
+"2026-11-13",
+null
+],
+"TDEQFOCUS-A": [
+"2026-11-13",
+null
+],
+"TDEX": [
+"2026-11-13",
+null
+],
+"TDF": [
+"2026-11-13",
+null
+],
+"TDSFOCUS-A": [
+"2026-11-13",
+null
+],
+"TEF": [
+"2026-11-13",
+null
+],
+"TEF-DIV": [
+"2026-11-13",
+null
+],
+"TEMxCH": [
+"2026-11-13",
+null
+],
+"TFIF": [
+"2026-11-13",
+null
+],
+"TFINTECH": [
+"2026-11-13",
+null
+],
+"TGENOME": [
+"2026-11-13",
+null
+],
+"TGHDIGI": [
+"2026-11-13",
+null
+],
+"TGHIDIV": [
+"2026-11-13",
+null
+],
+"TGHSTARP": [
+"2026-11-13",
+null
+],
+"TGINC-A": [
+"2026-11-13",
+null
+],
+"TGOLD": [
+"2026-11-13",
+null
+],
+"TGREIT": [
+"2026-11-13",
+null
+],
+"THANA1": [
+"2026-11-13",
+null
+],
+"TINC-A": [
+"2026-11-13",
+null
+],
+"TISCOAGF": [
+"2026-11-13",
+null
+],
+"TISCOAI": [
+"2026-11-13",
+null
+],
+"TISCOAP": [
+"2026-11-13",
+null
+],
+"TISCOBIG": [
+"2026-11-13",
+null
+],
+"TISCOCHA-A": [
+"2026-11-13",
+null
+],
+"TISCODS-D": [
+"2026-11-13",
+null
+],
+"TISCOEDF": [
+"2026-11-13",
+null
+],
+"TISCOEGF": [
+"2026-11-13",
+null
+],
+"TISCOEQF": [
+"2026-11-13",
+null
+],
+"TISCOFIX-A": [
+"2026-11-13",
+null
+],
+"TISCOFLEX": [
+"2026-11-13",
+null
+],
+"TISCOFLEXP": [
+"2026-11-13",
+null
+],
+"TISCOGC": [
+"2026-11-13",
+null
+],
+"TISCOGEM": [
+"2026-11-13",
+null
+],
+"TISCOGIF-A": [
+"2026-11-13",
+null
+],
+"TISCOHD-D": [
+"2026-11-13",
+null
+],
+"TISCOINA-A": [
+"2026-11-13",
+null
+],
+"TISCOJP": [
+"2026-11-13",
+null
+],
+"TISCOMS-A": [
+"2026-11-13",
+null
+],
+"TISCOOIL": [
+"2026-11-13",
+null
+],
+"TISCOSTF": [
+"2026-11-13",
+null
+],
+"TISCOUS-A": [
+"2026-11-13",
+null
+],
+"TISCOWB-A": [
+"2026-11-13",
+null
+],
+"TISTECH-A": [
+"2026-11-13",
+null
+],
+"TLA-GFIX": [
+"2026-11-13",
+null
+],
+"TLDEFENSE": [
+"2026-11-13",
+null
+],
+"TLDIVEQ-D": [
+"2026-11-13",
+null
+],
+"TLEQ-THAICG": [
+"2026-11-13",
+null
+],
+"TLFLEX": [
+"2026-11-13",
+null
+],
+"TLFVMR-ASIAX": [
+"2026-11-13",
+null
+],
+"TLGOLDPLUS": [
+"2026-11-13",
+null
+],
+"TLNDQINCOME-H-X": [
+"2026-11-13",
+null
+],
+"TLNDQINCOME-UH-X": [
+"2026-11-13",
+null
+],
+"TLQUANT-GROW-A": [
+"2026-11-13",
+null
+],
+"TLSEMICON-UH": [
+"2026-11-13",
+null
+],
+"TLTECH-H": [
+"2026-11-13",
+null
+],
+"TLTECH-UH": [
+"2026-11-13",
+null
+],
+"TLUS500-H": [
+"2026-11-13",
+null
+],
+"TLUS500-UH-A": [
+"2026-11-13",
+null
+],
+"TLUSHD-H": [
+"2026-11-13",
+null
+],
+"TLUSHD-UH": [
+"2026-11-13",
+null
+],
+"TLUSHG-H-X": [
+"2026-11-13",
+null
+],
+"TLUSHG-UH-X": [
+"2026-11-13",
+null
+],
+"TLUSNDQ-H-A": [
+"2026-11-13",
+null
+],
+"TLUSNDQ-UH-A": [
+"2026-11-13",
+null
+],
+"TLWORLD-X": [
+"2026-11-13",
+null
+],
+"TMSFOCUS-A": [
+"2026-11-13",
+null
+],
+"TNASDAQ-A": [
+"2026-11-13",
+null
+],
+"TNEWENGY": [
+"2026-11-13",
+null
+],
+"TNEXTGEN-A": [
+"2026-11-13",
+null
+],
+"TNP": [
+"2026-11-13",
+null
+],
+"TOP11JPN": [
+"2026-11-13",
+null
+],
+"TOP11USA": [
+"2026-11-13",
+null
+],
+"TRAREEARTH": [
+"2026-11-13",
+null
+],
+"TS": [
+"2026-11-13",
+null
+],
+"TSF-A": [
+"2026-11-13",
+null
+],
+"TSILVER": [
+"2026-11-13",
+null
+],
+"TTHREIT": [
+"2026-11-13",
+null
+],
+"TUSFIX": [
+"2026-11-13",
+null
+],
+"TUSMS": [
+"2026-11-13",
+null
+],
+"TUSREIT": [
+"2026-11-13",
+null
+],
+"TUSTECH-A": [
+"2026-11-13",
+null
+],
+"TUSTREASURY": [
+"2026-11-13",
+null
+],
+"TUSUTIL": [
+"2026-11-13",
+null
+],
+"TVIETNAM": [
+"2026-11-13",
+null
+],
+"TW-BAL": [
+"2026-11-13",
+null
+],
+"TW-E20": [
+"2026-11-13",
+null
+],
+"U-WXUSFX": [
+"2026-11-13",
+null
+],
+"UAI": [
+"2026-11-13",
+null
+],
+"UBOT": [
+"2026-11-13",
+null
+],
+"UCHINA": [
+"2026-11-13",
+null
+],
+"UCI": [
+"2026-11-13",
+null
+],
+"UDAILY": [
+"2026-11-13",
+null
+],
+"UEMIF-N": [
+"2026-11-13",
+null
+],
+"UEV": [
+"2026-11-13",
+null
+],
+"UFFF": [
+"2026-11-13",
+null
+],
+"UFIN-N": [
+"2026-11-13",
+null
+],
+"UGEAR": [
+"2026-11-13",
+null
+],
+"UGFT": [
+"2026-11-13",
+null
+],
+"UGFT-USD": [
+"2026-11-13",
+null
+],
+"UGIS-N": [
+"2026-11-13",
+null
+],
+"UGISFX-N": [
+"2026-11-13",
+null
+],
+"UGMAC": [
+"2026-11-13",
+null
+],
+"UGOLD-USD": [
+"2026-11-13",
+null
+],
+"UGQG": [
+"2026-11-13",
+null
+],
+"UGSTAR-D": [
+"2026-11-13",
+null
+],
+"UHERO": [
+"2026-11-13",
+null
+],
+"UIDPLUS": [
+"2026-11-13",
+null
+],
+"UIFT-N": [
+"2026-11-13",
+null
+],
+"UIFT-USD": [
+"2026-11-13",
+null
+],
+"UINC-N": [
+"2026-11-13",
+null
+],
+"UINFRA-N": [
+"2026-11-13",
+null
+],
+"UJAZZ": [
+"2026-11-13",
+null
+],
+"UMIX-DIV-D": [
+"2026-11-13",
+null
+],
+"UMIX-DIV-LD": [
+"2026-11-13",
+null
+],
+"UNF": [
+"2026-11-13",
+null
+],
+"UNI": [
+"2026-11-13",
+null
+],
+"UOBID": [
+"2026-11-13",
+null
+],
+"UOBSA": [
+"2026-11-13",
+null
+],
+"UOBSA-D": [
+"2026-11-13",
+null
+],
+"UOBSAI": [
+"2026-11-13",
+null
+],
+"UOBSAS100": [
+"2026-11-13",
+null
+],
+"UOBSAS100D": [
+"2026-11-13",
+null
+],
+"UOBSC": [
+"2026-11-13",
+null
+],
+"UOBSD": [
+"2026-11-13",
+null
+],
+"UOBSG-D": [
+"2026-11-13",
+null
+],
+"UOBSG-N": [
+"2026-11-13",
+null
+],
+"UOBSGC": [
+"2026-11-13",
+null
+],
+"UOBSHY": [
+"2026-11-13",
+null
+],
+"UOBSMG": [
+"2026-11-13",
+null
+],
+"UPINCM-N": [
+"2026-11-13",
+null
+],
+"UPOP": [
+"2026-11-13",
+null
+],
+"UQI-N": [
+"2026-11-13",
+null
+],
+"UROCK": [
+"2026-11-13",
+null
+],
+"USDAILY": [
+"2026-11-13",
+null
+],
+"USDREADY": [
+"2026-11-13",
+null
+],
+"USHY": [
+"2026-11-13",
+null
+],
+"USI": [
+"2026-11-13",
+null
+],
+"UST-N": [
+"2026-11-13",
+null
+],
+"USUS": [
+"2026-11-13",
+null
+],
+"UTCG-N": [
+"2026-11-13",
+null
+],
+"UTHAICG": [
+"2026-11-13",
+null
+],
+"UTSME": [
+"2026-11-13",
+null
+],
+"UVALUE-DIV-D": [
+"2026-11-13",
+null
+],
+"UVALUE-DIV-LD": [
+"2026-11-13",
+null
+],
+"UVO": [
+"2026-11-13",
+null
+],
+"UWEQP": [
+"2026-11-13",
+null
+],
+"X-DAILY": [
+"2026-11-13",
+null
+],
+"X-EMBOND": [
+"2026-11-13",
+null
+],
+"X-EQPRO": [
+"2026-11-13",
+null
+],
+"X-JPTOPTECH": [
+"2026-11-13",
+null
+],
+"X-NUCTECH": [
+"2026-11-13",
+null
+],
+"X-Plus": [
+"2026-11-13",
+null
+],
+"X-SEQS-RA": [
+"2026-11-13",
+null
+],
+"X-SEQS-RD": [
+"2026-11-13",
+null
+],
+"X-VOLT": [
+"2026-11-13",
+null
+],
+"tsp1-preserver": [
+"2026-11-13",
+null
+],
+"tsp2-nurturer": [
+"2026-11-13",
+null
+],
+"tsp3-balancer": [
+"2026-11-13",
+null
+],
+"tsp4-explorer": [
+"2026-11-13",
+null
+],
+"tsp5-gogetter": [
+"2026-11-13",
+null
+]
+}
