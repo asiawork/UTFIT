@@ -21,24 +21,24 @@
     <div class="hero-art">
       <svg viewBox="0 0 480 420" aria-hidden="true">
         <defs>
-          <linearGradient id="hc" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2a3c9c"/><stop offset="1" stop-color="#121a44"/></linearGradient>
-          <linearGradient id="hk" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4c6bff"/><stop offset="1" stop-color="#8b6cff"/></linearGradient>
-          <linearGradient id="hd" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3ec6f2"/><stop offset="1" stop-color="#4c6bff"/></linearGradient>
-          <filter id="hs" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#000" flood-opacity=".45"/></filter>
+          <linearGradient id="hc" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--c1)"/><stop offset="1" style="stop-color:var(--c2)"/></linearGradient>
+          <linearGradient id="hk" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--k1)"/><stop offset="1" style="stop-color:var(--k2)"/></linearGradient>
+          <linearGradient id="hd" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--g3)"/><stop offset="1" style="stop-color:var(--k1)"/></linearGradient>
+          <filter id="hs" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="18" stdDeviation="18" style="flood-color:var(--sh)" style="flood-opacity:var(--sho)"/></filter>
         </defs>
         <circle cx="300" cy="215" r="175" fill="url(#hc)" opacity=".9"/>
         <g filter="url(#hs)">
-          <rect x="196" y="34" width="212" height="352" rx="30" fill="#111b3d" stroke="#2a3870"/>
+          <rect x="196" y="34" width="212" height="352" rx="30" style="fill:var(--panel)" style="stroke:var(--panel-ln)"/>
         </g>
-        <rect x="222" y="62" width="70" height="9" rx="4.5" fill="#eef1ff" opacity=".85"/>
-        <rect x="222" y="80" width="44" height="7" rx="3.5" fill="#3a4c99"/>
+        <rect x="222" y="62" width="70" height="9" rx="4.5" style="fill:var(--ink)" opacity=".85"/>
+        <rect x="222" y="80" width="44" height="7" rx="3.5" style="fill:var(--p-200)"/>
         <g transform="rotate(-90 302 160)" fill="none" stroke-width="18">
-          <circle cx="302" cy="160" r="42" stroke="#1d2a5c"/>
+          <circle cx="302" cy="160" r="42" style="stroke:var(--p-100)"/>
           <circle cx="302" cy="160" r="42" stroke="url(#hk)" stroke-dasharray="120 264"/>
           <circle cx="302" cy="160" r="42" stroke="url(#hd)" stroke-dasharray="78 264" stroke-dashoffset="-124"/>
           <circle cx="302" cy="160" r="42" stroke="#2fd39a" stroke-dasharray="46 264" stroke-dashoffset="-206"/>
         </g>
-        <g fill="#4c6bff"><rect x="230" y="300" width="14" height="52" rx="5"/><rect x="258" y="272" width="14" height="80" rx="5" opacity=".55"/><rect x="286" y="288" width="14" height="64" rx="5"/><rect x="314" y="256" width="14" height="96" rx="5" opacity=".55"/><rect x="342" y="276" width="14" height="76" rx="5"/><rect x="370" y="244" width="14" height="108" rx="5" fill="#2fd39a"/></g>
+        <g style="fill:var(--bar)"><rect x="230" y="300" width="14" height="52" rx="5"/><rect x="258" y="272" width="14" height="80" rx="5" opacity=".55"/><rect x="286" y="288" width="14" height="64" rx="5"/><rect x="314" y="256" width="14" height="96" rx="5" opacity=".55"/><rect x="342" y="276" width="14" height="76" rx="5"/><rect x="370" y="244" width="14" height="108" rx="5" fill="#2fd39a"/></g>
         <g filter="url(#hs)">
           <rect x="34" y="214" width="250" height="150" rx="22" fill="url(#hk)" opacity=".94"/>
         </g>
