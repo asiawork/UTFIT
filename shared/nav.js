@@ -41,7 +41,9 @@
   if (title) parts.push(`<span class="sep">/</span><span class="cur">${esc(title)}</span>`);
   const ICON = { light: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 13A9 9 0 1 1 11 3a7 7 0 0 0 10 10Z"/></svg>', dark: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>' };
   const themeBtn = title ? "" : `<button class="theme" type="button" aria-label="สลับธีมสว่าง/มืด">${ICON[theme] || ICON.light}</button>`;
-  parts.push(`<span class="links">${Object.entries(SECT).map(([k, [n, p]]) => `<a href="${root}${p}"${k === secKey ? ' class="on"' : ""}>${esc(n)}</a>`).join("")}${themeBtn}</span>`);
+  // หน้าแรก: ปุ่มธีมอย่างเดียว · หน้าหมวด: ลิงก์หมวด + ปุ่มธีม · หน้าเครื่องมือ: ไม่มีฝั่งขวา (ใช้ลำดับหน้าทางซ้าย)
+  const catLinks = sec && !title ? Object.entries(SECT).map(([k, [n, p]]) => `<a href="${root}${p}"${k === secKey ? ' class="on"' : ""}>${esc(n)}</a>`).join("") : "";
+  if (catLinks || themeBtn) parts.push(`<span class="links">${catLinks}${themeBtn}</span>`);
   const bar = document.createElement("nav");
   bar.className = "utfit-nav"; bar.setAttribute("aria-label", "เมนู UTFIT");
   bar.innerHTML = `<div class="in">${parts.join("")}</div>`;
