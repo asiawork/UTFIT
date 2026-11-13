@@ -11,7 +11,7 @@
 <script src="shared/atf-store.js"></script>
 <script src="shared/ui.js"></script>
 </head>
-<body>
+<body class="home">
 <main class="wrap">
   <section class="hero">
     <div>
@@ -78,6 +78,15 @@
   <footer class="foot">UTFIT</footer>
 </main>
 <script>
+// แต่ละหมวดโชว์เครื่องมือไม่เกิน 3 อัน ที่เหลือรวมเป็น "ดูทั้งหมด" ไปหน้าหมวด หน้าแรกจะได้พอดีจอเสมอ
+const MAX_SUB = 3;
+document.querySelectorAll(".cat").forEach(cat => {
+  const lis = [...cat.querySelectorAll("ul > li")];
+  if (lis.length <= MAX_SUB) return;
+  lis.slice(MAX_SUB - 1).forEach(li => li.hidden = true);
+  const href = cat.querySelector(".cat-h").getAttribute("href");
+  cat.querySelector("ul").insertAdjacentHTML("beforeend", `<li class="more"><a href="${href}">ดูทั้งหมด ${lis.length} เครื่องมือ<span data-i="arrow"></span></a></li>`);
+});
 document.querySelectorAll("[data-i]").forEach(e => e.innerHTML = UI.icon(e.dataset.i));
 document.querySelectorAll("[data-art]").forEach(e => e.outerHTML = UI.art(e.dataset.art));
 (async () => {

@@ -129,3 +129,19 @@ footer.foot{margin:80px 0 32px;color:var(--mute);font-size:13px}
 .u-loading i{width:8px;height:8px;border-radius:50%;background:#2f56ff;box-shadow:0 0 0 0 rgba(47,86,255,.5);animation:u-pulse 1.6s infinite}
 @keyframes u-pulse{0%{box-shadow:0 0 0 0 rgba(47,86,255,.45)}70%{box-shadow:0 0 0 7px rgba(47,86,255,0)}100%{box-shadow:0 0 0 0 rgba(47,86,255,0)}}
 @media (prefers-reduced-motion:reduce){.u-loading i{animation:none}}
+
+/* ---------- หน้าแรกพอดีจอ desktop ---------- */
+@media (min-width:861px){
+  body.home main{min-height:calc(100vh - 66px);display:flex;flex-direction:column}
+  body.home .hero{min-height:0;padding:clamp(20px,4vh,48px) 0 0;grid-template-columns:1.2fr 1fr}
+  body.home .hero h1{font-size:clamp(44px,6vh,60px)}
+  body.home .hero-art{max-width:clamp(260px,38vh,420px)}
+  body.home .cats{margin-top:clamp(16px,3vh,36px)}
+  body.home .cat{padding:clamp(20px,3vh,30px) 30px;gap:clamp(12px,2vh,20px)}
+  body.home .cat-h{gap:clamp(10px,1.8vh,18px)}
+  body.home .cat .art{width:clamp(44px,6vh,60px);height:clamp(44px,6vh,60px)}
+  body.home .cat li a{padding:clamp(8px,1.3vh,12px) 10px}
+  body.home .foot{margin:auto 0 20px;padding-top:16px}
+}
+.cat li.more a{color:var(--p);font-weight:600}
+.cat li.more a::before{background:var(--p-50);content:"+";display:grid;place-items:center;font-size:13px;line-height:1;color:var(--p)}
