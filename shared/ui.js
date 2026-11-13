@@ -15,7 +15,7 @@ window.UI = (() => {
     file: '<path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8l-5-5Z"/><path d="M14 3v5h5"/>',
   };
   let gid = 0;
-  const GRAD = (id) => `<defs><linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="2" y1="3" x2="22" y2="21"><stop offset="0" stop-color="#1f5eff"/><stop offset=".55" stop-color="#6a5cff"/><stop offset="1" stop-color="#18c4f5"/></linearGradient></defs>`;
+  const GRAD = (id) => `<defs><linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="2" y1="3" x2="22" y2="21"><stop offset="0" stop-color="#5a5ff5"/><stop offset=".6" stop-color="#8b6cff"/><stop offset="1" stop-color="#3ec6f2"/></linearGradient></defs>`;
   /** ไอคอนเส้น · grad = เส้นไล่สีน้ำเงิน-ม่วง-ฟ้า */
   const icon = (n, cls = "ico", grad = false) => {
     const id = "ug" + (++gid);
@@ -25,9 +25,9 @@ window.UI = (() => {
   const ART = {
     // Auto Top Funds: พอร์ต = โดนัทสัดส่วนสินทรัพย์
     portfolio: (id) => `<svg viewBox="0 0 64 64" class="art" aria-hidden="true">
-      <defs><linearGradient id="${id}a" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1f5eff"/><stop offset="1" stop-color="#6a5cff"/></linearGradient>
-      <linearGradient id="${id}b" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#18c4f5"/><stop offset="1" stop-color="#1f5eff"/></linearGradient>
-      <linearGradient id="${id}c" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a48bff"/><stop offset="1" stop-color="#6a5cff"/></linearGradient></defs>
+      <defs><linearGradient id="${id}a" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5a5ff5"/><stop offset="1" stop-color="#8b6cff"/></linearGradient>
+      <linearGradient id="${id}b" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3ec6f2"/><stop offset="1" stop-color="#5a5ff5"/></linearGradient>
+      <linearGradient id="${id}c" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#b4a6ff"/><stop offset="1" stop-color="#8b6cff"/></linearGradient></defs>
       <g fill="none" stroke-width="12" transform="rotate(-90 32 32)">
         <circle cx="32" cy="32" r="22" stroke="url(#${id}a)" stroke-dasharray="62 138.2"/>
         <circle cx="32" cy="32" r="22" stroke="url(#${id}b)" stroke-dasharray="41 138.2" stroke-dashoffset="-64"/>
@@ -35,7 +35,7 @@ window.UI = (() => {
       </g></svg>`,
     // รายกองทุน: factsheet ของกองหนึ่งกอง (กราฟ NAV + บรรทัดข้อมูล)
     factsheet: (id) => `<svg viewBox="0 0 64 64" class="art" aria-hidden="true">
-      <defs><linearGradient id="${id}a" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1f5eff"/><stop offset=".6" stop-color="#6a5cff"/><stop offset="1" stop-color="#18c4f5"/></linearGradient></defs>
+      <defs><linearGradient id="${id}a" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5a5ff5"/><stop offset=".6" stop-color="#8b6cff"/><stop offset="1" stop-color="#3ec6f2"/></linearGradient></defs>
       <rect x="10" y="5" width="44" height="54" rx="9" fill="url(#${id}a)"/>
       <path d="M18 34l7-7 6 5 9-11 6 5" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
       <rect x="18" y="13" width="16" height="4" rx="2" fill="#fff" opacity=".9"/>

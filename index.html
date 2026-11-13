@@ -14,22 +14,57 @@
 <body>
 <main class="wrap">
   <section class="hero">
-    <h1>เครื่องมือทีม Mutual Fund</h1>
-    <div class="meta" id="meta"></div>
+    <div>
+      <div class="kicker">Mutual Fund Team</div>
+      <h1>เครื่องมือทีม<br><span>Mutual Fund</span></h1>
+    </div>
+    <div class="hero-art">
+      <svg viewBox="0 0 480 420" aria-hidden="true">
+        <defs>
+          <linearGradient id="hc" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#dfe1ff"/><stop offset="1" stop-color="#9ea2ff"/></linearGradient>
+          <linearGradient id="hk" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5a5ff5"/><stop offset="1" stop-color="#8b6cff"/></linearGradient>
+          <linearGradient id="hd" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3ec6f2"/><stop offset="1" stop-color="#5a5ff5"/></linearGradient>
+          <filter id="hs" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#5a5ff5" flood-opacity=".22"/></filter>
+        </defs>
+        <circle cx="300" cy="215" r="175" fill="url(#hc)" opacity=".75"/>
+        <g filter="url(#hs)">
+          <rect x="196" y="34" width="212" height="352" rx="30" fill="#fff"/>
+        </g>
+        <rect x="222" y="62" width="70" height="9" rx="4.5" fill="#151a3d" opacity=".85"/>
+        <rect x="222" y="80" width="44" height="7" rx="3.5" fill="#c9ccff"/>
+        <g transform="rotate(-90 302 160)" fill="none" stroke-width="18">
+          <circle cx="302" cy="160" r="42" stroke="#eceeff"/>
+          <circle cx="302" cy="160" r="42" stroke="url(#hk)" stroke-dasharray="120 264"/>
+          <circle cx="302" cy="160" r="42" stroke="url(#hd)" stroke-dasharray="78 264" stroke-dashoffset="-124"/>
+          <circle cx="302" cy="160" r="42" stroke="#2fd39a" stroke-dasharray="46 264" stroke-dashoffset="-206"/>
+        </g>
+        <g fill="#5a5ff5"><rect x="230" y="300" width="14" height="52" rx="5"/><rect x="258" y="272" width="14" height="80" rx="5" opacity=".55"/><rect x="286" y="288" width="14" height="64" rx="5"/><rect x="314" y="256" width="14" height="96" rx="5" opacity=".55"/><rect x="342" y="276" width="14" height="76" rx="5"/><rect x="370" y="244" width="14" height="108" rx="5" fill="#2fd39a"/></g>
+        <g filter="url(#hs)">
+          <rect x="34" y="214" width="250" height="150" rx="22" fill="url(#hk)" opacity=".94"/>
+        </g>
+        <rect x="58" y="238" width="86" height="9" rx="4.5" fill="#fff" opacity=".9"/>
+        <path d="M58 330l34-26 30 14 38-40 32 20 50-36" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="242" cy="262" r="6" fill="#2fd39a"/>
+        <rect x="58" y="344" width="60" height="7" rx="3.5" fill="#fff" opacity=".5"/>
+        <circle cx="90" cy="120" r="14" fill="#2fd39a" opacity=".85"/>
+        <circle cx="440" cy="92" r="9" fill="#3ec6f2"/>
+      </svg>
+    </div>
   </section>
+  <div class="stats" id="stats"></div>
 
   <div class="cats">
     <a class="cat" href="atf/">
-      <span data-art="portfolio"></span>
-      <div class="top"><h2>Auto Top Funds</h2><span class="go" data-i="arrow"></span></div>
+      <div class="top"><span data-art="portfolio"></span><span class="go" data-i="arrow"></span></div>
+      <div><h2>Auto Top Funds</h2><div class="tag" id="atfTag"></div></div>
       <ul>
         <li>Wealth Solution Plan</li>
         <li>เปรียบเทียบ Auto Top Funds กับกองทุน</li>
       </ul>
     </a>
     <a class="cat" href="funds/">
-      <span data-art="factsheet"></span>
-      <div class="top"><h2>รายกองทุน</h2><span class="go" data-i="arrow"></span></div>
+      <div class="top"><span data-art="factsheet"></span><span class="go" data-i="arrow"></span></div>
+      <div><h2>รายกองทุน</h2><div class="tag" id="fundsTag"></div></div>
       <ul>
         <li>กราฟ Weekly</li>
         <li>ค้นหาด้วย Master Fund</li>
@@ -43,12 +78,15 @@
 document.querySelectorAll("[data-i]").forEach(e => e.innerHTML = UI.icon(e.dataset.i));
 document.querySelectorAll("[data-art]").forEach(e => e.outerHTML = UI.art(e.dataset.art));
 (async () => {
+  const $ = id => document.getElementById(id);
   const [nav, wk, file] = await Promise.all([UI.navIndex(""), UI.weekly(""), UI.atfFile()]);
-  const m = [];
-  if (nav) m.push(`NAV ล่าสุด <b>${UI.thDate(nav.navTo)}</b>`);
-  if (wk) m.push(`กราฟ Weekly <b>${UI.thDate(wk.updated)}</b>`);
-  m.push(file ? `ไฟล์ Model Performance <b>พร้อมใช้</b>` : `ไฟล์ Model Performance <b>ยังไม่มีในเครื่องนี้</b>`);
-  document.getElementById("meta").innerHTML = m.map(x => `<span>${x}</span>`).join("");
+  const st = [];
+  if (nav) st.push([nav.count.toLocaleString(), "กองทุนที่มี NAV"]);
+  if (wk) st.push([wk.funds.length, "กอง Top Funds Weekly"]);
+  if (nav) st.push([UI.thDate(nav.navTo), "NAV ล่าสุด"]);
+  $("stats").innerHTML = st.map(([b, s]) => `<div><b>${b}</b><span>${s}</span></div>`).join("");
+  $("atfTag").innerHTML = file ? `<i class="dot ok"></i>ไฟล์ Model Performance พร้อมใช้` : `<i class="dot warn"></i>ยังไม่มีไฟล์ Model Performance ในเครื่องนี้`;
+  if (wk) $("fundsTag").innerHTML = `<i class="dot ok"></i>กราฟ Weekly อัปเดต ${UI.thDate(wk.updated)}`;
 })();
 </script>
 </body>

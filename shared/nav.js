@@ -7,25 +7,25 @@
   const secKey = me.dataset.section, sec = SECT[secKey], title = me.dataset.title;
   const st = document.createElement("style");
   st.textContent = `
-  .utfit-nav{position:sticky;top:0;z-index:60;background:#fff;border-bottom:1px solid #e4e7ee;
-    font:500 14.5px/1 "BLS Text","Anuphan","IBM Plex Sans Thai",system-ui,sans-serif;color:#0b1430}
+  .utfit-nav{position:sticky;top:0;z-index:60;background:rgba(251,251,255,.9);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid #e8e9f5;
+    font:500 14.5px/1 "BLS Text","Anuphan","IBM Plex Sans Thai",system-ui,sans-serif;color:#151a3d}
   .utfit-nav .in{max-width:1120px;margin:0 auto;padding:0 24px;height:60px;display:flex;align-items:center;gap:10px;white-space:nowrap}
   .utfit-nav a{color:inherit;text-decoration:none}
   .utfit-nav .logo{display:flex;align-items:center;gap:9px;font:700 18px/1 "BLS Bold","Anuphan",sans-serif;letter-spacing:.01em}
-  .utfit-nav .mark{width:10px;height:10px;border-radius:3px;background:#1f5eff}
-  .utfit-nav .sep{color:#b5bdd0}
-  .utfit-nav .crumb{color:#6b7690;overflow:hidden;text-overflow:ellipsis}
-  .utfit-nav a.crumb:hover{color:#1f5eff}
-  .utfit-nav .cur{color:#0b1430;font-weight:600;overflow:hidden;text-overflow:ellipsis}
+  .utfit-nav .mark{width:28px;height:28px;border-radius:9px;background:#5a5ff5;color:#fff;display:grid;place-items:center;font-size:14px}
+  .utfit-nav .sep{color:#c9ccff}
+  .utfit-nav .crumb{color:#868ba8;overflow:hidden;text-overflow:ellipsis}
+  .utfit-nav a.crumb:hover{color:#5a5ff5}
+  .utfit-nav .cur{color:#151a3d;font-weight:600;overflow:hidden;text-overflow:ellipsis}
   .utfit-nav .links{margin-left:auto;display:flex;gap:4px}
-  .utfit-nav .links a{padding:9px 14px;border-radius:99px;color:#3a4560;transition:background .15s,color .15s}
-  .utfit-nav .links a:hover{background:#eef3ff;color:#1f5eff}
-  .utfit-nav .links a.on{color:#0b1430;font-weight:600;background:#f4f6fa}
+  .utfit-nav .links a{padding:9px 14px;border-radius:99px;color:#4a5075;transition:background .15s,color .15s}
+  .utfit-nav .links a:hover{background:#f0f1ff;color:#5a5ff5}
+  .utfit-nav .links a.on{color:#5a5ff5;font-weight:600;background:#f0f1ff}
   @media (max-width:720px){.utfit-nav .links{display:none}}
   @media print{.utfit-nav{display:none}}`;
   document.head.appendChild(st);
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-  const parts = [`<a class="logo" href="${root}"><span class="mark"></span>UTFIT</a>`];
+  const parts = [`<a class="logo" href="${root}"><span class="mark">U</span>UTFIT</a>`];
   if (sec && title) parts.push(`<span class="sep">/</span><a class="crumb" href="${root}${sec[1]}">${esc(sec[0])}</a>`);
   if (title) parts.push(`<span class="sep">/</span><span class="cur">${esc(title)}</span>`);
   parts.push(`<span class="links">${Object.entries(SECT).map(([k, [n, p]]) => `<a href="${root}${p}"${k === secKey ? ' class="on"' : ""}>${esc(n)}</a>`).join("")}</span>`);
