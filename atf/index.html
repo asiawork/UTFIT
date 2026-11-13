@@ -29,8 +29,14 @@
   </section>
 
   <div class="tools">
-    <a class="tool" href="wealthplan/" data-need><span class="ic" data-i="stack"></span><b>Wealth Solution Plan</b></a>
-    <a class="tool" href="compare/" data-need><span class="ic" data-i="compare"></span><b>เปรียบเทียบ Auto Top Funds กับกองทุน</b></a>
+    <a class="tool" href="wealthplan/" data-need>
+      <span class="shot"><img src="../shared/previews/wealthplan.jpg" alt="" loading="lazy"></span>
+      <span class="name"><span class="ic" data-i="stack"></span><b>Wealth Solution Plan</b><span class="go" data-g="arrow"></span></span>
+    </a>
+    <a class="tool" href="compare/" data-need>
+      <span class="shot"><img src="../shared/previews/compare.jpg" alt="" loading="lazy"></span>
+      <span class="name"><span class="ic" data-i="compare"></span><b>เปรียบเทียบ Auto Top Funds กับกองทุน</b><span class="go" data-g="arrow"></span></span>
+    </a>
   </div>
   <footer class="foot">ไฟล์ที่อัปโหลดอยู่ในเบราว์เซอร์เครื่องนี้เท่านั้น</footer>
 </main>
@@ -38,6 +44,7 @@
 <script>
 const $ = id => document.getElementById(id);
 document.querySelectorAll("[data-i]").forEach(e => e.innerHTML = UI.icon(e.dataset.i, "ico", !e.closest(".drop")));
+document.querySelectorAll("[data-g]").forEach(e => e.innerHTML = UI.icon(e.dataset.g));
 document.querySelectorAll("[data-art]").forEach(e => e.outerHTML = UI.art(e.dataset.art));
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const TH_MON = ["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];

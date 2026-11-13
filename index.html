@@ -51,7 +51,6 @@
       </svg>
     </div>
   </section>
-  <div class="stats" id="stats"></div>
 
   <div class="cats">
     <a class="cat" href="atf/">
@@ -80,11 +79,7 @@ document.querySelectorAll("[data-art]").forEach(e => e.outerHTML = UI.art(e.data
 (async () => {
   const $ = id => document.getElementById(id);
   const [nav, wk, file] = await Promise.all([UI.navIndex(""), UI.weekly(""), UI.atfFile()]);
-  const st = [];
-  if (nav) st.push([nav.count.toLocaleString(), "กองทุนที่มี NAV"]);
-  if (wk) st.push([wk.funds.length, "กอง Top Funds Weekly"]);
-  if (nav) st.push([UI.thDate(nav.navTo), "NAV ล่าสุด"]);
-  $("stats").innerHTML = st.map(([b, s]) => `<div><b>${b}</b><span>${s}</span></div>`).join("");
+
   $("atfTag").innerHTML = file ? `<i class="dot ok"></i>ไฟล์ Model Performance พร้อมใช้` : `<i class="dot warn"></i>ยังไม่มีไฟล์ Model Performance ในเครื่องนี้`;
   if (wk) $("fundsTag").innerHTML = `<i class="dot ok"></i>กราฟ Weekly อัปเดต ${UI.thDate(wk.updated)}`;
 })();

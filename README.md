@@ -62,7 +62,7 @@ pipelines/              สคริปต์ดึงข้อมูลจา�
    <script src="../../shared/nav.js" data-section="funds" data-title="ชื่อเครื่องมือ"></script>
    ```
    ถ้าใช้ไฟล์ Model Performance เพิ่ม `<script src="../../shared/atf-store.js"></script>` แล้วอ่านด้วย `await UTFIT_ATF.get()` (ได้ `{text, name, savedAt}`)
-3. เพิ่มปุ่มในหน้าหมวด (`atf/index.html` หรือ `funds/index.html`)
+3. เพิ่มการ์ดในหน้าหมวด (`atf/index.html` หรือ `funds/index.html`) โดยก็อปการ์ด `<a class="tool">` ที่มีอยู่ แล้วใส่ภาพตัวอย่างหน้าเครื่องมือ (สัดส่วน 16:10 กว้างประมาณ 960px) ไว้ที่ `shared/previews/`
 
 ## ตั้งค่า GitHub Pages
 
