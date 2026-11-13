@@ -5,8 +5,10 @@
   const THEME_KEY = "utfit-theme";
   let theme = "light"; try { theme = localStorage.getItem(THEME_KEY) || "light"; } catch (e) {}
   const applyTheme = (t) => { document.documentElement.dataset.theme = t; };
-  applyTheme(theme);
   const me = document.currentScript;
+  // หน้าเครื่องมือใช้ธีมสว่างเสมอ (กราฟและไฟล์รายงานเป็นพื้นขาว)
+  if (me.dataset.tool) { document.documentElement.dataset.tool = me.dataset.tool; theme = "light"; }
+  applyTheme(theme);
   const root = me.src.replace(/shared\/nav\.js.*$/, "");
   const SECT = { atf: ["Auto Top Funds", "atf/"], funds: ["รายกองทุน", "funds/"] };
   const secKey = me.dataset.section, sec = SECT[secKey], title = me.dataset.title;

@@ -1,0 +1,64 @@
+/* หน้าตาของหน้าเครื่องมือให้เข้าชุดกับ UTFIT
+   แตะเฉพาะ "กรอบหน้า" (พื้นหลัง หัวหน้า ปุ่ม การ์ด) ไม่แตะกราฟ ตาราง สไลด์ หรือไฟล์ที่ copy/ดาวน์โหลดไปใช้ในรายงาน
+   จึงไม่เปลี่ยนตัวแปรสี (--navy ฯลฯ) ของแต่ละหน้า เพราะกราฟ/สไลด์/PowerPoint อ่านค่าเหล่านั้นอยู่ */
+@font-face{font-family:"UHead";src:local("BLS Bold"),local("BLS-Bold"),local("BLSBold")}
+@font-face{font-family:"UBody";src:local("BLS Text"),local("BLS-Text"),local("BLSText"),local("BLS Text Regular")}
+html[data-tool]{
+  --u-ink:#0f1a3c; --u-ink2:#1f2e5c; --u-blue:#2f56ff; --u-mute:#868ca6; --u-line:#e7e9f2; --u-soft:#f4f6fb;
+  --u-shadow:0 10px 30px rgba(15,26,60,.07);
+  --u-head:"UHead","Anuphan","IBM Plex Sans Thai",system-ui,sans-serif;
+}
+html[data-tool] body{background:radial-gradient(900px 600px at 95% -5%,#eef2fb 0%,rgba(238,242,251,0) 65%),#fff;background-attachment:fixed}
+
+/* ---------- หัวหน้า (กราฟ Weekly / ATF vs รายกอง): จากแถบสีน้ำเงินเป็นหัวข้อใหญ่บนพื้นขาว ---------- */
+html[data-tool=weekly] header,html[data-tool=compare] header{background:transparent;color:var(--u-ink);padding:44px 16px 4px}
+html[data-tool=weekly] header.has-tabs{padding-bottom:4px}
+html[data-tool=weekly] header h1,html[data-tool=compare] header h1{font-family:var(--u-head);font-size:40px;line-height:1.15;letter-spacing:-.025em;color:var(--u-ink)}
+html[data-tool=weekly] header p,html[data-tool=compare] header p{color:var(--u-mute);opacity:1;font-size:15px}
+html[data-tool=weekly] header .asof{background:var(--u-soft);color:var(--u-ink);border-radius:99px;padding:7px 14px;font-weight:600}
+html[data-tool=compare] header .asof{color:var(--u-mute);opacity:1}
+html[data-tool=compare] header a{color:var(--u-blue);opacity:1}
+/* ปุ่มบนหัว (อัปโหลด / ดาวน์โหลด) */
+html[data-tool=compare] .hdrbtn{background:#fff;color:var(--u-ink);border:1px solid var(--u-line);border-radius:12px}
+html[data-tool=compare] .hdrbtn:hover{background:var(--u-soft);border-color:var(--u-ink)}
+html[data-tool=compare] .hdrbtn.has{background:#e7f7ef;color:#0b6b3a;border-color:#bfe8d2}
+html[data-tool=compare] .dlhead{color:var(--u-ink);opacity:1}
+html[data-tool=compare] .dlgrp{background:var(--u-soft);border-radius:14px}
+html[data-tool=compare] .dlname{color:var(--u-ink)}
+
+/* ---------- การ์ดและปุ่ม ---------- */
+html[data-tool=weekly] .card,html[data-tool=compare] .card{border-radius:22px;border:1px solid var(--u-line);box-shadow:var(--u-shadow)}
+html[data-tool=weekly] .btn,html[data-tool=compare] .btn{border-radius:12px}
+html[data-tool=weekly] .btn.primary,html[data-tool=compare] .btn.primary{background:var(--u-ink);border-color:var(--u-ink)}
+html[data-tool=weekly] .btn.primary:hover,html[data-tool=compare] .btn.primary:hover{background:var(--u-ink2)}
+html[data-tool=weekly] .btn.ghost,html[data-tool=compare] .btn.ghost{border-color:var(--u-line);color:var(--u-ink)}
+html[data-tool=weekly] .btn.ghost:hover,html[data-tool=compare] .btn.ghost:hover{border-color:var(--u-ink)}
+/* ปุ่มเลือกกอง (Weekly) */
+html[data-tool=weekly] .chip{border-color:var(--u-line);border-radius:16px}
+html[data-tool=weekly] .chip:hover{border-color:var(--u-ink)}
+html[data-tool=weekly] .chip[aria-pressed="true"]{background:var(--u-ink);border-color:var(--u-ink)}
+html[data-tool=weekly] .head h2{font-family:var(--u-head);color:var(--u-ink)}
+/* หัวข้อย่อยในหน้า ATF vs รายกอง */
+html[data-tool=compare] main h3,html[data-tool=compare] .side h2{color:var(--u-ink)}
+
+/* ---------- Wealth Solution Plan: เฉพาะส่วนกรอกข้อมูล ไม่แตะสไลด์ ---------- */
+html[data-tool=wealthplan] body{background:#fff}
+html[data-tool=wealthplan] .topbar{padding-top:24px}
+html[data-tool=wealthplan] .topbar h1{font-family:var(--u-head);font-size:40px;line-height:1.15;letter-spacing:-.025em;color:var(--u-ink)}
+html[data-tool=wealthplan] .step,html[data-tool=wealthplan] .panel{border-radius:22px;border-color:var(--u-line);box-shadow:var(--u-shadow)}
+html[data-tool=wealthplan] .upbtn{border-radius:12px}
+html[data-tool=wealthplan] .drop{border-radius:22px;border-color:#c3cbe2;background:var(--u-soft)}
+
+/* ---------- ค้นหาด้วย Master Fund: ไม่ใช่หน้ารายงาน ปรับได้ทั้งหน้า ---------- */
+html[data-tool=masterfund]{--ink:#0f1a3c;--lotus:#2f56ff;--wash:#f4f6fb;--line:#e7e9f2}
+html[data-tool=masterfund] body{font-family:"UBody","Anuphan","IBM Plex Sans Thai",system-ui,sans-serif}
+html[data-tool=masterfund] h1{font-family:var(--u-head);font-size:40px;letter-spacing:-.025em}
+html[data-tool=masterfund] .field{border-radius:16px;box-shadow:var(--u-shadow)}
+
+/* ให้แถบเมนูกว้างเท่าเนื้อหาของแต่ละเครื่องมือ (ขอบซ้ายตรงกัน) */
+html[data-tool] .utfit-nav .in{padding:0 16px}
+html[data-tool=weekly] .utfit-nav .in{max-width:1040px}
+html[data-tool=compare] .utfit-nav .in{max-width:1240px}
+html[data-tool=wealthplan] .wrap{max-width:1400px}
+html[data-tool=wealthplan] .utfit-nav .in{max-width:1400px}
+html[data-tool=masterfund] .utfit-nav .in{max-width:1100px;padding:0 24px}
