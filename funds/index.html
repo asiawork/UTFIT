@@ -5,24 +5,66 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>รายกองทุน · UTFIT</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../shared/utfit.css">
 <script src="../shared/nav.js" data-section="funds"></script>
+<script src="../shared/ui.js"></script>
 </head>
 <body>
-<main class="page">
-  <h1>รายกองทุน</h1>
-  <p class="lead">ข้อมูลกองทุนรวมจาก SEC Open API อัปเดตอัตโนมัติ ไม่ต้องอัปโหลดไฟล์</p>
-  <div class="tiles two">
-    <a class="tile sm" href="weekly/">
-      <span class="t">กราฟ Weekly</span>
-      <span class="d">กราฟ NAV ของกองที่แนะนำ สำหรับรายงาน Top Funds Weekly Market Recap · Copy รูปไปวางใน PowerPoint</span>
-    </a>
-    <a class="tile sm" href="masterfund/">
-      <span class="t">ค้นหาด้วย Master Fund</span>
-      <span class="d">ค้นหา master fund แล้วดูว่ากองทุนไทยกองไหนลงทุนอยู่บ้าง</span>
-    </a>
-  </div>
+<main class="wrap">
+  <section class="hero sm">
+    <div>
+      <span class="eyebrow"><i></i>ข้อมูลจาก SEC อัปเดตอัตโนมัติ</span>
+      <h1>รายกองทุน</h1>
+      <p>ดูกราฟกองที่แนะนำ และค้นหากองทุนไทยจาก master fund ไม่ต้องอัปโหลดไฟล์</p>
+    </div>
+    <div class="float" id="float"></div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-h"><div><h2>เครื่องมือ</h2></div></div>
+    <div class="grid two">
+      <a class="card" href="weekly/">
+        <span class="badge-ico" data-i="chart"></span>
+        <h3>กราฟ Weekly</h3>
+        <p class="d">กราฟ NAV ของกองที่แนะนำ สำหรับรายงาน Top Funds Weekly Market Recap · Copy รูปไปวางใน PowerPoint ได้เลย</p>
+        <div class="chips"><span class="chip mute">อัปเดตทุกวันจันทร์ 06:15</span></div>
+        <span class="more">เปิดเครื่องมือ <span data-i="arrow"></span></span>
+      </a>
+      <a class="card" href="masterfund/">
+        <span class="badge-ico v" data-i="search"></span>
+        <h3>ค้นหาด้วย Master Fund</h3>
+        <p class="d">ค้นหา master fund แล้วดูว่ากองทุนไทยกองไหนลงทุนอยู่บ้าง กรองตามประเภท ตลาด และธีม</p>
+        <div class="chips"><span class="chip mute">อัปเดตทุกวันที่ 5 ของเดือน</span></div>
+        <span class="more">เปิดเครื่องมือ <span data-i="arrow"></span></span>
+      </a>
+    </div>
+  </section>
+
+  <section class="sec" id="wkSec" hidden>
+    <div class="sec-h"><div><h2>Top Funds Weekly</h2><p id="wkSub"></p></div></div>
+    <div class="wk" id="wk"></div>
+  </section>
+
+  <footer class="foot">ข้อมูลกองทุนจาก SEC Open API (สำนักงาน ก.ล.ต.) · ผลการดำเนินงานในอดีตไม่ได้เป็นสิ่งยืนยันถึงผลการดำเนินงานในอนาคต</footer>
 </main>
+<script>
+const $ = id => document.getElementById(id);
+document.querySelectorAll("[data-i]").forEach(e => e.innerHTML = UI.icon(e.dataset.i));
+(async () => {
+  const wk = await UI.weekly("../");
+  if (!wk) return;
+  $("wkSec").hidden = false;
+  const asOf = wk.funds.map(f => f.asOf).filter(Boolean).sort().at(-1);
+  $("wkSub").textContent = `ผลตอบแทนตั้งแต่วันที่แนะนำ · NAV ณ ${UI.thDate(asOf)} · กดที่กองเพื่อเปิดกราฟ`;
+  $("wk").innerHTML = wk.funds.map(f => `<a href="weekly/#${encodeURIComponent(f.name)}">
+    <div class="n">${UI.esc(f.name)}</div>
+    <div class="r ${f.since >= 0 ? "pos" : "neg"}">${UI.pct(f.since)}</div>
+    <div class="s">แนะนำ ${UI.thDate(f.rec)} · 1W ${UI.pct(f.w1)}</div></a>`).join("");
+  const up = wk.funds.filter(f => f.since > 0).length;
+  $("float").innerHTML = `<div class="glass"><div class="k">Top Funds Weekly</div><div class="v">${wk.funds.length} กอง</div><div class="s">บวก ${up} · ลบ ${wk.funds.length - up} ตั้งแต่แนะนำ</div></div>
+    <div class="glass"><div class="k">อัปเดตล่าสุด</div><div class="v">${UI.thDate(wk.updated)}</div><div class="s">NAV ณ ${UI.thDate(asOf)}</div></div>`;
+})();
+</script>
 </body>
 </html>

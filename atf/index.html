@@ -5,53 +5,69 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Auto Top Funds · UTFIT</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../shared/utfit.css">
 <script src="../shared/nav.js" data-section="atf"></script>
 <script src="../shared/atf-store.js"></script>
+<script src="../shared/ui.js"></script>
 </head>
 <body>
-<main class="page">
-  <h1>Auto Top Funds</h1>
-  <p class="lead">อัปโหลดไฟล์ Model Performance ครั้งเดียว แล้วใช้ได้ทุกเครื่องมือในหมวดนี้</p>
-
-  <section class="upload">
-    <div class="card">
-      <h3>ไฟล์ Model Performance</h3>
-      <ol class="steps">
-        <li>เปิด <a href="https://tableau.sawasdee.brk1/#/views/All_model_performance/ModelPerformance?:iid=1" target="_blank" rel="noopener">Tableau · Model Performance</a> แล้วเลือกทุกโมเดล</li>
-        <li>กด Download → <b>Data</b> แล้วดาวน์โหลดเป็น CSV</li>
-        <li>ลากไฟล์มาวางในกรอบด้านขวา หรือกดเพื่อเลือกไฟล์</li>
-      </ol>
-      <div class="status" id="status"><span class="k">ยังไม่มีไฟล์ในเครื่องนี้</span></div>
-      <div class="chips" id="models"></div>
-      <div style="margin-top:14px"><button class="btn danger" id="clear" hidden>ล้างไฟล์ออกจากเครื่องนี้</button></div>
-    </div>
+<main class="wrap">
+  <section class="hero sm">
     <div>
+      <span class="eyebrow"><i></i>อัปโหลดครั้งเดียว ใช้ได้ทุกเครื่องมือ</span>
+      <h1>Auto Top Funds</h1>
+      <p>ใส่ไฟล์ Model Performance จาก Tableau แล้วเปิด Wealth Solution Plan หรือหน้าเปรียบเทียบได้ทันที ไม่ต้องอัปโหลดซ้ำ</p>
+    </div>
+    <div class="float" id="float"></div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-h"><div><h2>ไฟล์ Model Performance</h2><p>ไฟล์อยู่ในเบราว์เซอร์เครื่องนี้เท่านั้น ไม่ถูกส่งขึ้นเว็บหรือเก็บใน GitHub</p></div></div>
+    <div class="up">
+      <div class="card">
+        <h3 style="font-size:19px">ดาวน์โหลดจาก Tableau</h3>
+        <ol class="steps">
+          <li><span>เปิด <a href="https://tableau.sawasdee.brk1/#/views/All_model_performance/ModelPerformance?:iid=1" target="_blank" rel="noopener">Tableau · Model Performance</a> แล้วเลือกทุกโมเดล</span></li>
+          <li><span>กด Download → <b>Data</b> แล้วดาวน์โหลดเป็น CSV</span></li>
+          <li><span>ลากไฟล์มาวางในกรอบ หรือกดเพื่อเลือกไฟล์</span></li>
+        </ol>
+        <div class="status" id="status"></div>
+        <div class="chips" id="models"></div>
+        <div style="margin-top:16px"><button class="btn danger" id="clear" hidden>ล้างไฟล์ออกจากเครื่องนี้</button></div>
+      </div>
       <label class="drop" id="drop" tabindex="0">
         <input type="file" id="file" accept=".csv,.txt,text/csv" hidden>
+        <span class="badge-ico" data-i="upload"></span>
         <b id="dropT">เลือกไฟล์ หรือลากไฟล์มาวางที่นี่</b>
-        <div class="s">ไฟล์ .csv ที่ดาวน์โหลดจาก Tableau</div>
+        <span class="s">ไฟล์ .csv ที่ดาวน์โหลดจาก Tableau · จำไว้จนกว่าจะอัปโหลดใหม่หรือกดล้าง</span>
       </label>
-      <p class="note">ไฟล์อยู่ในเบราว์เซอร์เครื่องนี้เท่านั้น ไม่ถูกส่งขึ้นเว็บหรือเก็บใน GitHub · จำไว้จนกว่าจะอัปโหลดไฟล์ใหม่หรือกดล้าง</p>
     </div>
   </section>
 
-  <h2 class="sec">เครื่องมือ</h2>
-  <div class="tiles two" style="margin-top:14px">
-    <a class="tile sm" href="wealthplan/" data-need>
-      <span class="t">Wealth Solution Plan</span>
-      <span class="d">สถิติแผนจัดพอร์ต 1–5 และพอร์ต DIY: ผลตอบแทน, drawdown, ระยะฟื้นตัว, 1Y rolling</span>
-    </a>
-    <a class="tile sm" href="compare/" data-need>
-      <span class="t">เปรียบเทียบ Auto Top Funds กับกองทุน</span>
-      <span class="d">เทียบโมเดล Auto Top Funds กับกองทุนรวมทุกประเภท · พอร์ตจำลอง · PowerPoint/PDF (FIXEDSP)</span>
-    </a>
-  </div>
+  <section class="sec">
+    <div class="sec-h"><div><h2>เครื่องมือ</h2></div></div>
+    <div class="grid two">
+      <a class="card" href="wealthplan/" data-need>
+        <span class="badge-ico v" data-i="stack"></span>
+        <h3>Wealth Solution Plan</h3>
+        <p class="d">สถิติแผนจัดพอร์ต 1–5 และพอร์ต DIY: ผลตอบแทน, drawdown, ระยะฟื้นตัว, 1Y rolling · Copy สไลด์ได้</p>
+        <span class="more">เปิดเครื่องมือ <span data-i="arrow"></span></span>
+      </a>
+      <a class="card" href="compare/" data-need>
+        <span class="badge-ico" data-i="compare"></span>
+        <h3>เปรียบเทียบ Auto Top Funds กับกองทุน</h3>
+        <p class="d">เทียบโมเดลกับกองทุนรวมทุกประเภท · พอร์ตจำลอง · ดาวน์โหลด PowerPoint/PDF ของ FIXEDSP</p>
+        <span class="more">เปิดเครื่องมือ <span data-i="arrow"></span></span>
+      </a>
+    </div>
+  </section>
+  <footer class="foot">UTFIT · ใช้ภายในทีม</footer>
 </main>
 
 <script>
 const $ = id => document.getElementById(id);
+document.querySelectorAll("[data-i]").forEach(e => e.innerHTML = UI.icon(e.dataset.i));
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const TH_MON = ["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
 const thDate = iso => { const [y, m, d] = iso.split("-"); return `${+d} ${TH_MON[+m - 1]} ${(+y + 543) % 100}`; };
@@ -100,16 +116,24 @@ function show(o, err) {
   const st = $("status"), mc = $("models");
   $("clear").hidden = !o;
   document.querySelectorAll("[data-need]").forEach(a => a.classList.toggle("dim", !o));
+  const fl = $("float");
   if (err) { st.innerHTML = `<span class="err">อ่านไฟล์ไม่ได้: ${esc(err)}</span>`; mc.innerHTML = ""; return; }
-  if (!o) { st.innerHTML = `<span class="k">ยังไม่มีไฟล์ในเครื่องนี้</span>`; mc.innerHTML = ""; $("dropT").textContent = "เลือกไฟล์ หรือลากไฟล์มาวางที่นี่"; return; }
+  if (!o) {
+    st.innerHTML = `<div class="row"><span>สถานะ</span><span class="chip warn">ยังไม่มีไฟล์ในเครื่องนี้</span></div>`;
+    mc.innerHTML = ""; $("dropT").textContent = "เลือกไฟล์ หรือลากไฟล์มาวางที่นี่";
+    fl.innerHTML = `<div class="glass"><div class="k">ไฟล์ Model Performance</div><div class="v">ยังไม่มี</div><div class="s">อัปโหลดด้านล่างก่อนเริ่มใช้</div></div>`;
+    return;
+  }
   let models = null; try { models = summarize(o.text); } catch (e) {}
   const to = models ? [...models.values()].reduce((a, b) => b.to > a ? b.to : a, "") : null;
-  const at = new Date(o.savedAt);
-  st.innerHTML = `<span class="ok">✓ พร้อมใช้</span> <span class="k">·</span> ${esc(o.name)}` +
-    (to ? `<br><span class="k">ข้อมูลถึง</span> ${thDate(to)}` : "") +
-    `<br><span class="k">อัปโหลดเมื่อ</span> ${at.toLocaleString("th-TH", { dateStyle: "medium", timeStyle: "short" })}`;
+  const at = new Date(o.savedAt).toLocaleString("th-TH", { dateStyle: "medium", timeStyle: "short" });
+  st.innerHTML = `<div class="row"><span>สถานะ</span><span class="chip ok">พร้อมใช้</span></div>
+    <div class="row"><span>ไฟล์</span><span>${esc(o.name)}</span></div>
+    ${to ? `<div class="row"><span>ข้อมูลถึง</span><span>${thDate(to)}</span></div>` : ""}
+    <div class="row"><span>อัปโหลดเมื่อ</span><span>${at}</span></div>`;
   mc.innerHTML = models ? [...models.keys()].map(m => `<span class="chip">${esc(m)}</span>`).join("") : "";
   $("dropT").textContent = "อัปโหลดไฟล์ใหม่แทน";
+  fl.innerHTML = `<div class="glass"><div class="k">ไฟล์ Model Performance</div><div class="v">พร้อมใช้ ✓</div><div class="s">${models ? models.size + " โมเดล" : ""}${to ? " · ข้อมูลถึง " + thDate(to) : ""}</div></div>`;
 }
 
 async function take(file) {
