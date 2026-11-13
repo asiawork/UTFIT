@@ -22,7 +22,7 @@
 
 ## ข้อมูลและการอัปเดตอัตโนมัติ
 
-ข้อมูลทั้งหมดอยู่ใน UTFIT แล้ว อัปเดตด้วย GitHub Actions (ต้องมี Secret `SEC_API_KEY`: Settings → Secrets and variables → Actions)
+ข้อมูลทั้งหมดอยู่ใน UTFIT แล้ว อัปเดตด้วย GitHub Actions
 
 | Workflow | ใช้กับ | เวลารัน | สคริปต์ / ข้อมูลดิบ | หน้าเว็บอ่านจาก |
 |---|---|---|---|---|
