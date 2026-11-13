@@ -37,10 +37,16 @@
   .utfit-nav .theme svg{width:18px;height:18px}
   .utfit-nav .home-only{display:none}
   @media (max-width:720px){.utfit-nav .links a{display:none}}
+  .utfit-nav .back{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 12px 0 9px;margin-right:6px;border:1px solid var(--n-ln);border-radius:11px;color:var(--n-tx2);font-size:14px;transition:background .15s,color .15s}
+  .utfit-nav .back:hover{background:var(--n-hov);color:var(--n-tx)}
+  @media (max-width:720px){.utfit-nav .back span{display:none}.utfit-nav .back{padding:0 9px}}
   @media print{.utfit-nav{display:none}}`;
   document.head.appendChild(st);
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-  const parts = [`<a class="logo" href="${root}" title="หน้าแรก"><span class="mark"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 10.5 12 3.5l8.5 7"/><path d="M5.5 9v10.5h4.5v-6h4v6h4.5V9"/></svg></span>UTFIT</a>`];
+  // ปุ่มย้อนกลับ (ทุกหน้ายกเว้นหน้าแรก): กลับหน้าก่อนหน้าในเว็บนี้ ถ้าเปิดมาจากที่อื่นให้ไปหน้าหมวด/หน้าแรก
+  const up = sec && title ? root + sec[1] : root;
+  const backBtn = sec ? `<a class="back" href="${up}" title="ย้อนกลับ" aria-label="ย้อนกลับ"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m11 18-6-6 6-6"/></svg><span>ย้อนกลับ</span></a>` : "";
+  const parts = [backBtn + `<a class="logo" href="${root}" title="หน้าแรก"><span class="mark"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 10.5 12 3.5l8.5 7"/><path d="M5.5 9v10.5h4.5v-6h4v6h4.5V9"/></svg></span>UTFIT</a>`];
   if (sec && title) parts.push(`<span class="sep">/</span><a class="crumb" href="${root}${sec[1]}">${esc(sec[0])}</a>`);
   if (title) parts.push(`<span class="sep">/</span><span class="cur">${esc(title)}</span>`);
   const ICON = { light: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 13A9 9 0 1 1 11 3a7 7 0 0 0 10 10Z"/></svg>', dark: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>' };
@@ -51,6 +57,11 @@
   const bar = document.createElement("nav");
   bar.className = "utfit-nav"; bar.setAttribute("aria-label", "เมนู UTFIT");
   bar.innerHTML = `<div class="in">${parts.join("")}</div>`;
+  const bb = bar.querySelector(".back");
+  if (bb) bb.onclick = (e) => {
+    let same = false; try { same = !!document.referrer && new URL(document.referrer).origin === location.origin && document.referrer.startsWith(root); } catch (err) {}
+    if (same && history.length > 1) { e.preventDefault(); history.back(); }
+  };
   const tb = bar.querySelector(".theme");
   if (tb) tb.onclick = () => {
     theme = theme === "dark" ? "light" : "dark";
