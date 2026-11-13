@@ -59,17 +59,25 @@ h1,h2,h3{font-family:var(--head);font-weight:700;margin:0;letter-spacing:-.015em
 .cats{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:22px;margin-top:44px}
 .cat{display:flex;flex-direction:column;gap:22px;padding:32px;border-radius:24px;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);
   color:inherit;text-decoration:none;transition:transform .2s,box-shadow .2s,border-color .2s}
-.cat:hover{transform:translateY(-4px);box-shadow:var(--shadow-h);border-color:var(--hover-ln)}
+.cat:hover{box-shadow:var(--shadow-h)}
 .cat:focus-visible{outline:3px solid var(--p);outline-offset:3px}
 .cat .top{display:flex;justify-content:space-between;align-items:center;gap:16px}
 .cat .art{width:64px;height:64px;display:block}
 .cat h2{font-size:30px;line-height:1.15}
 .cat .go{width:46px;height:46px;border-radius:14px;background:var(--p);color:#fff;display:grid;place-items:center;flex:none;transition:transform .2s,background .2s}
-.cat:hover .go{transform:translateX(3px);background:var(--p-dk)}
+.cat-h:hover .go{transform:translateX(3px);background:var(--p-dk)}
 .cat ul{list-style:none;margin:auto 0 0;padding:0}
-.cat li{display:flex;align-items:center;gap:10px;padding:12px 0;border-top:1px solid var(--line);color:var(--ink-2);font-weight:500}
-.cat li::before{content:"";width:18px;height:18px;flex:none;border-radius:50%;
-  background:var(--p-50) var(--check-img) center/11px no-repeat}
+.cat li{border-top:1px solid var(--line)}
+.cat li a{display:flex;align-items:center;gap:10px;padding:12px 10px;margin:0 -10px;border-radius:12px;color:var(--ink-2);font-weight:500;text-decoration:none;transition:background .15s,color .15s}
+.cat li a::before{content:"";width:18px;height:18px;flex:none;border-radius:50%;background:var(--p-50) var(--check-img) center/11px no-repeat}
+.cat li a > span{margin-left:auto;display:flex}
+.cat li a .ico{width:16px;height:16px;opacity:0;transform:translateX(-4px);transition:opacity .15s,transform .15s}
+.cat li a:hover{background:var(--p-50);color:var(--ink)}
+.cat li a:hover .ico{opacity:1;transform:none}
+.cat li a:focus-visible{outline:3px solid var(--p);outline-offset:-3px}
+.cat-h{display:flex;flex-direction:column;gap:22px;color:inherit;text-decoration:none}
+.cat-h:focus-visible{outline:3px solid var(--p);outline-offset:4px;border-radius:12px}
+.cat-h:hover h2{color:var(--p)}
 .cat .tag{font-size:13.5px;font-weight:600;color:var(--mute);margin-top:6px}
 
 /* ---------- เครื่องมือในหน้าหมวด (การ์ดใหญ่ + ภาพตัวอย่าง) ---------- */
