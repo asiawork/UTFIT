@@ -3,7 +3,9 @@
 (() => {
   // ธีม: light (ค่าเริ่มต้น) / dark — จำไว้ในเบราว์เซอร์
   const THEME_KEY = "utfit-theme";
-  let theme = "light"; try { theme = localStorage.getItem(THEME_KEY) || "light"; } catch (e) {}
+  // ตอนนี้ใช้ธีมสว่างอย่างเดียว (ธีมมืดยังไม่ครอบคลุมหน้าเครื่องมือ) เปลี่ยนเป็น true เพื่อเปิดปุ่มสลับธีมอีกครั้ง
+  const DARK_MODE = false;
+  let theme = "light"; if (DARK_MODE) { try { theme = localStorage.getItem(THEME_KEY) || "light"; } catch (e) {} }
   const applyTheme = (t) => { document.documentElement.dataset.theme = t; };
   const me = document.currentScript;
   // หน้าเครื่องมือใช้ธีมสว่างเสมอ (กราฟและไฟล์รายงานเป็นพื้นขาว)
@@ -42,7 +44,7 @@
   if (sec && title) parts.push(`<span class="sep">/</span><a class="crumb" href="${root}${sec[1]}">${esc(sec[0])}</a>`);
   if (title) parts.push(`<span class="sep">/</span><span class="cur">${esc(title)}</span>`);
   const ICON = { light: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 13A9 9 0 1 1 11 3a7 7 0 0 0 10 10Z"/></svg>', dark: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>' };
-  const themeBtn = title ? "" : `<button class="theme" type="button" aria-label="สลับธีมสว่าง/มืด">${ICON[theme] || ICON.light}</button>`;
+  const themeBtn = title || !DARK_MODE ? "" : `<button class="theme" type="button" aria-label="สลับธีมสว่าง/มืด">${ICON[theme] || ICON.light}</button>`;
   // หน้าแรก: ปุ่มธีมอย่างเดียว · หน้าหมวด: ลิงก์หมวด + ปุ่มธีม · หน้าเครื่องมือ: ไม่มีฝั่งขวา (ใช้ลำดับหน้าทางซ้าย)
   const catLinks = sec && !title ? Object.entries(SECT).map(([k, [n, p]]) => `<a href="${root}${p}"${k === secKey ? ' class="on"' : ""}>${esc(n)}</a>`).join("") : "";
   if (catLinks || themeBtn) parts.push(`<span class="links">${catLinks}${themeBtn}</span>`);
