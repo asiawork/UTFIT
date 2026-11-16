@@ -1892,7 +1892,7 @@ async function buildOnePage(tableNames) {
   s.addImage({ data: img, x: I(M + pad), y: I(cY + pad + capH), w: I(iw), h: I(ih) });
   const blob = await pptx.write({ outputType: "blob" });
   const JSZip = await loadJSZip();
-  return { zip: await JSZip.loadAsync(blob), blob, name: fileName("pptx").replace(/\.pptx$/, "_OnePage") };
+  return { zip: await JSZip.loadAsync(blob), blob, name: `${heroName}_${String(si.e || todayIso()).replace(/-/g, "")}_onepage` };   // เช่น FIXEDSP_20261112_onepage
 }
 async function runOnePage(e) {
   const btn = e.currentTarget, fmt = btn.dataset.fmt, label = { pptx: "PowerPoint", pdf: "PDF", png: "PNG" }[fmt];
