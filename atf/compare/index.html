@@ -275,6 +275,9 @@
   .modal p { margin: 0 0 10px; color: var(--muted); font-size: 14px; }
   .modal ul { margin: 0 0 16px; padding-left: 20px; line-height: 1.7; }
   .modal li a { color: var(--navy); cursor: pointer; text-decoration: underline; }
+  .oplist { display: grid; gap: 6px; margin: 4px 0 16px; }
+  .oplist label { display: flex; align-items: center; gap: 8px; font-size: 14.5px; cursor: pointer; }
+  .oplist label.off { color: var(--muted); cursor: default; }
   .modal-act { display: flex; justify-content: flex-end; gap: 8px; }
   .flash { outline: 3px solid #f59e0b !important; outline-offset: 2px; border-radius: 6px; }
   .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(20px); opacity: 0;
@@ -353,6 +356,12 @@
           <span class="dlname">Ver. เปรียบเทียบกับรายกอง</span>
           <button class="hdrbtn sm" id="pptx" data-fmt="pptx"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v9M6.5 8.5 10 12l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.5 12.5v3h13v-3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>PowerPoint</span></button>
           <button class="hdrbtn sm" id="pdf" data-fmt="pdf"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v9M6.5 8.5 10 12l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.5 12.5v3h13v-3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>PDF</span></button>
+        </div>
+        <div class="dlgrp" title="หน้าเดียว A4 แนวนอน: กราฟเส้นกับตารางเทียบ FIXEDSP">
+          <span class="dlname">One Page <small>(กราฟกับตาราง)</small></span>
+          <button class="hdrbtn sm" id="opPptx" data-fmt="pptx"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v9M6.5 8.5 10 12l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.5 12.5v3h13v-3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>PowerPoint</span></button>
+          <button class="hdrbtn sm" id="opPdf" data-fmt="pdf"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v9M6.5 8.5 10 12l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.5 12.5v3h13v-3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>PDF</span></button>
+          <button class="hdrbtn sm" id="opPng" data-fmt="png"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v9M6.5 8.5 10 12l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.5 12.5v3h13v-3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>PNG</span></button>
         </div>
         <div class="dlgrp" title="FIXEDSP อย่างเดียว: รายละเอียดพอร์ต · ผลตอบแทนรายปี · กราฟ 3 ปี">
           <span class="dlname">Ver. SP Only <small>(สำหรับลูกค้า Bank)</small></span>
@@ -457,6 +466,14 @@
   </div>
 </div>
 <div class="simac" id="simAc" role="listbox" hidden></div>
+<div class="modal-bg" id="opBg" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="opTitle">
+    <h2 id="opTitle">เลือกกองที่จะใส่ในตาราง</h2>
+    <p>ตารางใน One Page ใส่ได้สูงสุด 5 กอง กราฟยังแสดงครบทุกเส้น</p>
+    <div id="opList" class="oplist"></div>
+    <div class="modal-act"><button class="btn ghost" id="opCancel">ยกเลิก</button><button class="btn primary" id="opGo">ดาวน์โหลด</button></div>
+  </div>
+</div>
 <div class="modal-bg" id="warnBg" hidden>
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="warnTitle">
     <h2 id="warnTitle">ยังไม่ได้ใส่ข้อมูลบางส่วน</h2>
@@ -1764,6 +1781,142 @@ $("t1").addEventListener("change", (e) => {
 });
 $("title").addEventListener("input", () => { renderChart(); saveHash(); });
 $("showTitle").onchange = () => { renderChart(); saveHash(); };
+/* ---------- One Page (A4 แนวนอน: กราฟเส้น + ตารางเทียบ FIXEDSP)
+   สร้างเป็น PowerPoint 1 สไลด์ (pptxgenjs) แล้ววาดไฟล์นั้นเป็น PDF/PNG ด้วย pptx2pdf.js ให้หน้าตาตรงกันทุกแบบ */
+const OP = { W: 842, H: 595, M: 30, maxFunds: 5 };   // หน่วย pt
+const OP_LOGO = '<svg width="148.32" height="200" viewBox="0 0 148.32 200" xmlns="http://www.w3.org/2000/svg"><g fill="#C10230"><path d="M85.22 128.7C107.4 109.93 140.68 114.02 148.32 115.27 145.38 98.31 136.4 84.62 133.06 79.35 132.94 79.16 132.78 78.92 132.64 78.71 80.6 84.84 60.09 117.09 57.28 121.49 38.78 155.05 67.81 191.11 75.23 199.48 53.78 153.32 81.52 131.82 85.22 128.7Z"/><path d="M88.45 149.08C72.41 167.74 75.82 193.54 76.99 200 84.9 194.58 108.82 183.5 113.93 180.62 136.63 166.16 145.92 149.85 148.3 134.53 116.57 129.69 98.52 137.36 88.45 149.08Z"/><path d="M74.35 0.04C72.86 2.02 23.37 67.94 16.19 79.27 12.28 85.44 0.66 103.1 0 124.07-0.13 129.93 1.37 142.52 9.96 156.25 25.66 178.1 39.34 181.45 71.26 197.95 24.08 159.04 35.32 127.01 40.53 113.6 57.72 76.27 108.24 58.03 115.83 55.47 98.79 32.21 75.42 1.38 74.41 0.04L74.38 0 74.35 0.04Z"/></g></svg>';
+const OP_NOTES = ["อัตราผลตอบแทนคาดหวังเป็นเพียงแค่ประมาณการเท่านั้น ไม่ใช่การการันตีผลตอบแทน สามารถเปลี่ยนแปลงได้ในแต่ละปี ตามสถานการณ์การลงทุน ผู้ลงทุนควรศึกษาข้อมูลก่อนการตัดสินใจลงทุน",
+  "รับเงินเข้าบัญชีหลักประกันหุ้น (T+2) หากรับเงินเข้าบัญชีธนาคาร T+3"];
+const hex6 = (c) => String(c).replace("#", "").toUpperCase();
+async function svgPng(svg, h) {
+  const img = new Image(); img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+  await img.decode();
+  const c = document.createElement("canvas"); c.height = h; c.width = Math.round(h * img.naturalWidth / img.naturalHeight);
+  c.getContext("2d").drawImage(img, 0, 0, c.width, c.height); return c.toDataURL("image/png");
+}
+// เลือกกองลงตาราง: เกิน 5 กองให้ผู้ใช้ติ๊กเลือก
+function opPickFunds(names) {
+  if (names.length <= OP.maxFunds) return Promise.resolve(names);
+  return new Promise((ok) => {
+    const bg = $("opBg"), list = $("opList");
+    list.innerHTML = names.map((n, i) => `<label><input type="checkbox" value="${esc(n)}"${i < OP.maxFunds ? " checked" : ""}> ${esc(n)}</label>`).join("");
+    const sync = () => { const on = list.querySelectorAll("input:checked").length;
+      list.querySelectorAll("input").forEach(b => { b.disabled = !b.checked && on >= OP.maxFunds; b.parentElement.classList.toggle("off", b.disabled); });
+      $("opGo").disabled = !on; };
+    list.onchange = sync; sync();
+    bg.hidden = false; $("opGo").focus();
+    const done = (v) => { bg.hidden = true; document.removeEventListener("keydown", key); ok(v); };
+    const key = (e) => { if (e.key === "Escape") done(null); };
+    document.addEventListener("keydown", key);
+    $("opGo").onclick = () => done([...list.querySelectorAll("input:checked")].map(b => b.value));
+    $("opCancel").onclick = () => done(null);
+    bg.onclick = (e) => { if (e.target === bg) done(null); };
+  });
+}
+// วัดจำนวนบรรทัดของข้อความในช่องกว้าง w (pt) ที่ขนาดตัวอักษร size
+const opCtx = document.createElement("canvas").getContext("2d");
+function opLines(text, w, size, bold) {
+  opCtx.font = `${bold ? 700 : 400} ${size}px ${bold ? FONT_B : FONT}`;
+  let n = 0;
+  for (const para of String(text || "").split("\n")) {
+    if (opCtx.measureText(para).width <= w) { n++; continue; }
+    const parts = typeof Intl !== "undefined" && Intl.Segmenter ? [...new Intl.Segmenter("th", { granularity: "word" }).segment(para)].map(x => x.segment) : para.split(/(?<= )/);
+    let line = ""; n++;
+    for (const p of parts) { if (line && opCtx.measureText(line + p).width > w) { n++; line = p; } else line += p; }
+  }
+  return Math.max(n, 1);
+}
+// ขนาดตาราง: เริ่มจากตัวอักษรตามจำนวนกอง แล้วลดลงจนกราฟมีที่พอ
+function opTable(m, maxH) {
+  const n = m.cols.length - 1, TW = OP.W - OP.M * 2, labW = n <= 2 ? 210 : 172, colW = (TW - labW) / m.cols.length;
+  const rows = [["กองทุน", m.cols.map(c => c.name)], ...m.rows];
+  let fs = n <= 1 ? 11.5 : n === 2 ? 11 : n === 3 ? 10.5 : n === 4 ? 10 : 9.5, H = [];
+  for (; ; fs -= 0.5) {
+    const pad = fs * 0.45, lh = fs * 1.3;
+    H = rows.map(([l, vs], r) => Math.max(opLines(l, labW - 10, fs, true),
+      ...vs.map((v, i) => opLines(v, colW - 10, isFxCol(m.cols[i]) ? fs + 0.5 : fs, isFxCol(m.cols[i]) || r === 0))) * lh + pad * 2);
+    if (H.reduce((a, b) => a + b, 0) <= maxH || fs <= 7.5) break;
+  }
+  return { fs, labW, colW, rows, H, h: H.reduce((a, b) => a + b, 0) };
+}
+async function buildOnePage(tableNames) {
+  await loadScript("https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js", () => window.PptxGenJS);
+  const all = modelT1(), keepIdx = all.cols.map((c, i) => isFxCol(c) || tableNames.includes(c.name) ? i : -1).filter(i => i >= 0);
+  const m = { cols: keepIdx.map(i => all.cols[i]), rows: all.rows.map(([l, vs]) => [l, keepIdx.map(i => vs[i])]) };
+  const hero = heroSeries(), heroName = hero ? hero.name : "FIXEDSP", custom = $("title").value.trim();
+  const funds = selected.filter(n => !isHero(byName(n)));
+  const si = startInfo();
+  const pptx = new PptxGenJS(); pptx.defineLayout({ name: "A4L", width: OP.W / 72, height: OP.H / 72 }); pptx.layout = "A4L";
+  const s = pptx.addSlide(), I = (v) => v / 72, NV = hex6(NAVY), MUT = "5B6578", BL = hex6(colorOf(heroName));
+  const TX = "BLS Text", TB = "BLS Bold", TXB = "BLS ExtraBold", M = OP.M, TW = OP.W - M * 2;
+  // หัว: โลโก้ | หัวข้อ แล้วบรรทัดรองไล่ชื่อกองที่เทียบ
+  s.addImage({ data: await svgPng(OP_LOGO, 240), x: I(M), y: I(22), w: I(27.5), h: I(37) });
+  s.addShape(pptx.ShapeType.rect, { x: I(M + 36), y: I(25), w: I(1.6), h: I(31), fill: { color: NV }, line: { color: NV, width: 0 } });
+  s.addText(custom ? [{ text: custom }] : [{ text: "เปรียบเทียบผลตอบแทนโมเดล " }, { text: heroName, options: { color: BL } }],
+    { x: I(M + 46), y: I(19), w: I(TW - 46), h: I(26), fontFace: TXB, fontSize: 20, color: NV, margin: 0, valign: "middle" });
+  if (funds.length) s.addText(`เทียบกับ ${funds.join("   ")}`, { x: I(M + 46), y: I(44), w: I(TW - 46), h: I(15), fontFace: TX, fontSize: 10.5, color: MUT, margin: 0, valign: "middle" });
+  // ล่าง: หมายเหตุ แล้วที่มา
+  const footY = OP.H - 24, noteY = footY - 30;
+  s.addText([{ text: "* หมายเหตุ: ", options: { bold: true, fontFace: TB } }, { text: OP_NOTES[0], options: { breakLine: true } }, { text: "** " + OP_NOTES[1] }],
+    { x: I(M), y: I(noteY), w: I(TW), h: I(26), fontFace: TX, fontSize: 7.5, color: MUT, margin: 0, valign: "top" });
+  s.addShape(pptx.ShapeType.line, { x: I(M), y: I(footY - 3), w: I(TW), h: 0, line: { color: "E3E7EE", width: 0.75 } });
+  s.addText(`ที่มา: BLS Top Funds ข้อมูล ณ ${thDate(si.e)}`, { x: I(M), y: I(footY), w: I(TW / 2), h: I(12), fontFace: TX, fontSize: 7.5, color: MUT, margin: 0, valign: "middle" });
+  s.addText("ผลการดำเนินงานในอดีตไม่ได้เป็นสิ่งยืนยันผลการดำเนินงานในอนาคต", { x: I(M + TW / 2), y: I(footY), w: I(TW / 2), h: I(12), fontFace: TX, fontSize: 7.5, color: MUT, margin: 0, align: "right", valign: "middle" });
+  // ตารางชิดล่าง กราฟใช้ที่ที่เหลือด้านบน
+  const top = 68, bottom = noteY - 8, gap = 10, minChart = 200;
+  const t = opTable(m, bottom - top - gap - minChart), tY = bottom - t.h;
+  const bd = (c) => ({ type: "solid", pt: 0.75, color: c });
+  const rowsX = t.rows.map(([l, vs], r) => [
+    { text: l, options: { fill: { color: NV }, color: "FFFFFF", fontFace: TB, bold: true, fontSize: t.fs, border: [bd("FFFFFF"), bd("C9D3E3"), bd("FFFFFF"), bd(NV)] } },
+    ...vs.map((v, i) => { const fx = isFxCol(m.cols[i]);
+      return { text: v || "", options: { fill: { color: fx ? hex6(SLIDE_T.fxBg) : "FFFFFF" }, color: NV, fontFace: fx || r === 0 ? TB : TX, bold: fx || r === 0, fontSize: fx ? t.fs + 0.5 : t.fs, border: [bd("C9D3E3"), bd("C9D3E3"), bd("C9D3E3"), bd("C9D3E3")] } }; })]);
+  s.addTable(rowsX, { x: I(M), y: I(tY), w: I(TW), colW: [I(t.labW), ...m.cols.map(() => I(t.colW))], rowH: t.H.map(I), align: "center", valign: "middle", margin: [2, 4, 2, 4] });
+  // กราฟเส้นในกรอบ
+  const cY = top, cH = tY - gap - top, pad = 8, capH = 16;
+  s.addShape(pptx.ShapeType.roundRect, { x: I(M), y: I(cY), w: I(TW), h: I(cH), fill: { color: "FFFFFF" }, line: { color: "E3E7EE", width: 0.75 }, rectRadius: I(6) });
+  const span = si.s && si.e ? `${thDate(si.s)} – ${thDate(si.e)}` : "";
+  s.addText(`ผลตอบแทนสะสม ${span}`, { x: I(M + pad + 2), y: I(cY + pad - 2), w: I(TW - 2 * pad), h: I(capH), fontFace: TB, bold: true, fontSize: 11, color: NV, margin: 0, valign: "middle" });
+  const iw = TW - 2 * pad, ih = cH - capH - pad * 1.5, show = $("showTitle").checked;
+  $("showTitle").checked = false;
+  let img; try { img = exportCanvas(3, Math.round(ih * W / iw)).toDataURL("image/png"); } finally { $("showTitle").checked = show; }
+  s.addImage({ data: img, x: I(M + pad), y: I(cY + pad + capH), w: I(iw), h: I(ih) });
+  const blob = await pptx.write({ outputType: "blob" });
+  const JSZip = await loadJSZip();
+  return { zip: await JSZip.loadAsync(blob), blob, name: fileName("pptx").replace(/\.pptx$/, "_OnePage") };
+}
+async function runOnePage(e) {
+  const btn = e.currentTarget, fmt = btn.dataset.fmt, label = { pptx: "PowerPoint", pdf: "PDF", png: "PNG" }[fmt];
+  if (!heroSeries()) { toast("อัปโหลดข้อมูล Auto Top Funds ที่มีโมเดล FIXEDSP ก่อน", 4000); $("fxOpen").click(); return; }
+  const low = modelT1().cols.filter(c => !isFxCol(c)).map(c => c.name);
+  if (!low.length) { toast("เลือกกองความเสี่ยง 1–4 อย่างน้อย 1 กองเพื่อเทียบกับ FIXEDSP ในตาราง"); return; }
+  const names = await opPickFunds(low); if (!names) return;
+  const m = modelT1(), miss = [];
+  for (const l of Object.keys(PICK)) {
+    const row = m.rows.find(([x]) => x === l); if (!row) continue;
+    const ns = m.cols.filter((c, i) => !isFxCol(c) && names.includes(c.name) && !row[1][i]).map(c => c.name);
+    if (ns.length) miss.push({ text: `${l}: ${ns.join(", ")}`, el: () => document.querySelector(`#t1 select.pick[data-l="${CSS.escape(l)}"][data-n="${CSS.escape(ns[0])}"]`) });
+  }
+  if (miss.length && !(await warnMissing(miss))) return;
+  const sp = btn.querySelector("span"), html = sp.innerHTML; btn.disabled = true; sp.textContent = "กำลังสร้าง…";
+  try {
+    const { zip, blob, name } = await buildOnePage(names);
+    let out = blob, ext = "pptx";
+    if (fmt !== "pptx") {
+      await Promise.all([
+        loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js", () => window.jspdf),
+        loadScript(UTFIT_SRC.atfCompare + "assets/pptx2pdf.js?v=" + Date.now(), () => window.PptxPdf),
+      ]);
+      if (fmt === "pdf") { out = await PptxPdf.render(zip, { jsPDF: window.jspdf.jsPDF, scale: 4, quality: 0.95 }); ext = "pdf"; }
+      else { const [cv] = await PptxPdf.renderCanvases(zip, 300 / 72); out = await pngWithDpi(await toBlob(cv), 300); ext = "png"; }
+    }
+    const a = document.createElement("a"); a.href = URL.createObjectURL(out); a.download = `${name}.${ext}`.replace(/[\\/:*?"<>|]+/g, "-"); a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    toast(`ดาวน์โหลด ${label} แล้ว`);
+  } catch (err) { console.error(err); toast(`สร้าง ${label} ไม่ได้: ` + err.message, 5000); }
+  finally { btn.disabled = false; sp.innerHTML = html; }
+}
+$("opPptx").onclick = $("opPdf").onclick = $("opPng").onclick = runOnePage;
+
 /* ---------- พอร์ตจำลอง ----------
    def = { name, rb: "none"|"M"|"Q"|"Y", parts: [{ n: ชื่อกอง, w: % }] } · จำไว้ในเบราว์เซอร์ 1 วันนับจากบันทึกล่าสุด */
 const SIM_GROUP = "พอร์ตจำลอง", SIM_STORE = "atf-sims-v1", SIM_KEEP_DAYS = 1, SIM_MAX = 10;

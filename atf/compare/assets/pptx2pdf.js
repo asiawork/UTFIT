@@ -571,9 +571,8 @@
     return { size: { w: pt(at(sz, "cx", 12192000)), h: pt(at(sz, "cy", 6858000)) }, ids, defaultText: pres.getElementsByTagNameNS("*", "defaultTextStyle")[0] || null };
   }
 
-  async function render(zip, { jsPDF, scale = 2, quality = 0.92, onProgress } = {}) {
-    const pkg = new Pkg(zip), info = await slideList(pkg);
-    // โหลดฟอนต์ที่ใช้ในไฟล์ก่อนวาด
+  // โหลดฟอนต์ที่ใช้ในไฟล์ก่อนวาด
+  async function loadFonts(zip) {
     const faces = new Set();
     for (const f of Object.keys(zip.files).filter(n => /^ppt\/(slides|slideLayouts|slideMasters|theme)\/[^/]+\.xml$/.test(n))) {
       const s = await zip.file(f).async("string");
@@ -581,6 +580,10 @@
     }
     await Promise.all([...faces].map(ensureFont));
     await document.fonts.ready;
+  }
+  async function render(zip, { jsPDF, scale = 2, quality = 0.92, onProgress } = {}) {
+    const pkg = new Pkg(zip), info = await slideList(pkg);
+    await loadFonts(zip);
     const pdf = new jsPDF({ orientation: info.size.w >= info.size.h ? "landscape" : "portrait", unit: "pt", format: [info.size.w, info.size.h], compress: true });
     let n = 0;
     for (let i = 0; i < info.ids.length; i++) {
@@ -594,9 +597,10 @@
     return pdf.output("blob");
   }
 
-  // ใช้ทดสอบ: วาดสไลด์เดียวเป็น canvas
+  // วาดทุกสไลด์เป็น canvas (ใช้ทำ PNG และทดสอบ)
   async function renderCanvases(zip, scale = 1) {
     const pkg = new Pkg(zip), info = await slideList(pkg), out = [];
+    await loadFonts(zip);
     for (let i = 0; i < info.ids.length; i++) out.push(await renderSlide(pkg, info.ids[i], i + 1, info.size, scale, info));
     return out;
   }
