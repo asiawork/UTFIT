@@ -1858,9 +1858,9 @@ async function buildOnePage(tableNames) {
   // หัว: โลโก้ | หัวข้อ แล้วบรรทัดรองไล่ชื่อกองที่เทียบ
   s.addImage({ data: await svgPng(OP_LOGO, 240), x: I(M), y: I(22), w: I(27.5), h: I(37) });
   s.addShape(pptx.ShapeType.rect, { x: I(M + 36), y: I(25), w: I(1.6), h: I(31), fill: { color: NV }, line: { color: NV, width: 0 } });
-  s.addText(custom ? [{ text: custom }] : [{ text: "เปรียบเทียบผลตอบแทนโมเดล " }, { text: heroName, options: { color: BL } }],
+  s.addText(custom ? [{ text: custom }] : [{ text: "ผลตอบแทนโมเดล " }, { text: heroName, options: { color: BL } }],
     { x: I(M + 46), y: I(19), w: I(TW - 46), h: I(26), fontFace: TXB, fontSize: 20, color: NV, margin: 0, valign: "middle" });
-  if (funds.length) s.addText([{ text: "เทียบกับ: ", options: { fontFace: TB, bold: true, color: NV } },
+  if (funds.length) s.addText([{ text: "เปรียบเทียบกับ: ", options: { fontFace: TB, bold: true, color: NV } },
     ...funds.flatMap((n, i) => [...(i ? [{ text: "  |  ", options: { color: "B8C0CE" } }] : []), { text: n }])],
     { x: I(M + 46), y: I(44), w: I(TW - 46), h: I(15), fontFace: TX, fontSize: 11, color: MUT, margin: 0, valign: "middle" });
   // ล่าง: หมายเหตุ แล้วที่มา
