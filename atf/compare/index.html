@@ -240,15 +240,19 @@
   .modal .fld { display: block; font-size: 13.5px; color: var(--ink); margin: 10px 0; }
   .modal .fld > input { display: block; width: 100%; margin-top: 4px; font: inherit; font-size: 15px; padding: 8px 10px; border: 1.5px solid var(--line); border-radius: 9px; box-sizing: border-box; }
   .modal .fld .seg { display: flex; margin-top: 4px; width: fit-content; max-width: 100%; flex-wrap: wrap; }
-  .simrow { display: grid; grid-template-columns: 1fr 86px 26px; gap: 6px; align-items: center; margin: 6px 0; }
+  .simrow { display: grid; grid-template-columns: 1fr 128px 86px 26px; gap: 6px; align-items: center; margin: 6px 0; }
   .simrow input { font: inherit; font-size: 14px; padding: 7px 9px; border: 1.5px solid var(--line); border-radius: 8px; width: 100%; box-sizing: border-box; }
   .simrow input.bad { border-color: var(--red); }
   .simrow .w { text-align: right; }
   .simrow .wrap-w { position: relative; } .simrow .wrap-w::after { content: "%"; position: absolute; right: 9px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 13px; }
   .simrow .wrap-w input { padding-right: 24px; }
+  .simrow .wrap-a { position: relative; } .simrow .wrap-a::after { content: "บาท"; position: absolute; right: 9px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 13px; }
+  .simrow .wrap-a input { padding-right: 36px; text-align: right; font-variant-numeric: tabular-nums; }
+  .simrow .w.calc { background: #f4f6fa; color: var(--muted); }
+  @media (max-width: 520px) { .simrow, .simhead { grid-template-columns: 1fr 104px 72px 22px; } }
   .simrow button { border: 0; background: none; color: var(--muted); font-size: 18px; cursor: pointer; }
   .simrow button:hover { color: var(--red); }
-  .simhead { display: grid; grid-template-columns: 1fr 86px 26px; gap: 6px; font-size: 12.5px; color: var(--muted); margin-top: 12px; }
+  .simhead { display: grid; grid-template-columns: 1fr 128px 86px 26px; gap: 6px; font-size: 12.5px; color: var(--muted); margin-top: 12px; }
   .simfoot { display: flex; align-items: center; gap: 10px; margin: 8px 0 12px; font-size: 13.5px; }
   .simfoot #simSum { margin-left: auto; font-weight: 600; }
   .simfoot #simSum.bad { color: var(--red); }
@@ -445,7 +449,7 @@
     <label class="fld">ชื่อพอร์ต (ขึ้นในกราฟ)<input id="simName" maxlength="40" autocomplete="off"></label>
     <div class="fld">ปรับสัดส่วนกลับ (rebalance)
       <div class="seg sm" id="simRb"><button type="button" data-r="none">ไม่ปรับ (ซื้อแล้วถือ)</button><button type="button" data-r="M">รายเดือน</button><button type="button" data-r="Q">รายไตรมาส</button><button type="button" data-r="Y">รายปี</button></div></div>
-    <div class="simhead"><span>กองทุน / โมเดล</span><span style="text-align:right">สัดส่วน</span><span></span></div>
+    <div class="simhead"><span>กองทุน / โมเดล</span><span style="text-align:right">จำนวนเงิน</span><span style="text-align:right">สัดส่วน</span><span></span></div>
     <div id="simRows"></div>
     <div class="simfoot"><button type="button" class="btn ghost sm" id="simAdd">+ เพิ่มกอง</button><button type="button" class="reset" id="simEqual">แบ่งเท่ากัน</button><span id="simSum"></span></div>
     <p class="note-sm">กราฟเส้นเริ่มซื้อตามสัดส่วนนี้ ณ วันแรกของช่วงที่เลือก · กราฟรายปีนับจากวันแรกที่ทุกกองในพอร์ตมี NAV · ไม่รวมค่าธรรมเนียมซื้อขาย · พอร์ตจำไว้ในเบราว์เซอร์เครื่องนี้ 1 วัน</p>
@@ -929,7 +933,6 @@ function drawBars(ctx) {
   const m = annualModel();
   const INK = "#1f2937", MUTE = "#6b7280", GRID = "#e9ecf1";
   ctx.save(); ctx.clearRect(0, 0, W, H);   // พื้นหลังโปร่งใส (วางบนสไลด์สีไหนก็ได้)
-  layout = null;
   const showTitle = false;   // กราฟแท่งไม่มีหัวข้อ (ใช้หัวข้อในสไลด์)
   if (showTitle && m) {
     const end = LANG === "en" ? `${+m.ytdEnd.slice(8)} ${EN_MON[+m.ytdEnd.slice(5, 7) - 1]} ${m.ytdEnd.slice(0, 4)}` : thDate(m.ytdEnd);
@@ -1133,6 +1136,9 @@ function exportCanvas(scale = 2, h = H) {
 const toBlob = (c) => new Promise((ok, no) => c.toBlob(b => b ? ok(b) : no(new Error("toBlob")), "image/png"));
 
 /* tooltip */
+// พอร์ตจำลองที่ใส่จำนวนเงิน: แสดงมูลค่าพอร์ต ณ วันนั้นด้วย
+const simTotal = (name) => { const def = byName(name)?.def; return def ? def.parts.reduce((a, p) => a + (p.a > 0 ? p.a : 0), 0) : 0; };
+const simAmtText = (name, p) => { const t = simTotal(name); return t > 0 ? ` <span style="opacity:.8">${fmtAmt(Math.round(t * (1 + p / 100)))} บาท</span>` : ""; };
 $("cv").addEventListener("mousemove", (e) => {
   const tt = $("tt"); if (!layout) { tt.style.display = "none"; return; }
   const rect = $("cv").getBoundingClientRect(), k = W / rect.width;
@@ -1141,7 +1147,7 @@ $("cv").addEventListener("mousemove", (e) => {
   const d = layout.x0 + (mx - layout.L) / layout.pw * (layout.x1 - layout.x0);
   const rows = layout.ser.map(s => { let best = s.pts[0]; for (const p of s.pts) { if (p[0] <= d) best = p; else break; } return { s, p: best }; });
   const iso = isoOf(Math.round(rows.reduce((m, r) => Math.max(m, r.p[0]), -Infinity)));
-  tt.innerHTML = `<b>${thDate(iso)}</b>` + rows.map(r => `<div class="r"><i style="background:${r.s.color}"></i>${esc(r.s.name)} <span style="margin-left:auto">${pct(r.p[1], 2)}</span></div>`).join("");
+  tt.innerHTML = `<b>${thDate(iso)}</b>` + rows.map(r => `<div class="r"><i style="background:${r.s.color}"></i>${esc(r.s.name)} <span style="margin-left:auto">${pct(r.p[1], 2)}${simAmtText(r.s.name, r.p[1])}</span></div>`).join("");
   tt.style.display = "block";
   const bx = $("chartBox").getBoundingClientRect(), x = e.clientX - bx.left;
   tt.style.left = (x + 14 + tt.offsetWidth > bx.width ? x - 14 - tt.offsetWidth : x + 14) + "px";
@@ -1802,7 +1808,9 @@ async function buildSims() {
   if (SIMS.length) openGroups.add(SIM_GROUP);
 }
 let simEditing = null, simRb = "none";
-const simRow = (n = "", w = "") => `<div class="simrow"><input class="n" autocomplete="off" value="${esc(n)}" placeholder="พิมพ์ชื่อกองหรือโมเดล" aria-label="กองทุน"><span class="wrap-w"><input class="w" type="number" min="0" max="100" step="0.01" value="${esc(w)}" aria-label="สัดส่วน %"></span><button type="button" class="rm" title="เอาออก">×</button></div>`;
+const fmtAmt = (a) => isFinite(a) && a > 0 ? (+a.toFixed(2)).toLocaleString("en-US", { maximumFractionDigits: 2 }) : "";
+const parseAmt = (s) => { const t = String(s ?? "").replace(/[,\s฿]/g, ""); return t === "" ? NaN : parseFloat(t); };
+const simRow = (n = "", w = "", a = "") => `<div class="simrow"><input class="n" autocomplete="off" value="${esc(n)}" placeholder="พิมพ์ชื่อกองหรือโมเดล" aria-label="กองทุน"><span class="wrap-a"><input class="a" inputmode="decimal" autocomplete="off" value="${esc(fmtAmt(+a))}" aria-label="จำนวนเงิน (บาท)"></span><span class="wrap-w"><input class="w" type="number" min="0" max="100" step="0.01" value="${esc(w)}" aria-label="สัดส่วน %"></span><button type="button" class="rm" title="เอาออก">×</button></div>`;
 const defaultSimName = () => { for (let i = 1; ; i++) { const n = `พอร์ตจำลอง ${i}`; if (!SIM_DEFS.some(d => d.name === n)) return n; } };
 function simSetRb(r) { simRb = RB_TEXT[r] ? r : "none"; document.querySelectorAll("#simRb button").forEach(b => b.setAttribute("aria-pressed", b.dataset.r === simRb)); }
 function simOpen(name) {
@@ -1814,8 +1822,8 @@ function simOpen(name) {
   simSetRb(def ? def.rb : "none");
   // ตั้งต้น: กองที่เลือกอยู่ (ไม่รวมพอร์ตจำลอง) แบ่งเท่ากัน
   const seed = def ? def.parts : (() => { const ns = selected.filter(n => !byName(n)?.sim).slice(0, SIM_MAX); return ns.length ? ns.map(n => ({ n, w: +(100 / ns.length).toFixed(2) })) : [{ n: "", w: "" }, { n: "", w: "" }]; })();
-  $("simRows").innerHTML = seed.map(p => simRow(p.n, p.w)).join("");
-  simSum(); $("simBg").hidden = false; $("simName").focus(); $("simName").select();
+  $("simRows").innerHTML = seed.map(p => simRow(p.n, p.w, p.a)).join("");
+  simSyncW(); simSum(); $("simBg").hidden = false; $("simName").focus(); $("simName").select();
 }
 const simClose = () => { acHide(); $("simBg").hidden = true; simEditing = null; };
 /* ช่องเลือกกองในพอร์ตจำลอง: ค้นแบบเดียวกับช่องค้นหาหลัก (ไม่สนขีด ช่องว่าง ตัวพิมพ์ · ค้นชื่อย่อ ชื่อเต็ม บลจ. ได้) */
@@ -1860,8 +1868,17 @@ $("simRows").addEventListener("keydown", (e) => {
 });
 document.querySelector(".modal.sim").addEventListener("scroll", acHide);
 window.addEventListener("resize", acHide);
+// ใส่จำนวนเงินแถวไหนก็ได้ สัดส่วนจะคิดจากจำนวนเงินทั้งหมด (พิมพ์สัดส่วนเองเมื่อไหร่ จำนวนเงินจะถูกล้าง)
+const simAmtMode = () => [...document.querySelectorAll("#simRows .a")].some(i => parseAmt(i.value) > 0);
 function simParts() {
-  return [...document.querySelectorAll("#simRows .simrow")].map(r => ({ el: r, n: simResolve(r.querySelector(".n").value.trim()), w: parseFloat(r.querySelector(".w").value) }));
+  const rows = [...document.querySelectorAll("#simRows .simrow")].map(r => ({ el: r, n: simResolve(r.querySelector(".n").value.trim()), w: parseFloat(r.querySelector(".w").value), a: parseAmt(r.querySelector(".a").value) }));
+  if (rows.some(p => p.a > 0)) { const tot = rows.reduce((s, p) => s + (p.a > 0 ? p.a : 0), 0); rows.forEach(p => p.w = p.a > 0 ? p.a / tot * 100 : NaN); }
+  return rows;
+}
+// ใส่จำนวนเงินแล้ว ช่องสัดส่วนแสดงค่าที่คำนวณได้
+function simSyncW() {
+  const amt = simAmtMode();
+  simParts().forEach(p => { const w = p.el.querySelector(".w"); w.classList.toggle("calc", amt); if (amt) w.value = isFinite(p.w) ? +p.w.toFixed(2) : ""; });
 }
 // พิมพ์ชื่อเองไม่ตรงตัว (เช่น bbharata) แต่ตรงกับกองเดียวแบบไม่สนขีด/ตัวพิมพ์ ก็ใช้ได้
 function simResolve(raw) {
@@ -1873,17 +1890,26 @@ const simValidName = (n) => !!(byName(n) && !byName(n).sim) || STUBS.has(n);
 function simSum() {
   const ps = simParts(), sum = ps.reduce((a, p) => a + (isFinite(p.w) ? p.w : 0), 0);
   ps.forEach(p => p.el.querySelector(".n").classList.toggle("bad", !!p.n && !simValidName(p.n)));
-  $("simSum").textContent = `รวม ${+sum.toFixed(2)}%`;
+  const tot = ps.reduce((a, p) => a + (p.a > 0 ? p.a : 0), 0);
+  $("simSum").textContent = `รวม ${+sum.toFixed(2)}%` + (tot > 0 ? ` (${fmtAmt(tot)} บาท)` : "");
   $("simSum").classList.toggle("bad", Math.abs(sum - 100) > 0.01);
   $("simAdd").disabled = ps.length >= SIM_MAX;
 }
 $("simNew").onclick = () => simOpen(null);
 $("simRb").onclick = (e) => { if (e.target.dataset.r) simSetRb(e.target.dataset.r); };
-$("simAdd").onclick = () => { $("simRows").insertAdjacentHTML("beforeend", simRow()); simSum(); $("simRows").lastElementChild.querySelector(".n").focus(); };
-$("simEqual").onclick = () => { const ps = simParts().filter(p => p.n); if (!ps.length) return; const w = Math.floor(10000 / ps.length) / 100;
+$("simAdd").onclick = () => { $("simRows").insertAdjacentHTML("beforeend", simRow()); simSyncW(); simSum(); $("simRows").lastElementChild.querySelector(".n").focus(); };
+$("simEqual").onclick = () => { const ps = simParts().filter(p => p.n); if (!ps.length) return;
+  const tot = ps.reduce((a, p) => a + (p.a > 0 ? p.a : 0), 0);
+  if (tot > 0) { const a = Math.floor(tot * 100 / ps.length) / 100; ps.forEach((p, i) => p.el.querySelector(".a").value = fmtAmt(i === ps.length - 1 ? tot - a * (ps.length - 1) : a)); simSyncW(); simSum(); return; }
+  const w = Math.floor(10000 / ps.length) / 100;
   ps.forEach((p, i) => p.el.querySelector(".w").value = i === ps.length - 1 ? +(100 - w * (ps.length - 1)).toFixed(2) : w); simSum(); };
-$("simRows").addEventListener("input", simSum);
-$("simRows").addEventListener("click", (e) => { if (e.target.classList.contains("rm")) { e.target.closest(".simrow").remove(); if (!simParts().length) $("simRows").innerHTML = simRow(); simSum(); } });
+$("simRows").addEventListener("input", (e) => {
+  if (e.target.classList.contains("w") && simAmtMode()) { const keep = e.target.value; simParts().forEach(p => { p.el.querySelector(".a").value = ""; p.el.querySelector(".w").classList.remove("calc"); }); e.target.value = keep; }
+  if (e.target.classList.contains("a")) simSyncW();
+  simSum();
+});
+$("simRows").addEventListener("focusout", (e) => { if (e.target.classList.contains("a")) { const v = parseAmt(e.target.value); e.target.value = v > 0 ? fmtAmt(v) : ""; } });
+$("simRows").addEventListener("click", (e) => { if (e.target.classList.contains("rm")) { e.target.closest(".simrow").remove(); if (!simParts().length) $("simRows").innerHTML = simRow(); simSyncW(); simSum(); } });
 $("simCancel").onclick = simClose;
 $("simBg").addEventListener("click", (e) => { if (e.target.id === "simBg") simClose(); });
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("simBg").hidden) simClose(); });
@@ -1902,12 +1928,13 @@ $("simSave").onclick = async () => {
   const ps = simParts().filter(p => p.n || isFinite(p.w));
   if (!ps.length) { toast("ใส่กองอย่างน้อย 1 กอง"); return; }
   const badN = ps.find(p => !simValidName(p.n)); if (badN) { toast(badN.n ? `ไม่พบกอง ${badN.n} (เลือกจากรายการที่ขึ้นมา)` : "ใส่ชื่อกองให้ครบทุกแถว"); badN.el.querySelector(".n").focus(); return; }
-  const badW = ps.find(p => !(p.w > 0)); if (badW) { toast(`ใส่สัดส่วนของ ${badW.n} (มากกว่า 0%)`); badW.el.querySelector(".w").focus(); return; }
+  const amt = ps.some(p => p.a > 0);
+  const badW = ps.find(p => !(p.w > 0)); if (badW) { toast(amt ? `ใส่จำนวนเงินของ ${badW.n}` : `ใส่สัดส่วนของ ${badW.n} (มากกว่า 0%)`); badW.el.querySelector(amt ? ".a" : ".w").focus(); return; }
   if (new Set(ps.map(p => p.n)).size < ps.length) { toast("มีกองซ้ำกัน รวมเป็นแถวเดียวก่อน"); return; }
   const sum = ps.reduce((a, p) => a + p.w, 0);
   if (Math.abs(sum - 100) > 0.01) { toast(`สัดส่วนรวม ${+sum.toFixed(2)}% ต้องรวมได้ 100% (กด "แบ่งเท่ากัน" ได้)`, 4000); return; }
   if (name !== simEditing && (SIM_DEFS.some(d => d.name === name) || byName(name) || STUBS.has(name))) { toast(`ชื่อ ${name} ซ้ำกับพอร์ตหรือกองที่มีอยู่ ตั้งชื่ออื่น`); $("simName").focus(); return; }
-  const def = { name, rb: simRb, parts: ps.map(p => ({ n: p.n, w: p.w })) };
+  const def = { name, rb: simRb, parts: ps.map(p => amt ? { n: p.n, w: p.w, a: p.a } : { n: p.n, w: p.w }) };
   const btn = $("simSave"); btn.disabled = true;
   try {
     const old = simEditing, prev = SIM_DEFS;
