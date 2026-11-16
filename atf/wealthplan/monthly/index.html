@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>รายงานประจำเดือน Wealth Solution Plan</title>
+<link rel="stylesheet" href="../../../shared/utfit.css">
+<style>
+  .mh{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;padding:44px 0 20px;flex-wrap:wrap}
+  .mh h1{font-size:40px;line-height:1.15;letter-spacing:-.02em}
+  .mh .sub{margin-top:8px;color:#6b7290;font-size:15px}
+  .mh .sub b{color:#0f1a3c;font-weight:600}
+  .go{display:inline-flex;align-items:center;gap:10px;background:#0f1a3c;color:#fff;border:0;border-radius:14px;padding:14px 22px;
+      font:600 16px var(--head);cursor:pointer;box-shadow:0 6px 18px rgba(15,26,60,.18);transition:background .15s,transform .15s}
+  .go:hover:not(:disabled){background:#2f56ff;transform:translateY(-1px)}
+  .go:disabled{opacity:.45;cursor:default}
+  .go svg{width:18px;height:18px}
+  .msg{margin-top:8px;font-size:13.5px;color:#6b7290;text-align:right;min-height:20px}
+  .empty{border:1.5px dashed #d5daea;border-radius:18px;padding:40px;text-align:center;color:#6b7290;margin:20px 0 60px}
+  .empty a{color:#2f56ff;font-weight:600}
+  #view{width:100%;border:0;display:block;margin-bottom:60px;min-height:400px}
+</style>
+</head>
+<body>
+<script src="../../../shared/nav.js" data-section="atf" data-title="รายงานประจำเดือน"></script>
+<main class="wrap">
+  <div class="mh">
+    <div>
+      <h1>รายงานประจำเดือน<br>Wealth Solution Plan</h1>
+      <div class="sub" id="sub">กำลังโหลดข้อมูล…</div>
+    </div>
+    <div>
+      <button class="go" id="go" disabled><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v9M6.5 8.5 10 12l3.5-3.5M3.5 12.5v3h13v-3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>ดาวน์โหลด PowerPoint</button>
+      <div class="msg" id="msg"></div>
+    </div>
+  </div>
+  <div class="empty" id="empty" hidden>ยังไม่มีไฟล์ Model Performance ในเบราว์เซอร์นี้ อัปโหลดได้ที่หน้า <a href="../../">Auto Top Funds</a></div>
+  <iframe id="view" src="../" title="ตัวอย่างสไลด์"></iframe>
+</main>
+<script>
+/* หน้านี้ไม่มีลิงก์จากหน้าอื่น ใช้คนเดียว
+   ใช้โค้ดคำนวณและวาดสไลด์ของหน้า Wealth Solution Plan (โหลดไว้ใน iframe) ตัวเลขจึงตรงกับหน้าที่ทีมใช้เสมอ
+   ได้ไฟล์เดียว 20 สไลด์: ไทย ขาว › ไทย กรมท่า › อังกฤษ ขาว › อังกฤษ กรมท่า (แต่ละชุด แผน 1–5) */
+const VERSIONS = [
+  {lang: 'th', theme: 'white', label: 'ไทย พื้นขาว'},
+  {lang: 'th', theme: 'navy',  label: 'ไทย พื้นกรมท่า'},
+  {lang: 'en', theme: 'white', label: 'English White'},
+  {lang: 'en', theme: 'navy',  label: 'English Navy'},
+];
+const TH_MON = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+const thDate = s => `${+s.slice(8,10)} ${TH_MON[+s.slice(5,7)-1]} ${+s.slice(0,4) + 543 - 2500}`;
+const $ = id => document.getElementById(id);
+const frame = $('view');
+let W, D, ITEMS = [];
+
+function waitReady(){
+  return new Promise(res => {
+    const t0 = Date.now();
+    (function tick(){
+      W = frame.contentWindow; D = frame.contentDocument;
+      const api = W && W.WPAPI;
+      if (api && (api.ready() || Date.now() - t0 > 6000)) return res(api);
+      setTimeout(tick, 150);
+    })();
+  });
+}
+
+function build(api){
+  // ซ่อนหน้าเดิมทั้งหมด เหลือแค่สไลด์ตัวอย่าง
+  const css = D.createElement('style');
+  css.textContent = `html,body{background:#fff!important;margin:0!important;padding:0!important}
+    body > *:not(#mroot){display:none!important}
+    #mroot{display:block;padding:4px 2px 2px}
+    #mroot h3{font:600 15px var(--head);color:#0f1a3c;margin:26px 0 10px}
+    #mroot h3:first-child{margin-top:0}
+    #mroot .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    #mroot .cell{position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;border-radius:8px;border:1px solid #e3e6ef}
+    #mroot .cell .slide{position:absolute;left:0;top:0}`;
+  D.head.appendChild(css);
+  const root = D.createElement('div'); root.id = 'mroot'; D.body.appendChild(root);
+
+  const st = api.state;
+  st.start = api.SLIDE_PERIOD.start; st.end = api.lastDate(); st.amount = '';
+  const plans = api.PLANS.filter(p => p.no);
+  ITEMS = [];
+  let r0;
+  VERSIONS.forEach(v => {
+    root.insertAdjacentHTML('beforeend', `<h3>${v.label}</h3><div class="grid"></div>`);
+    const grid = root.lastElementChild;
+    plans.forEach(p => {
+      st.plan = p.id; st.weights[p.id] = {...p.w};
+      const r = api.compute(); r0 = r0 || r;
+      const cell = D.createElement('div'); cell.className = 'cell';
+      const el = D.createElement('div'); el.className = 'slide' + (v.theme === 'navy' ? ' navy' : '');
+      el.innerHTML = api.slideHTML(p, r, {...v, report: true});
+      cell.appendChild(el); grid.appendChild(cell);
+      ITEMS.push({el, r, p, v});
+    });
+  });
+  const scale = () => {
+    ITEMS.forEach(it => { it.el.style.transform = `scale(${it.el.parentNode.clientWidth / 1280})`; });
+    frame.style.height = D.documentElement.scrollHeight + 'px';
+  };
+  // stretchTable วัดที่ขนาดจริง ก่อนย่อ
+  ITEMS.forEach(it => { it.el.style.transform = 'none'; api.stretchTable(it.el); });
+  scale(); W.addEventListener('resize', scale);
+  $('sub').innerHTML = `ข้อมูล <b>${thDate(r0.start)} – ${thDate(r0.end)}</b>  ไทยและอังกฤษ พื้นขาวและกรมท่า รวม ${ITEMS.length} สไลด์`;
+  $('go').disabled = false;
+}
+
+async function download(){
+  const api = W.WPAPI, btn = $('go');
+  if (!W.PptxGenJS){ $('msg').textContent = 'โหลดตัวช่วยสร้าง PowerPoint ไม่สำเร็จ ลองรีเฟรชหน้า'; return; }
+  btn.disabled = true; $('msg').textContent = 'กำลังสร้างไฟล์…';
+  try{
+    const pptx = new W.PptxGenJS(); pptx.layout = 'LAYOUT_WIDE';
+    const lotus = {white: await api.svgToPNG(api.BRAND.lotus, 148, 200),
+                   navy: await api.svgToPNG(api.BRAND.lotus.replace(/#C10230/g, '#ffffff'), 148, 200)};
+    VERSIONS.forEach(v => pptx.addSection({title: v.label}));
+    for (const it of ITEMS){
+      await api.addPlanSlide(pptx, it.el, it.r, it.p, {...it.v, section: it.v.label}, lotus[it.v.theme]);
+    }
+    const end = ITEMS[0].r.end;
+    await pptx.writeFile({fileName: `Wealth Solution Plan ข้อมูลถึง ${thDate(end)}.pptx`});
+    $('msg').textContent = '';
+  }catch(e){ console.error(e); $('msg').textContent = 'สร้างไฟล์ไม่สำเร็จ: ' + (e.message || e); }
+  btn.disabled = false;
+}
+
+frame.addEventListener('load', async () => {
+  const api = await waitReady();
+  if (!api || !api.ready()){ $('sub').textContent = ''; $('empty').hidden = false; frame.hidden = true; return; }
+  build(api);
+});
+$('go').onclick = download;
+</script>
+</body>
+</html>

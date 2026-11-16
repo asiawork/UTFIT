@@ -462,6 +462,25 @@ body.capturing .print-head.printonly{display:flex;padding:4px 2px 6px;background
 .brow .v.dark{color:var(--ink)}
 .foot{position:absolute;right:34px;bottom:12px;text-align:right;font-family:var(--body);font-size:11px;color:#333;line-height:1.7}
 .foot b{font-weight:700}
+.s-h1 .hl{color:inherit}
+/* ธีมกรมท่า-ทอง (ใช้ในรายงานประจำเดือน) */
+.slide.navy{background:#0b1d42;color:#fff;--gold:#c9b282;--goldl:#f4eedf}
+.slide.navy .s-h1{color:#fff}
+.slide.navy .s-h1 .hl{background:linear-gradient(180deg,#efe3c4,#c9b282);-webkit-background-clip:text;background-clip:text;color:transparent}
+.slide.navy .s-legend{color:#fff}
+.slide.navy .s-title{background:linear-gradient(180deg,#ffffff 0%,#efe7d4 45%,#c9b282 100%);color:#0b1d42}
+.slide.navy .s-title .r{color:#0b1d42}
+.slide.navy .tbl thead th{background:var(--gold);color:#0b1d42}
+.slide.navy .tbl td{color:#fff;border-bottom-color:var(--gold)}
+.slide.navy .tbl td.strat{border-bottom-color:var(--gold)}
+.slide.navy .s-table::after{background:var(--gold)}
+.slide.navy .box{border-bottom-color:var(--gold)}
+.slide.navy .box h4{background:linear-gradient(90deg,var(--goldl),var(--gold));color:#0b1d42}
+.slide.navy .brow{border-bottom-color:var(--gold)}
+.slide.navy .brow .v.dark,.slide.navy .brow .v .u{color:#fff}
+.slide.navy .pos{color:#22c55e} .slide.navy .neg{color:#ff2d2d}
+.slide.navy .dv{color:#dfe5ef}
+.slide.navy .foot{color:#fff}
 .s-msg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--muted);text-align:center;padding:40px}
 </style>
 <style>
@@ -1307,20 +1326,25 @@ function update(){
 const fmtMoney = x => x.toLocaleString('en-US', {maximumFractionDigits: 2});
 const fmtNum = x => (Math.round(x*100)/100).toString();
 
-function colorsFor(models, raw){
+function colorsFor(models, raw, theme){
   // largest weight -> blue, the rest in order: grey, navy, light ...
   const big = models.reduce((b,m) => (+raw[m] > +raw[b] ? m : b), models[0]);
-  const rest = ['#a5adbf','#2b4167','#dbe7f7','#7aa5d8','#5b6474','#c8ced9','#8fa0bb'];
+  const rest = theme === 'navy' ? ['#ffffff','#a5adbf','#d9c79c','#7aa5d8','#8fa0bb','#c8ced9','#5b6474']
+                                : ['#a5adbf','#2b4167','#dbe7f7','#7aa5d8','#5b6474','#c8ced9','#8fa0bb'];
   const out = {}; let k = 0;
   models.forEach(m => { out[m] = m === big ? '#3b7cc4' : rest[k++ % rest.length]; });
   return out;
 }
 
-function slideHTML(plan, r){
-  const meta = planMeta(plan);
+/* opt (ใช้ในรายงานประจำเดือน): {lang:'th'|'en', theme:'white'|'navy', report:true} */
+const EN_MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const enMonYear = s => `${EN_MON[+s.slice(5,7)-1]} ${s.slice(0,4)}`;
+function slideHTML(plan, r, opt = {}){
+  const meta = planMeta(plan), en = opt.lang === 'en';
   const models = r.models;
   if (!models.length) return `<div class="s-msg">ใส่ % ของโมเดลในแผงด้านขวา</div>`;
-  const col = colorsFor(models, r.raw);
+  const col = colorsFor(models, r.raw, opt.theme);
+  const dvT = en ? 'Div.' : 'ปันผล', dvB = en ? 'Dividend' : 'เงินปันผล', my = en ? enMonYear : thMonYear;
   const titleBlock = `<div class="s-title"><div class="n">${esc(meta.name)}</div>${meta.risk ? `<div class="r">- Risk Profile: ${esc(meta.risk)} -</div>` : ''}</div>`;
   if (Math.abs(r.sum-100) > 1e-6) return `<div class="s-msg">สัดส่วนรวม ${fmtNum(r.sum)}% — ต้องเท่ากับ 100% ถึงจะคำนวณได้</div>`;
   if (r.missing) return `<div class="s-msg">ไม่มีข้อมูลของ ${r.missing.join(', ')} ในไฟล์ CSV</div>`;
@@ -1333,16 +1357,19 @@ function slideHTML(plan, r){
     return `<tr>
       ${span ? `<td class="strat${i + span === r.rows.length ? ' end' : ''}" rowspan="${span}">${esc(s).replace(' With', '<br>With').replace('Max ', 'Max<br>').replace('Stabilizer', '<br>Stabilizer').replace(/^Core <br>/, 'Core<br>').replace('Engine','<br>Engine').replace('Growth <br>','Growth<br>')}</td>` : ''}
       <td class="model"><i style="background:${col[row.m]}"></i>${row.m}</td>
-      <td class="${cls(row.st.total)}">${row.div ? pct(row.st.total + row.div.total) + `<span class="dv">(ปันผล ${pct(row.div.total)})</span>` : pct(row.st.total)}</td>
-      <td class="${cls(row.st.rollAvg)}">${row.div ? pct(row.st.rollAvg + row.div.avg) + `<span class="dv">(ปันผล ${pct(row.div.avg)})</span>` : pct(row.st.rollAvg)}</td>
+      <td class="${cls(row.st.total)}">${row.div ? pct(row.st.total + row.div.total) + `<span class="dv">(${dvT} ${pct(row.div.total)})</span>` : pct(row.st.total)}</td>
+      <td class="${cls(row.st.rollAvg)}">${row.div ? pct(row.st.rollAvg + row.div.avg) + `<span class="dv">(${dvT} ${pct(row.div.avg)})</span>` : pct(row.st.rollAvg)}</td>
       <td class="${cls(row.st.maxDD)}">${pct(row.st.maxDD, {dp: Math.abs(row.st.maxDD) < 0.001 ? 2 : 1})}</td>
       <td>${recShort(row.st.recLongest)}</td></tr>`;
   }).join('');
   const rec1 = recLong(p.recMedian), rec2 = recLong(p.recLongest);
-  const headTxt = plan.id === 'diy' ? 'จัดพอร์ตเชิงกลยุทธ์ Wealth Solution Plan' : `แบบที่ ${plan.no} จัดพอร์ตเชิงกลยุทธ์ ${esc(meta.name)}`;
+  const headTxt = !opt.report ? (plan.id === 'diy' ? 'จัดพอร์ตเชิงกลยุทธ์ Wealth Solution Plan' : `แบบที่ ${plan.no} จัดพอร์ตเชิงกลยุทธ์ ${esc(meta.name)}`)
+    : en ? `Wealth Solution Plan ${plan.no}: <span class="hl">${esc(meta.name)}</span>`
+         : `จัดพอร์ตเชิงกลยุทธ์ แผน ${plan.no} <span class="hl">${esc(meta.name)}</span>`;
+  const lotus = opt.theme === 'navy' ? BRAND.lotus.replace(/#C10230/g, '#ffffff') : BRAND.lotus;
   return `
-    <div class="s-head"><span class="s-lotus">${BRAND.lotus.replace('<svg ', '<svg style="height:62px;width:auto;display:block" ')}</span><span class="s-h1">${headTxt}</span></div>
-    <svg class="s-donut" viewBox="0 0 500 420" aria-label="สัดส่วนพอร์ต">${donut(models, r.raw, col)}</svg>
+    <div class="s-head"><span class="s-lotus">${lotus.replace('<svg ', '<svg style="height:62px;width:auto;display:block" ')}</span><span class="s-h1">${headTxt}</span></div>
+    <svg class="s-donut" viewBox="0 0 500 420" aria-label="สัดส่วนพอร์ต">${donut(models, r.raw, col, opt)}</svg>
     <div class="s-legend">${models.map(m => `<span><i style="background:${col[m]}"></i>${m}</span>`).join('')}</div>
     <div class="s-table">
       ${titleBlock}
@@ -1356,8 +1383,8 @@ function slideHTML(plan, r){
     </div>
     <div class="boxes">
       <div class="box"><h4>Return</h4>
-        <div class="brow"><div class="k">1Y Rolling<br>Average</div><div class="v big ${r.div ? 'wdv' : ''} ${cls(p.rollAvg)}">${r.div ? pct(p.rollAvg + r.div.avg) + `<span class="dv">(เงินปันผล ${pct(r.div.avg)})</span>` : pct(p.rollAvg)}</div></div>
-        <div class="brow"><div class="k" style="font-size:13.5px">${yrs}Y<br>Total Return</div><div class="v small ${cls(p.total)}">${r.div ? pct(p.total + r.div.total) + `<span class="dv">(เงินปันผล ${pct(r.div.total)})</span>` : pct(p.total)}</div></div></div>
+        <div class="brow"><div class="k">1Y Rolling<br>Average</div><div class="v big ${r.div ? 'wdv' : ''} ${cls(p.rollAvg)}">${r.div ? pct(p.rollAvg + r.div.avg) + `<span class="dv">(${dvB} ${pct(r.div.avg)})</span>` : pct(p.rollAvg)}</div></div>
+        <div class="brow"><div class="k" style="font-size:13.5px">${yrs}Y<br>Total Return</div><div class="v small ${cls(p.total)}">${r.div ? pct(p.total + r.div.total) + `<span class="dv">(${dvB} ${pct(r.div.total)})</span>` : pct(p.total)}</div></div></div>
       <div class="box"><h4>${yrs}Y Drawdown</h4>
         <div class="brow"><div class="k">Median</div><div class="v ${cls(p.cycDDMedian)}">${pct(p.cycDDMedian)}</div></div>
         <div class="brow"><div class="k">Max</div><div class="v ${cls(p.maxDD)}">${pct(p.maxDD)}</div></div></div>
@@ -1368,14 +1395,17 @@ function slideHTML(plan, r){
         <div class="brow"><div class="k">Min</div><div class="v ${cls(p.rollMin)}">${pct(p.rollMin)}</div></div>
         <div class="brow"><div class="k">Max</div><div class="v ${cls(p.rollMax)}">${pct(p.rollMax)}</div></div></div>
     </div>
-    <div class="foot">
+    <div class="foot">${en ? `
+      <b>Historical performance</b> calculated based on data from ${my(r.start)} – ${my(r.end)} | <b>*1Y Rolling Return</b> represents data from ${p.rollStart ? my(p.rollStart) : '—'} – ${my(r.end)}<br>
+      Disclaimer: Past performance is not indicative of future results. Investors should understand the product characteristics, return conditions, and associated risks before making an investment decision.` : `
       <b>ผลการดำเนินงานย้อนหลัง</b> คำนวณจากข้อมูล ${thMonYear(r.start)} – ${thMonYear(r.end)} | <b>*1Y Rolling Return</b> แสดงผลข้อมูล ${p.rollStart ? thMonYear(p.rollStart) : '—'} – ${thMonYear(r.end)}<br>
-      หมายเหตุ : ผลการดำเนินงานในอดีต มิได้เป็นสิ่งยืนยันถึงผลการดำเนินงานในอนาคต ผู้ลงทุนโปรดทำความเข้าใจลักษณะสินค้า เงื่อนไขผลตอบแทนและความเสี่ยง ก่อนตัดสินใจลงทุน
+      หมายเหตุ : ผลการดำเนินงานในอดีต มิได้เป็นสิ่งยืนยันถึงผลการดำเนินงานในอนาคต ผู้ลงทุนโปรดทำความเข้าใจลักษณะสินค้า เงื่อนไขผลตอบแทนและความเสี่ยง ก่อนตัดสินใจลงทุน`}
     </div>`;
 }
 
-function donut(models, raw, col){
-  const amt = parseFloat(state.amount) || 0;
+function donut(models, raw, col, opt = {}){
+  const amt = parseFloat(state.amount) || 0, ink = opt.theme === 'navy' ? '#ffffff' : '#16233a', sub = opt.theme === 'navy' ? '#c9d2e3' : '#5b6474';
+  const unit = opt.lang === 'en' ? 'THB Mn' : 'ล้านบาท';
   const cx = 250, cy = 210, R = 146, r = 112, total = models.reduce((a,m) => a + (+raw[m]||0), 0);
   let a0 = -Math.PI/2, out = '';
   const pt = (rad, a) => [cx + rad*Math.cos(a), cy + rad*Math.sin(a)];
@@ -1407,23 +1437,23 @@ function donut(models, raw, col){
     const lx = right ? cx + R + 28 : cx - R - 28;
     out += `<polyline points="${sx},${sy} ${lx + (right?-6:6)},${ly}" fill="none" stroke="#9aa3b2" stroke-width="1"/>`;
     const tx = lx, anchor = right ? 'start' : 'end';
-    out += `<text x="${tx}" y="${ly-10}" text-anchor="${anchor}" font-size="14" font-weight="600" fill="#16233a">${L.m}</text>`;
-    out += `<text x="${tx}" y="${ly+14}" text-anchor="${anchor}" font-size="24" font-weight="700" fill="#16233a">${fmtNum(L.v)}%</text>`;
-    if (amt > 0) out += `<text x="${tx}" y="${ly+33}" text-anchor="${anchor}" font-size="14" font-weight="500" fill="#5b6474">${fmtMoney(amt*L.v/total)} ล้านบาท</text>`;
+    out += `<text x="${tx}" y="${ly-10}" text-anchor="${anchor}" font-size="14" font-weight="600" fill="${ink}">${L.m}</text>`;
+    out += `<text x="${tx}" y="${ly+14}" text-anchor="${anchor}" font-size="24" font-weight="700" fill="${ink}">${fmtNum(L.v)}%</text>`;
+    if (amt > 0) out += `<text x="${tx}" y="${ly+33}" text-anchor="${anchor}" font-size="14" font-weight="500" fill="${sub}">${fmtMoney(amt*L.v/total)} ${unit}</text>`;
   });
-  out += `<text x="${cx}" y="${cy-48}" text-anchor="middle" font-size="19" font-weight="500" fill="#16233a">Portfolio Value</text>`;
+  out += `<text x="${cx}" y="${cy-48}" text-anchor="middle" font-size="19" font-weight="500" fill="${ink}">Portfolio Value</text>`;
   if (amt > 0){
-    out += `<text x="${cx}" y="${cy+18}" text-anchor="middle" font-size="${fmtMoney(amt).length > 7 ? 40 : 52}" font-weight="700" fill="#16233a">${fmtMoney(amt)}</text>`;
-    out += `<text x="${cx}" y="${cy+62}" text-anchor="middle" font-size="24" font-weight="600" fill="#16233a">ล้านบาท</text>`;
-  } else out += `<text x="${cx}" y="${cy+66}" text-anchor="middle" font-size="24" font-weight="600" fill="#16233a">ล้านบาท</text>`;
+    out += `<text x="${cx}" y="${cy+18}" text-anchor="middle" font-size="${fmtMoney(amt).length > 7 ? 40 : 52}" font-weight="700" fill="${ink}">${fmtMoney(amt)}</text>`;
+    out += `<text x="${cx}" y="${cy+62}" text-anchor="middle" font-size="24" font-weight="600" fill="${ink}">${unit}</text>`;
+  } else out += `<text x="${cx}" y="${cy+66}" text-anchor="middle" font-size="24" font-weight="600" fill="${ink}">${unit}</text>`;
   return out;
 }
 
 
 /* make the model table reach down to just above the bottom boxes */
 const TABLE_BOTTOM = 466;
-function stretchTable(){
-  const st = document.querySelector('#slide .s-table'); if (!st) return;
+function stretchTable(root = document.getElementById('slide')){
+  const st = root && root.querySelector('.s-table'); if (!st) return;
   const tbl = st.querySelector('.tbl'), rows = [...tbl.tBodies[0].rows];
   rows.forEach(tr => tr.style.height = ''); tbl.classList.remove('dense');
   if (st.offsetTop + st.offsetHeight > TABLE_BOTTOM) tbl.classList.add('dense');   // หลายโมเดลมาก ให้แถวชิดขึ้น
@@ -1926,32 +1956,26 @@ function svgToPNG(svg, w, h, scale = 4){
     img.onload = () => { const c = document.createElement('canvas'); c.width = w * scale; c.height = h * scale; c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); ok(c.toDataURL('image/png')); };
     img.onerror = bad; img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg); });
 }
-async function exportPPTX(){
-  if (!window.PptxGenJS){ exMsg('โหลดตัวช่วยสร้าง PowerPoint ไม่สำเร็จ (ต้องต่ออินเทอร์เน็ต)'); return; }
-  const r = compute(); if (!r.port){ exMsg('ยังไม่มีผลลัพธ์ให้บันทึก'); return; }
-  exMsg('กำลังสร้างไฟล์…');
-  try{
-    const slideEl = document.getElementById('slide'), k = slideEl.getBoundingClientRect().width / 1280;
-    const IN = px => px / 96;                       // 1280 px slide = 13.333 in
+/* one Portfolio Overview slide (editable shapes) from a rendered .slide element; opt.theme 'navy' = กรมท่า-ทอง */
+function gradPNG(dir){
+  const c = document.createElement('canvas'); c.width = dir === 'v' ? 8 : 400; c.height = dir === 'v' ? 200 : 8;
+  const x = c.getContext('2d'), g = dir === 'v' ? x.createLinearGradient(0, 0, 0, 200) : x.createLinearGradient(0, 0, 400, 0);
+  if (dir === 'v'){ g.addColorStop(0, '#ffffff'); g.addColorStop(.45, '#efe7d4'); g.addColorStop(1, '#c9b282'); }
+  else { g.addColorStop(0, '#f4eedf'); g.addColorStop(1, '#c9b282'); }
+  x.fillStyle = g; x.fillRect(0, 0, c.width, c.height); return c.toDataURL('image/png');
+}
+async function addPlanSlide(pptx, slideEl, r, plan, opt = {}, lotusPNG){
+    const k = slideEl.getBoundingClientRect().width / 1280;
+    const IN = px => px / 96;
     const box = el => { const a = slideEl.getBoundingClientRect(), b = el.getBoundingClientRect();
       return {x: IN((b.left - a.left) / k), y: IN((b.top - a.top) / k), w: IN(b.width / k), h: IN(b.height / k)}; };
-    const HF = 'BLS Bold', XB = 'BLS ExtraBold', BF = 'BLS Text', NAVY = '16233A', POS = '16A34A', NEG = 'E3191B', GREY = '8B93A3';
-    const pick = new Set(dlPicked());
-    if (!pick.size){ exMsg('เลือกอย่างน้อย 1 ส่วน'); return; }
-    const pptx = new PptxGenJS(); pptx.layout = 'LAYOUT_WIDE';
-    const lotusPNG = await svgToPNG(BRAND.lotus, 148, 200);
-    if (pick.has('cover')){
-      const c = pptx.addSlide(); c.background = {color: 'FFFFFF'};
-      c.addImage({data: BRAND.waves, x: 3.23, y: 2.92, w: 10.11, h: 5.76});
-      c.addImage({data: BRAND.bls, x: 0.6, y: 0.45, w: 2.83, h: 0.7});
-      c.addImage({data: BRAND.bua, x: 13.333 - 0.6 - 2.42, y: 0.4, w: 2.42, h: 0.8});
-      c.addText('Wealth Solution Plan', {x: 0.55, y: 1.85, w: 9, h: 1.0, margin: 0, fontFace: HF, fontSize: 54, bold: true, color: '1F3A63'});
-      c.addText('Exclusive Investment Strategy', {x: 0.6, y: 2.85, w: 9, h: 0.6, margin: 0, fontFace: BF, fontSize: 26, color: '1F3A63'});
-    }
-    if (pick.has('slide')){
-    const s = pptx.addSlide(); s.background = {color: 'FFFFFF'};
-    const plan = PLANS.find(p => p.id === state.plan), meta = planMeta(plan);
-    const col = colorsFor(r.models, r.raw), amt = parseFloat(state.amount) || 0;
+    const gold = opt.theme === 'navy';
+    const HF = 'BLS Bold', XB = 'BLS ExtraBold', BF = 'BLS Text', NAVY = '16233A', GREY = '8B93A3', GOLD = 'C9B282';
+    const BG = gold ? '0B1D42' : 'FFFFFF', INK = gold ? 'FFFFFF' : NAVY, HL = gold ? 'D9C79C' : NAVY, SUB = gold ? 'DFE5EF' : '333333';
+    const LINE = gold ? GOLD : GREY, BAR = gold ? GOLD : NAVY, POS = gold ? '22C55E' : '16A34A', NEG = gold ? 'FF2D2D' : 'E3191B';
+    const s = pptx.addSlide(opt.section ? {sectionTitle: opt.section} : undefined); s.background = {color: BG};
+    const meta = planMeta(plan);
+    const col = colorsFor(r.models, r.raw, opt.theme);
 
     // donut (editable chart) + labels from the on-screen layout
     const svg = slideEl.querySelector('.s-donut'), sb = box(svg), sx = sb.w / 500;
@@ -1976,24 +2000,27 @@ async function exportPPTX(){
     const sh = slideEl.querySelector('.s-head');
     if (sh){ const bl = box(sh.querySelector('.s-lotus svg')), bt = box(sh.querySelector('.s-h1'));
       s.addImage({data: lotusPNG, x: bl.x, y: bl.y, w: bl.w, h: bl.h});
-      s.addText(sh.querySelector('.s-h1').textContent, {x: bt.x, y: bt.y - 0.05, w: bt.w + 0.6, h: bt.h + 0.1, margin: 0, fontFace: XB, fontSize: 36, bold: false, color: NAVY, valign: 'middle'}); }
+      const h1 = sh.querySelector('.s-h1'), hl = h1.querySelector('.hl');
+      const parts = hl ? [{text: h1.textContent.slice(0, h1.textContent.length - hl.textContent.length), options: {color: INK}}, {text: hl.textContent, options: {color: HL}}] : h1.textContent;
+      s.addText(parts, {x: bt.x, y: bt.y - 0.05, w: bt.w + 0.6, h: bt.h + 0.1, margin: 0, fontFace: XB, fontSize: 36, bold: false, color: INK, valign: 'middle'}); }
     // legend
     slideEl.querySelectorAll('.s-legend span').forEach(sp => {
       const i = sp.querySelector('i'), bi = box(i), bs = box(sp);
       s.addShape(pptx.ShapeType.rect, {x: bi.x, y: bi.y, w: bi.w, h: bi.h, fill: {color: hex(i.style.background)}, line: {type: 'none'}});
-      s.addText(sp.textContent.trim(), {x: bi.x + bi.w + 0.04, y: bs.y, w: bs.w, h: bs.h, margin: 0, fontFace: HF, fontSize: 11.25, bold: true, color: NAVY, valign: 'middle'});
+      s.addText(sp.textContent.trim(), {x: bi.x + bi.w + 0.04, y: bs.y, w: bs.w, h: bs.h, margin: 0, fontFace: HF, fontSize: 11.25, bold: true, color: INK, valign: 'middle'});
     });
     // title block
     const tb = box(slideEl.querySelector('.s-title'));
-    s.addShape(pptx.ShapeType.rect, {x: tb.x, y: tb.y, w: tb.w, h: tb.h, fill: {color: NAVY}, line: {type: 'none'}});
+    if (gold) s.addImage({data: gradPNG('v'), x: tb.x, y: tb.y, w: tb.w, h: tb.h});
+    else s.addShape(pptx.ShapeType.rect, {x: tb.x, y: tb.y, w: tb.w, h: tb.h, fill: {color: NAVY}, line: {type: 'none'}});
     s.addText(meta.risk ? [{text: meta.name, options: {fontFace: XB, fontSize: 33, breakLine: true}},
-               {text: `- Risk Profile: ${meta.risk} -`, options: {fontFace: BF, fontSize: 12, color: 'DFE5EF'}}]
+               {text: `- Risk Profile: ${meta.risk} -`, options: {fontFace: BF, fontSize: 12, color: gold ? NAVY : 'DFE5EF'}}]
              : [{text: meta.name, options: {fontFace: XB, fontSize: 33}}],
-      {x: tb.x, y: tb.y, w: tb.w, h: tb.h, align: 'center', valign: 'middle', color: 'FFFFFF', margin: 0});
+      {x: tb.x, y: tb.y, w: tb.w, h: tb.h, align: 'center', valign: 'middle', color: gold ? NAVY : 'FFFFFF', margin: 0});
     // table
     const tbl = slideEl.querySelector('.tbl'), tbB = box(tbl);
-    const hdr = {fill: {color: NAVY}, color: 'FFFFFF', bold: true, fontFace: HF, align: 'center', valign: 'middle', fontSize: 12, border: {type: 'none'}};
-    const thin = {type: 'solid', pt: 1, color: GREY}, none = {type: 'none'}, thick = {type: 'solid', pt: 3, color: NAVY};
+    const hdr = {fill: {color: gold ? GOLD : NAVY}, color: gold ? NAVY : 'FFFFFF', bold: true, fontFace: HF, align: 'center', valign: 'middle', fontSize: 12, border: {type: 'none'}};
+    const thin = {type: 'solid', pt: 1, color: LINE}, none = {type: 'none'}, thick = {type: 'solid', pt: 3, color: BAR};
     const rows = [[{text: 'Strategy', options: {...hdr, rowspan: 2}}, {text: 'Portfolio Model', options: {...hdr, rowspan: 2}},
                    {text: tbl.tHead.rows[0].cells[2].textContent.trim(), options: {...hdr, colspan: 4}}],
                   [...tbl.tHead.rows[1].cells].map(c => ({text: c.innerText.trim(), options: {...hdr, fontSize: 11}}))];
@@ -2002,13 +2029,13 @@ async function exportPPTX(){
       const last = ri === body.length - 1, row = [];
       [...tr.cells].forEach(td => {
         const span = +td.getAttribute('rowspan') || 1, endsLast = ri + span - 1 === body.length - 1;
-        const base = {fontFace: BF, fontSize: 12, align: 'center', valign: 'middle', color: NAVY,
+        const base = {fontFace: BF, fontSize: 12, align: 'center', valign: 'middle', color: INK,
           border: [none, none, endsLast ? thick : thin, none]};
         if (td.classList.contains('strat')) row.push({text: td.innerText.trim(), options: {...base, fontSize: 11, rowspan: span}});
         else if (td.classList.contains('model')) row.push({text: [{text: '● ', options: {color: hex(td.querySelector('i').style.background), fontSize: 14}},
                                                                      {text: td.textContent.trim(), options: {bold: true, fontFace: HF}}], options: {...base, align: 'left'}});
-        else { const dv = td.querySelector('.dv'), c = td.classList.contains('pos') ? POS : td.classList.contains('neg') ? NEG : NAVY;
-          row.push({text: dv ? [{text: td.firstChild.textContent, options: {breakLine: true}}, {text: dv.textContent, options: {fontSize: 8, color: '333333'}}] : td.textContent.trim(), options: {...base, color: c}}); }
+        else { const dv = td.querySelector('.dv'), c = td.classList.contains('pos') ? POS : td.classList.contains('neg') ? NEG : INK;
+          row.push({text: dv ? [{text: td.firstChild.textContent, options: {breakLine: true}}, {text: dv.textContent, options: {fontSize: 8, color: SUB}}] : td.textContent.trim(), options: {...base, color: c}}); }
       });
       rows.push(row);
     });
@@ -2018,27 +2045,52 @@ async function exportPPTX(){
     // four boxes
     slideEl.querySelectorAll('.box').forEach(bx => {
       const h4 = box(bx.querySelector('h4')), bb = box(bx);
-      s.addShape(pptx.ShapeType.rect, {x: h4.x, y: h4.y, w: h4.w, h: h4.h, fill: {color: NAVY}, line: {type: 'none'}});
-      s.addText(bx.querySelector('h4').textContent.trim(), {x: h4.x, y: h4.y, w: h4.w, h: h4.h, margin: 0, fontFace: HF, fontSize: 13.5, bold: true, color: 'FFFFFF', align: 'center', valign: 'middle'});
+      if (gold) s.addImage({data: gradPNG('h'), x: h4.x, y: h4.y, w: h4.w, h: h4.h});
+      else s.addShape(pptx.ShapeType.rect, {x: h4.x, y: h4.y, w: h4.w, h: h4.h, fill: {color: NAVY}, line: {type: 'none'}});
+      s.addText(bx.querySelector('h4').textContent.trim(), {x: h4.x, y: h4.y, w: h4.w, h: h4.h, margin: 0, fontFace: HF, fontSize: 13.5, bold: true, color: gold ? NAVY : 'FFFFFF', align: 'center', valign: 'middle'});
       bx.querySelectorAll('.brow').forEach((rw, i, all) => {
         const b = box(rw), kEl = rw.querySelector('.k'), vEl = rw.querySelector('.v'), kb = box(kEl), vb = box(vEl);
-        s.addText(kEl.innerText.trim(), {x: kb.x, y: b.y, w: kb.w, h: b.h, margin: 0, fontFace: BF, fontSize: +getComputedStyle(kEl).fontSize.replace('px', '') * 0.75, color: NAVY, align: 'center', valign: 'middle'});
+        s.addText(kEl.innerText.trim(), {x: kb.x, y: b.y, w: kb.w, h: b.h, margin: 0, fontFace: BF, fontSize: +getComputedStyle(kEl).fontSize.replace('px', '') * 0.75, color: INK, align: 'center', valign: 'middle'});
         const u = vEl.querySelector('.u'), dv = vEl.querySelector('.dv'), main = (u || dv) ? vEl.firstChild.textContent : vEl.textContent;
-        const vc = vEl.classList.contains('pos') ? POS : vEl.classList.contains('neg') ? NEG : NAVY, vfs = +getComputedStyle(vEl).fontSize.replace('px', '') * 0.75;
+        const vc = vEl.classList.contains('pos') ? POS : vEl.classList.contains('neg') ? NEG : INK, vfs = +getComputedStyle(vEl).fontSize.replace('px', '') * 0.75;
         s.addText(u ? [{text: main, options: {fontSize: vfs}}, {text: ' ' + u.textContent, options: {fontSize: 12.75, bold: false, fontFace: BF}}]
-                 : dv ? [{text: main, options: {fontSize: vfs, breakLine: true}}, {text: dv.textContent, options: {fontSize: 8, bold: false, fontFace: BF, color: '333333'}}] : main,
+                 : dv ? [{text: main, options: {fontSize: vfs, breakLine: true}}, {text: dv.textContent, options: {fontSize: 8, bold: false, fontFace: BF, color: SUB}}] : main,
           {x: vb.x, y: b.y, w: vb.w, h: b.h, margin: 0, fontFace: HF, fontSize: vfs, bold: true, color: vc, align: 'center', valign: 'middle'});
-        if (i < all.length - 1) s.addShape(pptx.ShapeType.line, {x: b.x, y: b.y + b.h, w: b.w, h: 0, line: {color: GREY, width: 1}});
+        if (i < all.length - 1) s.addShape(pptx.ShapeType.line, {x: b.x, y: b.y + b.h, w: b.w, h: 0, line: {color: LINE, width: 1}});
       });
-      s.addShape(pptx.ShapeType.rect, {x: bb.x, y: bb.y + bb.h - IN(4), w: bb.w, h: IN(4), fill: {color: NAVY}, line: {type: 'none'}});
+      s.addShape(pptx.ShapeType.rect, {x: bb.x, y: bb.y + bb.h - IN(4), w: bb.w, h: IN(4), fill: {color: BAR}, line: {type: 'none'}});
     });
     // table bottom bar
-    s.addShape(pptx.ShapeType.rect, {x: tbB.x, y: tbB.y + tbB.h, w: tbB.w, h: IN(4), fill: {color: NAVY}, line: {type: 'none'}});
+    s.addShape(pptx.ShapeType.rect, {x: tbB.x, y: tbB.y + tbB.h, w: tbB.w, h: IN(4), fill: {color: BAR}, line: {type: 'none'}});
     // footnote
     const ft = slideEl.querySelector('.foot'), fb = box(ft), lines = ft.innerText.split('\n');
     s.addText(lines.map((l, i) => ({text: l, options: {breakLine: i < lines.length - 1}})),
-      {x: fb.x - 0.2, y: fb.y, w: fb.w + 0.2, h: fb.h, margin: 0, fontFace: BF, fontSize: 8, color: '333333', align: 'right', valign: 'middle'});
+      {x: fb.x - 0.2, y: fb.y, w: fb.w + 0.2, h: fb.h, margin: 0, fontFace: BF, fontSize: 8, color: gold ? 'FFFFFF' : '333333', align: 'right', valign: 'middle'});
     }
+
+async function exportPPTX(){
+  if (!window.PptxGenJS){ exMsg('โหลดตัวช่วยสร้าง PowerPoint ไม่สำเร็จ (ต้องต่ออินเทอร์เน็ต)'); return; }
+  const r = compute(); if (!r.port){ exMsg('ยังไม่มีผลลัพธ์ให้บันทึก'); return; }
+  exMsg('กำลังสร้างไฟล์…');
+  try{
+    const slideEl = document.getElementById('slide'), k = slideEl.getBoundingClientRect().width / 1280;
+    const IN = px => px / 96;                       // 1280 px slide = 13.333 in
+    const box = el => { const a = slideEl.getBoundingClientRect(), b = el.getBoundingClientRect();
+      return {x: IN((b.left - a.left) / k), y: IN((b.top - a.top) / k), w: IN(b.width / k), h: IN(b.height / k)}; };
+    const HF = 'BLS Bold', XB = 'BLS ExtraBold', BF = 'BLS Text', NAVY = '16233A', POS = '16A34A', NEG = 'E3191B', GREY = '8B93A3';
+    const pick = new Set(dlPicked());
+    if (!pick.size){ exMsg('เลือกอย่างน้อย 1 ส่วน'); return; }
+    const pptx = new PptxGenJS(); pptx.layout = 'LAYOUT_WIDE';
+    const lotusPNG = await svgToPNG(BRAND.lotus, 148, 200);
+    if (pick.has('cover')){
+      const c = pptx.addSlide(); c.background = {color: 'FFFFFF'};
+      c.addImage({data: BRAND.waves, x: 3.23, y: 2.92, w: 10.11, h: 5.76});
+      c.addImage({data: BRAND.bls, x: 0.6, y: 0.45, w: 2.83, h: 0.7});
+      c.addImage({data: BRAND.bua, x: 13.333 - 0.6 - 2.42, y: 0.4, w: 2.42, h: 0.8});
+      c.addText('Wealth Solution Plan', {x: 0.55, y: 1.85, w: 9, h: 1.0, margin: 0, fontFace: HF, fontSize: 54, bold: true, color: '1F3A63'});
+      c.addText('Exclusive Investment Strategy', {x: 0.6, y: 2.85, w: 9, h: 0.6, margin: 0, fontFace: BF, fontSize: 26, color: '1F3A63'});
+    }
+    if (pick.has('slide')) await addPlanSlide(pptx, document.getElementById('slide'), r, PLANS.find(p => p.id === state.plan), {}, lotusPNG);
     // further slides: grouped like the PDF pages, with a title bar and page number
     if (window.htmlToImage){
       let n = (pick.has('cover') ? 1 : 0) + (pick.has('slide') ? 1 : 0);
@@ -2073,6 +2125,10 @@ window.addEventListener('resize', fit);
 window.addEventListener('beforeprint', fit);
 window.addEventListener('afterprint', fit);
 if (window.ResizeObserver) new ResizeObserver(fit).observe(document.body);
+
+/* ใช้โดยหน้ารายงานประจำเดือน (monthly/) */
+window.WPAPI = {PLANS, state, compute, slideHTML, stretchTable, addPlanSlide, svgToPNG, BRAND, setPeriod, SLIDE_PERIOD,
+  ready: () => !!(DATA && DATA.csv && FULL), lastDate: () => lastDate(), csvName: () => DATA && DATA.csvName};
 
 /* boot */
 (async () => {
