@@ -1827,24 +1827,26 @@ function opLines(text, w, size, bold) {
   return Math.max(n, 1);
 }
 // ขนาดตาราง: เริ่มจากตัวอักษรตามจำนวนกอง แล้วลดลงจนกราฟมีที่พอ
+const OP_ONE_LINE = new Set(["ระยะเวลาที่ควรถือลงทุน"]);   // แถวที่ให้อยู่บรรทัดเดียวเสมอ
 function opTable(m, maxH) {
   const n = m.cols.length - 1, TW = OP.W - OP.M * 2, labW = n <= 2 ? 210 : 172, colW = (TW - labW) / m.cols.length;
   const rows = [["กองทุน", m.cols.map(c => c.name)], ...m.rows];
-  let fs = n <= 1 ? 11.5 : n === 2 ? 11 : n === 3 ? 10.5 : n === 4 ? 10 : 9.5, H = [];
+  let fs = n <= 1 ? 11.5 : n === 2 ? 11 : n === 3 ? 10.5 : n === 4 ? 10 : 9.5, H = [], K = [];
+  const width = (v, size, bold) => { opCtx.font = `${bold ? 700 : 400} ${size}px ${bold ? FONT_B : FONT}`; return opCtx.measureText(String(v || "")).width; };
   for (; ; fs -= 0.5) {
     const pad = fs * 0.45, lh = fs * 1.3;
-    H = rows.map(([l, vs], r) => Math.max(opLines(l, labW - 10, fs, true),
-      ...vs.map((v, i) => opLines(v, colW - 10, isFxCol(m.cols[i]) ? fs + 0.5 : fs, isFxCol(m.cols[i]) || r === 0))) * lh + pad * 2);
+    // แถวที่ต้องอยู่บรรทัดเดียว: ย่อตัวอักษรทั้งแถวเท่ากันจนข้อความยาวสุดพอดีช่อง
+    K = rows.map(([l, vs], r) => OP_ONE_LINE.has(l) ? Math.min(1, ...vs.map((v, i) => { const fx = isFxCol(m.cols[i]), w = width(v, fx ? fs + 0.5 : fs, fx); return w ? (colW - 12) * 0.95 / w : 1; })) : 1);
+    H = rows.map(([l, vs], r) => (K[r] < 1 || OP_ONE_LINE.has(l) ? Math.max(1, opLines(l, labW - 10, fs, true)) : Math.max(opLines(l, labW - 10, fs, true),
+      ...vs.map((v, i) => opLines(v, colW - 10, isFxCol(m.cols[i]) ? fs + 0.5 : fs, isFxCol(m.cols[i]) || r === 0)))) * lh + pad * 2);
     if (H.reduce((a, b) => a + b, 0) <= maxH || fs <= 7.5) break;
   }
-  return { fs, labW, colW, rows, H, h: H.reduce((a, b) => a + b, 0) };
+  return { fs, K, labW, colW, rows, H, h: H.reduce((a, b) => a + b, 0) };
 }
 async function buildOnePage(tableNames) {
   await loadScript("https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js", () => window.PptxGenJS);
   const all = modelT1(), keepIdx = all.cols.map((c, i) => isFxCol(c) || tableNames.includes(c.name) ? i : -1).filter(i => i >= 0);
-  // ระยะเวลาถือ: ตัด "แนะนำประมาณ" ออกให้อยู่บรรทัดเดียว (เช่น "1 เดือนขึ้นไป")
-  const short = (l, v) => l === "ระยะเวลาที่ควรถือลงทุน" && v ? String(v).replace(/^\s*(แนะนำ)?\s*(ประมาณ)?\s*/, "") : v;
-  const m = { cols: keepIdx.map(i => all.cols[i]), rows: all.rows.map(([l, vs]) => [l, keepIdx.map(i => short(l, vs[i]))]) };
+  const m = { cols: keepIdx.map(i => all.cols[i]), rows: all.rows.map(([l, vs]) => [l, keepIdx.map(i => vs[i])]) };
   const hero = heroSeries(), heroName = hero ? hero.name : "FIXEDSP", custom = $("title").value.trim();
   // กราฟและบรรทัด "เทียบกับ" แสดงเฉพาะ FIXEDSP กับกองที่อยู่ในตาราง (สีเส้นเหมือนบนหน้าเว็บ)
   const funds = selected.filter(n => !isHero(byName(n)) && tableNames.includes(n));
@@ -1875,7 +1877,7 @@ async function buildOnePage(tableNames) {
   const rowsX = t.rows.map(([l, vs], r) => [
     { text: l, options: { fill: { color: NV }, color: "FFFFFF", fontFace: TB, bold: true, fontSize: t.fs, border: [bd("FFFFFF"), bd("C9D3E3"), bd("FFFFFF"), bd(NV)] } },
     ...vs.map((v, i) => { const fx = isFxCol(m.cols[i]);
-      return { text: v || "", options: { fill: { color: fx ? hex6(SLIDE_T.fxBg) : "FFFFFF" }, color: NV, fontFace: fx || r === 0 ? TB : TX, bold: fx || r === 0, fontSize: fx ? t.fs + 0.5 : t.fs, border: [bd("C9D3E3"), bd("C9D3E3"), bd("C9D3E3"), bd("C9D3E3")] } }; })]);
+      return { text: v || "", options: { fill: { color: fx ? hex6(SLIDE_T.fxBg) : "FFFFFF" }, color: NV, fontFace: fx || r === 0 ? TB : TX, bold: fx || r === 0, fontSize: Math.floor((fx ? t.fs + 0.5 : t.fs) * t.K[r] * 4) / 4, border: [bd("C9D3E3"), bd("C9D3E3"), bd("C9D3E3"), bd("C9D3E3")] } }; })]);
   s.addTable(rowsX, { x: I(M), y: I(tY), w: I(TW), colW: [I(t.labW), ...m.cols.map(() => I(t.colW))], rowH: t.H.map(I), align: "center", valign: "middle", margin: [2, 4, 2, 4] });
   // กราฟเส้นในกรอบ
   const cY = top, cH = tY - gap - top, pad = 8, capH = 16;
