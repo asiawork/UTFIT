@@ -14,13 +14,14 @@
 /* Layout: tool controls on top, a fixed 1280x720 "slide" scaled to fit, weights editor beside it. */
 @font-face{font-family:'BLS';src:url('fonts/BLS-Bold.ttf');font-weight:700;font-display:swap}
 @font-face{font-family:'BLS';src:url('fonts/BLS-Regular.ttf');font-weight:400;font-display:swap}
+@font-face{font-family:'BLS XB';src:local('BLS Extra Bold'),local('BLS ExtraBold'),local('BLS-ExtraBold'),local('BLSExtraBold'),local('BLS Bold');font-weight:800;font-display:swap}
 @font-face{font-family:'BLS Text';src:url('fonts/BLS_Text-Regular.ttf');font-weight:400;font-display:swap}
 @font-face{font-family:'BLS Text';src:url('fonts/BLS_Text-Bold.ttf');font-weight:700;font-display:swap}
 :root{
   --navy:#16233a; --navy-2:#22324f; --ink:#16233a; --muted:#6a7488; --line:#d6dbe4;
   --bg:#eef1f5; --paper:#ffffff; --pos:#16a34a; --neg:#e3191b; --accent:#1f5fbf;
   --c1:#3b7cc4; --c2:#a5adbf; --c3:#2b4167; --c4:#dbe7f7; --c5:#7aa5d8; --c6:#5b6474;
-  --head:'BLS','Kanit',system-ui,sans-serif; --body:'BLS Text','Kanit',system-ui,sans-serif;
+  --head:'BLS','Kanit',system-ui,sans-serif; --xb:'BLS XB','BLS','Kanit',system-ui,sans-serif; --body:'BLS Text','Kanit',system-ui,sans-serif;
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:14px}
@@ -418,26 +419,27 @@ body.capturing .print-head.printonly{display:flex;padding:4px 2px 6px;background
 .meta b{color:var(--ink);font-weight:600}
 
 /* ===== slide (fixed 1280x720) ===== */
-.s-head{position:absolute;left:30px;top:14px;right:30px;display:flex;align-items:center;gap:16px}
-.s-h1{font-family:var(--head);font-weight:700;font-size:37px;color:var(--navy);letter-spacing:-.5px;line-height:1;padding-top:3px}
-.s-donut{position:absolute;left:28px;top:74px;width:500px;height:386px;overflow:visible}
-.s-legend{position:absolute;left:28px;top:464px;width:500px;display:flex;justify-content:center;gap:18px;font-size:15px;font-weight:600;color:var(--navy)}
+.s-head{position:absolute;left:44px;top:26px;right:30px;display:flex;align-items:center;gap:20px}
+.s-h1{font-family:var(--xb);font-weight:800;font-size:48px;color:var(--navy);letter-spacing:-.3px;line-height:1;padding-top:4px}
+.s-donut{position:absolute;left:28px;top:104px;width:500px;height:386px;overflow:visible}
+.s-legend{position:absolute;left:28px;top:446px;width:500px;display:flex;justify-content:center;gap:18px;font-size:15px;font-weight:600;color:var(--navy)}
 .s-legend span{display:inline-flex;align-items:center;gap:6px}
 .s-legend i{width:11px;height:11px;display:inline-block}
-.s-table{position:absolute;left:558px;top:74px;width:670px}
+.s-table{position:absolute;left:558px;top:118px;width:670px}
 .s-title{background:var(--navy);color:#fff;text-align:center;padding:10px 10px 8px;margin-bottom:6px}
-.s-title .n{font-size:40px;font-weight:700;letter-spacing:-.5px;line-height:1.05}
+.s-title .n{font-family:var(--xb);font-size:44px;font-weight:800;letter-spacing:-.5px;line-height:1.05}
 .s-title .r{font-size:16px;font-weight:300;color:#dfe5ef;margin-top:2px}
 .tbl{width:100%;border-collapse:collapse;font-size:18px}
 .tbl td:not(.strat):not(.model){font-weight:700}
 .tbl thead th{background:var(--navy);color:#fff;font-weight:600;padding:4px 6px;line-height:1.15}
 .tbl thead tr:first-child th{padding-top:10px}
 .tbl thead tr:last-child th{padding-bottom:10px;font-size:15.5px}
-.tbl td{text-align:center;padding:9px 6px;border-bottom:1.5px solid #8b93a3;font-weight:500;font-variant-numeric:tabular-nums}
+.tbl td{text-align:center;padding:6px 6px;border-bottom:1.5px solid #8b93a3;font-weight:500;font-variant-numeric:tabular-nums}
 .tbl td.strat{font-size:15.5px;font-weight:500;line-height:1.35;width:120px}
 .tbl td.model{text-align:left;font-weight:600;white-space:nowrap}
 .tbl td.model i{display:inline-block;width:17px;height:17px;border-radius:50%;vertical-align:-2px;margin-right:10px}
 .tbl tbody tr:last-child td{border-bottom:0}
+.tbl.dense td{padding:2px 6px;font-size:16px} .tbl.dense td.strat{font-size:14px;line-height:1.2}
 .s-table::after{content:'';display:block;height:4px;background:var(--navy)}
 .tbl td.strat.end{border-bottom:0}
 .tbl td.strat{border-bottom-color:#8b93a3}
@@ -1339,7 +1341,7 @@ function slideHTML(plan, r){
   const rec1 = recLong(p.recMedian), rec2 = recLong(p.recLongest);
   const headTxt = plan.id === 'diy' ? 'จัดพอร์ตเชิงกลยุทธ์ Wealth Solution Plan' : `แบบที่ ${plan.no} จัดพอร์ตเชิงกลยุทธ์ ${esc(meta.name)}`;
   return `
-    <div class="s-head"><span class="s-lotus">${BRAND.lotus.replace('<svg ', '<svg style="height:46px;width:auto;display:block" ')}</span><span class="s-h1">${headTxt}</span></div>
+    <div class="s-head"><span class="s-lotus">${BRAND.lotus.replace('<svg ', '<svg style="height:62px;width:auto;display:block" ')}</span><span class="s-h1">${headTxt}</span></div>
     <svg class="s-donut" viewBox="0 0 500 420" aria-label="สัดส่วนพอร์ต">${donut(models, r.raw, col)}</svg>
     <div class="s-legend">${models.map(m => `<span><i style="background:${col[m]}"></i>${m}</span>`).join('')}</div>
     <div class="s-table">
@@ -1390,7 +1392,7 @@ function donut(models, raw, col){
     labels.push({m, v, am:(a0+a1)/2}); a0 = a1;
   });
   // labels with leader lines; spread labels on each side so they never overlap
-  const gap = amt > 0 ? 58 : 44, top = 30, bottom = amt > 0 ? 362 : 380;
+  const gap = amt > 0 ? 58 : 44, top = 30, bottom = amt > 0 ? 330 : 350;   // ไม่ให้ชน legend ใต้กราฟ
   labels.forEach(L => { L.right = Math.cos(L.am) >= 0; L.ly = cy + (R + 22) * Math.sin(L.am); });
   [true, false].forEach(side => {
     const g = labels.filter(L => L.right === side).sort((a, b) => a.ly - b.ly);
@@ -1423,7 +1425,8 @@ const TABLE_BOTTOM = 466;
 function stretchTable(){
   const st = document.querySelector('#slide .s-table'); if (!st) return;
   const tbl = st.querySelector('.tbl'), rows = [...tbl.tBodies[0].rows];
-  rows.forEach(tr => tr.style.height = '');
+  rows.forEach(tr => tr.style.height = ''); tbl.classList.remove('dense');
+  if (st.offsetTop + st.offsetHeight > TABLE_BOTTOM) tbl.classList.add('dense');   // หลายโมเดลมาก ให้แถวชิดขึ้น
   const used = st.offsetTop + tbl.offsetTop + tbl.tHead.offsetHeight;
   const natural = rows.reduce((a, tr) => a + tr.offsetHeight, 0);
   const avail = TABLE_BOTTOM - used;
@@ -1932,7 +1935,7 @@ async function exportPPTX(){
     const IN = px => px / 96;                       // 1280 px slide = 13.333 in
     const box = el => { const a = slideEl.getBoundingClientRect(), b = el.getBoundingClientRect();
       return {x: IN((b.left - a.left) / k), y: IN((b.top - a.top) / k), w: IN(b.width / k), h: IN(b.height / k)}; };
-    const HF = 'BLS Bold', BF = 'BLS Text', NAVY = '16233A', POS = '16A34A', NEG = 'E3191B', GREY = '8B93A3';
+    const HF = 'BLS Bold', XB = 'BLS Extra Bold', BF = 'BLS Text', NAVY = '16233A', POS = '16A34A', NEG = 'E3191B', GREY = '8B93A3';
     const pick = new Set(dlPicked());
     if (!pick.size){ exMsg('เลือกอย่างน้อย 1 ส่วน'); return; }
     const pptx = new PptxGenJS(); pptx.layout = 'LAYOUT_WIDE';
@@ -1973,7 +1976,7 @@ async function exportPPTX(){
     const sh = slideEl.querySelector('.s-head');
     if (sh){ const bl = box(sh.querySelector('.s-lotus svg')), bt = box(sh.querySelector('.s-h1'));
       s.addImage({data: lotusPNG, x: bl.x, y: bl.y, w: bl.w, h: bl.h});
-      s.addText(sh.querySelector('.s-h1').textContent, {x: bt.x, y: bt.y - 0.05, w: bt.w + 0.6, h: bt.h + 0.1, margin: 0, fontFace: HF, fontSize: 27, bold: true, color: NAVY, valign: 'middle'}); }
+      s.addText(sh.querySelector('.s-h1').textContent, {x: bt.x, y: bt.y - 0.05, w: bt.w + 0.6, h: bt.h + 0.1, margin: 0, fontFace: XB, fontSize: 36, bold: false, color: NAVY, valign: 'middle'}); }
     // legend
     slideEl.querySelectorAll('.s-legend span').forEach(sp => {
       const i = sp.querySelector('i'), bi = box(i), bs = box(sp);
@@ -1983,9 +1986,9 @@ async function exportPPTX(){
     // title block
     const tb = box(slideEl.querySelector('.s-title'));
     s.addShape(pptx.ShapeType.rect, {x: tb.x, y: tb.y, w: tb.w, h: tb.h, fill: {color: NAVY}, line: {type: 'none'}});
-    s.addText(meta.risk ? [{text: meta.name, options: {fontFace: HF, fontSize: 30, bold: true, breakLine: true}},
+    s.addText(meta.risk ? [{text: meta.name, options: {fontFace: XB, fontSize: 33, breakLine: true}},
                {text: `- Risk Profile: ${meta.risk} -`, options: {fontFace: BF, fontSize: 12, color: 'DFE5EF'}}]
-             : [{text: meta.name, options: {fontFace: HF, fontSize: 30, bold: true}}],
+             : [{text: meta.name, options: {fontFace: XB, fontSize: 33}}],
       {x: tb.x, y: tb.y, w: tb.w, h: tb.h, align: 'center', valign: 'middle', color: 'FFFFFF', margin: 0});
     // table
     const tbl = slideEl.querySelector('.tbl'), tbB = box(tbl);
