@@ -728,7 +728,7 @@ function optItem(f, qn, idx, pinned) {
   return `<label class="opt" ${idx != null ? `data-i="${idx}"` : ""} title="${esc(f.info?.proj_name_th || f.name)}"><input type="checkbox" data-n="${esc(f.name)}" ${on ? "checked" : ""}>` +
     (on ? `<input type="color" data-c="${esc(f.name)}" value="${colorOf(f.name)}" title="เปลี่ยนสีเส้น">` : `<span class="sw"></span>`) +
     `<span class="nm">${hl(f.name, qn)}${ipoTag(f)}${meta ? `<span class="meta${f.sim ? " sim" : ""}">${esc(meta)}</span>` : ""}</span>` +
-    (f.sim ? `<button class="ed" data-edit="${esc(f.name)}" title="แก้พอร์ตจำลอง">แก้</button>` : "") +
+    (f.sim && !f.plan ? `<button class="ed" data-edit="${esc(f.name)}" title="แก้พอร์ตจำลอง">แก้</button>` : "") +
     (pinned ? `<button class="x" data-unsel="${esc(f.name)}" title="เอาออกจากที่เลือก">×</button>` : "") + `</label>`;   // × = เอาออกจากที่เลือก (ไม่ลบข้อมูล)
 }
 let hits = [], activeIdx = -1;
@@ -1929,6 +1929,15 @@ $("opPptx").onclick = $("opPdf").onclick = $("opPng").onclick = runOnePage;
 
 /* ---------- พอร์ตจำลอง ----------
    def = { name, rb: "none"|"M"|"Q"|"Y", parts: [{ n: ชื่อกอง, w: % }] } · จำไว้ในเบราว์เซอร์ 1 วันนับจากบันทึกล่าสุด */
+/* Wealth Solution Plan 1–5 (สัดส่วนเดียวกับหน้า Wealth Plan) ซื้อตามสัดส่วนวันแรกของช่วงแล้วถือ ไม่ rebalance ไม่รวมปันผล DAA */
+const WSP_GROUP = "Wealth Solution Plan";
+const WSP_PLANS = [
+  { no: 1, w: { FIXEDSP: 80, FIXEDTDP: 20 } },
+  { no: 2, w: { FIXEDSP: 20, FIXEDTDP: 60, MAA: 10, TCT: 10 } },
+  { no: 3, w: { FIXEDTDP: 40, DAA: 50, TCT: 10 } },
+  { no: 4, w: { FIXEDSP: 20, MAA: 50, TCT: 30 } },
+  { no: 5, w: { AAA: 50, TCT: 50 } },
+].map(p => ({ name: `Wealth Plan ${p.no}`, rb: "none", parts: Object.entries(p.w).map(([n, w]) => ({ n, w })) }));
 const SIM_GROUP = "พอร์ตจำลอง", SIM_STORE = "atf-sims-v1", SIM_KEEP_DAYS = 1, SIM_MAX = 10;
 const RB_TEXT = { none: "ไม่ปรับสัดส่วน", M: "ปรับสัดส่วนรายเดือน", Q: "ปรับสัดส่วนรายไตรมาส", Y: "ปรับสัดส่วนรายปี" };
 let SIM_DEFS = [];
@@ -1967,7 +1976,10 @@ function simulate(def, s0, e0) {
 async function buildSims() {
   const need = new Set(SIM_DEFS.flatMap(def => def.parts.map(p => p.n)).filter(n => !byName(n) && STUBS.has(n)));
   await Promise.all([...need].map(loadFund));
-  SIMS = SIM_DEFS.map(def => { const r = simulate(def); return r && { name: def.name, group: SIM_GROUP, sim: true, def, d: r.d, v: r.v, info: { proj_name_th: simDesc(def) }, sec: {} }; }).filter(Boolean);
+  const mk = (def, group, plan) => { const r = simulate(def); return r && { name: def.name, group, sim: true, plan, def, d: r.d, v: r.v, info: { proj_name_th: simDesc(def) }, sec: {} }; };
+  // Wealth Plan 1–5: สร้างจากโมเดลในไฟล์ Auto Top Funds (ต้องมีครบทุกโมเดลในแผน)
+  const plans = WSP_PLANS.filter(def => def.parts.every(p => CUSTOM.some(c => c.name === p.n))).map(def => mk(def, WSP_GROUP, true));
+  SIMS = [...plans, ...SIM_DEFS.map(def => mk(def, SIM_GROUP, false))].filter(Boolean);
   if (SIMS.length) openGroups.add(SIM_GROUP);
 }
 let simEditing = null, simRb = "none";
