@@ -235,7 +235,7 @@
   .simbtn:hover { background: #2f56ff; transform: translateY(-1px); }
   .opt .ed { border: 0; background: none; color: var(--muted); cursor: pointer; font-size: 13px; padding: 0 4px; }
   .opt .ed:hover { color: var(--navy); }
-  .opt .nm .meta.sim { white-space: normal; }
+  .opt .nm .meta.sim { white-space: pre-line; }
   .modal.sim { max-width: 560px; max-height: calc(100vh - 32px); overflow: auto; }
   .modal .fld { display: block; font-size: 13.5px; color: var(--ink); margin: 10px 0; }
   .modal .fld > input { display: block; width: 100%; margin-top: 4px; font: inherit; font-size: 15px; padding: 8px 10px; border: 1.5px solid var(--line); border-radius: 9px; box-sizing: border-box; }
@@ -1951,7 +1951,9 @@ const simStore = {
   },
   set(defs) { try { if (!defs.length) localStorage.removeItem(SIM_STORE); else localStorage.setItem(SIM_STORE, JSON.stringify({ at: Date.now(), sims: defs })); } catch (e) {} },
 };
-const simDesc = (def) => def.parts.map(p => `${p.n} ${+p.w.toFixed(2)}%`).join(" · ") + ` · ${RB_TEXT[def.rb] || RB_TEXT.none}`;
+// คำอธิบายพอร์ต: บรรทัดแรกสัดส่วน (ย่อ FIXEDSP เป็น SP) บรรทัดที่สองวิธีปรับสัดส่วน
+const simShort = (n) => n.replace(/^FIXED(?=[A-Z])/, "");
+const simDesc = (def, sep = "\n") => def.parts.map(p => `${simShort(p.n)}\u00a0${+p.w.toFixed(2)}%`).join("\u2002 ") + sep + (RB_TEXT[def.rb] || RB_TEXT.none);
 const rbKey = (iso, rb) => rb === "M" ? iso.slice(0, 7) : rb === "Q" ? iso.slice(0, 4) + "Q" + Math.ceil(+iso.slice(5, 7) / 3) : rb === "Y" ? iso.slice(0, 4) : "";
 // มูลค่าพอร์ตเริ่ม 100 · ซื้อตามสัดส่วนวันแรก · rebalance = วันทำการแรกของเดือน/ไตรมาส/ปีใหม่ ปรับกลับเป็นสัดส่วนเดิม (ใช้ NAV ล่าสุดที่มีของแต่ละกอง)
 function simulate(def, s0, e0) {
@@ -1976,7 +1978,7 @@ function simulate(def, s0, e0) {
 async function buildSims() {
   const need = new Set(SIM_DEFS.flatMap(def => def.parts.map(p => p.n)).filter(n => !byName(n) && STUBS.has(n)));
   await Promise.all([...need].map(loadFund));
-  const mk = (def, group, plan) => { const r = simulate(def); return r && { name: def.name, group, sim: true, plan, def, d: r.d, v: r.v, info: { proj_name_th: simDesc(def) }, sec: {} }; };
+  const mk = (def, group, plan) => { const r = simulate(def); return r && { name: def.name, group, sim: true, plan, def, d: r.d, v: r.v, info: { proj_name_th: simDesc(def, " ") }, sec: {} }; };
   // Wealth Plan 1–5: สร้างจากโมเดลในไฟล์ Auto Top Funds (ต้องมีครบทุกโมเดลในแผน)
   const plans = WSP_PLANS.filter(def => def.parts.every(p => CUSTOM.some(c => c.name === p.n))).map(def => mk(def, WSP_GROUP, true));
   SIMS = [...plans, ...SIM_DEFS.map(def => mk(def, SIM_GROUP, false))].filter(Boolean);
