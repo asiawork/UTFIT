@@ -463,6 +463,9 @@ body.capturing .print-head.printonly{display:flex;padding:4px 2px 6px;background
 .foot{position:absolute;right:34px;bottom:12px;text-align:right;font-family:var(--body);font-size:11px;color:#333;line-height:1.7}
 .foot b{font-weight:700}
 .s-h1 .hl{color:inherit}
+/* ธีมขาว หัวข้อไล่สีกรมท่า (ใช้ในรายงานประจำเดือน) */
+.slide.rep:not(.navy) .s-title{background:linear-gradient(180deg,#3d5585 0%,#22324f 45%,#16233a 100%)}
+.slide.rep:not(.navy) .box h4{background:linear-gradient(90deg,#3d5585,#16233a)}
 /* ธีมกรมท่า-ทอง (ใช้ในรายงานประจำเดือน) */
 .slide.navy{background:#0b1d42;color:#fff;--gold:#c9b282;--goldl:#f4eedf}
 .slide.navy .s-h1{color:#fff}
@@ -1329,7 +1332,7 @@ const fmtNum = x => (Math.round(x*100)/100).toString();
 function colorsFor(models, raw, theme){
   // largest weight -> blue, the rest in order: grey, navy, light ...
   const big = models.reduce((b,m) => (+raw[m] > +raw[b] ? m : b), models[0]);
-  const rest = theme === 'navy' ? ['#ffffff','#a5adbf','#d9c79c','#7aa5d8','#8fa0bb','#c8ced9','#5b6474']
+  const rest = theme === 'navy' ? ['#ffffff','#a5adbf','#7aa5d8','#5b6b8c','#c8ced9','#8fa0bb','#dbe7f7']
                                 : ['#a5adbf','#2b4167','#dbe7f7','#7aa5d8','#5b6474','#c8ced9','#8fa0bb'];
   const out = {}; let k = 0;
   models.forEach(m => { out[m] = m === big ? '#3b7cc4' : rest[k++ % rest.length]; });
@@ -1957,11 +1960,12 @@ function svgToPNG(svg, w, h, scale = 4){
     img.onerror = bad; img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg); });
 }
 /* one Portfolio Overview slide (editable shapes) from a rendered .slide element; opt.theme 'navy' = กรมท่า-ทอง */
-function gradPNG(dir){
+const GRAD = {gold: {v: [[0, '#ffffff'], [.45, '#efe7d4'], [1, '#c9b282']], h: [[0, '#f4eedf'], [1, '#c9b282']]},
+              navy: {v: [[0, '#3d5585'], [.45, '#22324f'], [1, '#16233a']], h: [[0, '#3d5585'], [1, '#16233a']]}};
+function gradPNG(dir, tone = 'gold'){
   const c = document.createElement('canvas'); c.width = dir === 'v' ? 8 : 400; c.height = dir === 'v' ? 200 : 8;
   const x = c.getContext('2d'), g = dir === 'v' ? x.createLinearGradient(0, 0, 0, 200) : x.createLinearGradient(0, 0, 400, 0);
-  if (dir === 'v'){ g.addColorStop(0, '#ffffff'); g.addColorStop(.45, '#efe7d4'); g.addColorStop(1, '#c9b282'); }
-  else { g.addColorStop(0, '#f4eedf'); g.addColorStop(1, '#c9b282'); }
+  GRAD[tone][dir].forEach(([o, col]) => g.addColorStop(o, col));
   x.fillStyle = g; x.fillRect(0, 0, c.width, c.height); return c.toDataURL('image/png');
 }
 async function addPlanSlide(pptx, slideEl, r, plan, opt = {}, lotusPNG){
@@ -1978,7 +1982,9 @@ async function addPlanSlide(pptx, slideEl, r, plan, opt = {}, lotusPNG){
     const col = colorsFor(r.models, r.raw, opt.theme);
 
     // donut (editable chart) + labels from the on-screen layout
-    const svg = slideEl.querySelector('.s-donut'), sb = box(svg), sx = sb.w / 500;
+    // viewBox 500x420 ย่อแบบ meet ในกล่อง svg จึงต้องใช้สเกลเดียวกันและชดเชยระยะขอบ ไม่งั้นวงใหญ่เกินจนทับ legend
+    const svg = slideEl.querySelector('.s-donut'), sb0 = box(svg), sx = Math.min(sb0.w / 500, sb0.h / 420);
+    const sb = {x: sb0.x + (sb0.w - 500 * sx) / 2, y: sb0.y + (sb0.h - 420 * sx) / 2};
     const cx = 250, cy = 210, R = 146, ms = r.models;
     s.addChart(pptx.ChartType.doughnut, [{name: 'Portfolio', labels: ms, values: ms.map(m => +r.raw[m])}], {
       x: sb.x + (cx - R) * sx, y: sb.y + (cy - R) * sx, w: 2 * R * sx, h: 2 * R * sx,
@@ -2011,7 +2017,7 @@ async function addPlanSlide(pptx, slideEl, r, plan, opt = {}, lotusPNG){
     });
     // title block
     const tb = box(slideEl.querySelector('.s-title'));
-    if (gold) s.addImage({data: gradPNG('v'), x: tb.x, y: tb.y, w: tb.w, h: tb.h});
+    if (gold || opt.report) s.addImage({data: gradPNG('v', gold ? 'gold' : 'navy'), x: tb.x, y: tb.y, w: tb.w, h: tb.h});
     else s.addShape(pptx.ShapeType.rect, {x: tb.x, y: tb.y, w: tb.w, h: tb.h, fill: {color: NAVY}, line: {type: 'none'}});
     s.addText(meta.risk ? [{text: meta.name, options: {fontFace: XB, fontSize: 33, breakLine: true}},
                {text: `- Risk Profile: ${meta.risk} -`, options: {fontFace: BF, fontSize: 12, color: gold ? NAVY : 'DFE5EF'}}]
@@ -2045,7 +2051,7 @@ async function addPlanSlide(pptx, slideEl, r, plan, opt = {}, lotusPNG){
     // four boxes
     slideEl.querySelectorAll('.box').forEach(bx => {
       const h4 = box(bx.querySelector('h4')), bb = box(bx);
-      if (gold) s.addImage({data: gradPNG('h'), x: h4.x, y: h4.y, w: h4.w, h: h4.h});
+      if (gold || opt.report) s.addImage({data: gradPNG('h', gold ? 'gold' : 'navy'), x: h4.x, y: h4.y, w: h4.w, h: h4.h});
       else s.addShape(pptx.ShapeType.rect, {x: h4.x, y: h4.y, w: h4.w, h: h4.h, fill: {color: NAVY}, line: {type: 'none'}});
       s.addText(bx.querySelector('h4').textContent.trim(), {x: h4.x, y: h4.y, w: h4.w, h: h4.h, margin: 0, fontFace: HF, fontSize: 13.5, bold: true, color: gold ? NAVY : 'FFFFFF', align: 'center', valign: 'middle'});
       bx.querySelectorAll('.brow').forEach((rw, i, all) => {

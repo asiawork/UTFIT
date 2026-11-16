@@ -41,12 +41,12 @@
 <script>
 /* หน้านี้ไม่มีลิงก์จากหน้าอื่น ใช้คนเดียว
    ใช้โค้ดคำนวณและวาดสไลด์ของหน้า Wealth Solution Plan (โหลดไว้ใน iframe) ตัวเลขจึงตรงกับหน้าที่ทีมใช้เสมอ
-   ได้ไฟล์เดียว 20 สไลด์: ไทย ขาว › ไทย กรมท่า › อังกฤษ ขาว › อังกฤษ กรมท่า (แต่ละชุด แผน 1–5) */
+   ได้ไฟล์เดียว 20 สไลด์ 4 section: TH (ไทย กรมท่า) › EN (อังกฤษ กรมท่า) › P (ไทย ขาว) › ENP (อังกฤษ ขาว) แต่ละชุด แผน 1–5 */
 const VERSIONS = [
-  {lang: 'th', theme: 'white', label: 'ไทย พื้นขาว'},
-  {lang: 'th', theme: 'navy',  label: 'ไทย พื้นกรมท่า'},
-  {lang: 'en', theme: 'white', label: 'English White'},
-  {lang: 'en', theme: 'navy',  label: 'English Navy'},
+  {lang: 'th', theme: 'navy',  label: 'TH',  desc: 'ไทย พื้นกรมท่า'},
+  {lang: 'en', theme: 'navy',  label: 'EN',  desc: 'อังกฤษ พื้นกรมท่า'},
+  {lang: 'th', theme: 'white', label: 'P',   desc: 'ไทย พื้นขาว'},
+  {lang: 'en', theme: 'white', label: 'ENP', desc: 'อังกฤษ พื้นขาว'},
 ];
 const TH_MON = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
 const thDate = s => `${+s.slice(8,10)} ${TH_MON[+s.slice(5,7)-1]} ${+s.slice(0,4) + 543 - 2500}`;
@@ -74,6 +74,7 @@ function build(api){
     #mroot{display:block;padding:4px 2px 2px}
     #mroot h3{font:600 15px var(--head);color:#0f1a3c;margin:26px 0 10px}
     #mroot h3:first-child{margin-top:0}
+    #mroot h3 span{font-weight:400;color:#6b7290;margin-left:8px}
     #mroot .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
     #mroot .cell{position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;border-radius:8px;border:1px solid #e3e6ef}
     #mroot .cell .slide{position:absolute;left:0;top:0}`;
@@ -86,13 +87,13 @@ function build(api){
   ITEMS = [];
   let r0;
   VERSIONS.forEach(v => {
-    root.insertAdjacentHTML('beforeend', `<h3>${v.label}</h3><div class="grid"></div>`);
+    root.insertAdjacentHTML('beforeend', `<h3>${v.label}<span>${v.desc}</span></h3><div class="grid"></div>`);
     const grid = root.lastElementChild;
     plans.forEach(p => {
       st.plan = p.id; st.weights[p.id] = {...p.w};
       const r = api.compute(); r0 = r0 || r;
       const cell = D.createElement('div'); cell.className = 'cell';
-      const el = D.createElement('div'); el.className = 'slide' + (v.theme === 'navy' ? ' navy' : '');
+      const el = D.createElement('div'); el.className = 'slide rep' + (v.theme === 'navy' ? ' navy' : '');
       el.innerHTML = api.slideHTML(p, r, {...v, report: true});
       cell.appendChild(el); grid.appendChild(cell);
       ITEMS.push({el, r, p, v});
