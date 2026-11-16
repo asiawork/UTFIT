@@ -123,7 +123,7 @@ async function download(){
       await api.addPlanSlide(pptx, it.el, it.r, it.p, {...it.v, section: it.v.label}, lotus[it.v.theme]);
     }
     const end = ITEMS[0].r.end;
-    const blob = await api.goldTextGradient(await pptx.write({outputType: 'arraybuffer'}));
+    const blob = await api.goldTextGradient(await pptx.write({outputType: 'arraybuffer'}), pptx._goldHL);
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
     a.download = `Wealth Solution Plan ข้อมูลถึง ${thDate(end)}.pptx`; document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 10000);

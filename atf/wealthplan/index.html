@@ -466,7 +466,7 @@ body.capturing .print-head.printonly{display:flex;padding:4px 2px 6px;background
 /* ธีมกรมท่า-ทอง (ใช้ในรายงานประจำเดือน) */
 .slide.navy{background:#0b1d42;color:#fff;--gold:#c9b282;--goldl:#f4eedf}
 .slide.navy .s-h1{color:#fff}
-.slide.navy .s-h1 .hl{background:linear-gradient(180deg,#fbf3dc 0%,#e2cf9f 45%,#a8864a 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.slide.navy .s-h1 .hl{background:linear-gradient(90deg,#ffffff,#c9b282);-webkit-background-clip:text;background-clip:text;color:transparent}
 .slide.navy .s-legend{color:#fff}
 .slide.navy .s-title{background:linear-gradient(180deg,#ffffff 0%,#efe7d4 45%,#c9b282 100%);color:#0b1d42}
 .slide.navy .s-title .r{color:#0b1d42}
@@ -1404,6 +1404,7 @@ function slideHTML(plan, r, opt = {}){
 }
 
 function donut(models, raw, col, opt = {}){
+  const bg = opt.theme === 'navy' ? '#0b1d42' : '#ffffff';
   const amt = parseFloat(state.amount) || 0, ink = opt.theme === 'navy' ? '#ffffff' : '#16233a', sub = opt.theme === 'navy' ? '#c9d2e3' : '#5b6474';
   const unit = opt.lang === 'en' ? 'THB Mn' : 'ล้านบาท';
   const cx = 250, cy = 210, R = 146, r = 112, total = models.reduce((a,m) => a + (+raw[m]||0), 0);
@@ -1417,7 +1418,7 @@ function donut(models, raw, col, opt = {}){
       out += `<circle cx="${cx}" cy="${cy}" r="${(R+r)/2}" fill="none" stroke="${col[m]}" stroke-width="${R-r}"/>`;
     } else {
       const [x1,y1] = pt(R,a0), [x2,y2] = pt(R,a1), [x3,y3] = pt(r,a1), [x4,y4] = pt(r,a0);
-      out += `<path d="M${x1},${y1} A${R},${R} 0 ${large} 1 ${x2},${y2} L${x3},${y3} A${r},${r} 0 ${large} 0 ${x4},${y4}Z" fill="${col[m]}" stroke="#fff" stroke-width="1.5"/>`;
+      out += `<path d="M${x1},${y1} A${R},${R} 0 ${large} 1 ${x2},${y2} L${x3},${y3} A${r},${r} 0 ${large} 0 ${x4},${y4}Z" fill="${col[m]}" stroke="${bg}" stroke-width="1.5"/>`;
     }
     labels.push({m, v, am:(a0+a1)/2}); a0 = a1;
   });
@@ -1967,10 +1968,13 @@ function gradPNG(dir){
 /* สีทองของชื่อแผนบนหัวสไลด์กรมท่า PptxGenJS ใส่ gradient ให้ตัวหนังสือไม่ได้
    หน้ารายงานประจำเดือนจึงเปลี่ยนสีนี้เป็น gradFill ในไฟล์ที่สร้างเสร็จ (goldTextGradient) */
 const HL_GOLD = 'D9C79C';
-async function goldTextGradient(data){
-  const zip = await JSZip.loadAsync(data), fill = '<a:gradFill rotWithShape="1"><a:gsLst><a:gs pos="0"><a:srgbClr val="FBF3DC"/></a:gs><a:gs pos="45000"><a:srgbClr val="E2CF9F"/></a:gs><a:gs pos="100000"><a:srgbClr val="A8864A"/></a:gs></a:gsLst><a:lin ang="5400000" scaled="0"/></a:gradFill>';
+async function goldTextGradient(data, stops = {}){
+  // ไล่ซ้ายไปขวา ขาวไปทอง เฉพาะช่วงชื่อแผน (สัดส่วนในกล่องข้อความ เก็บไว้ตอน addPlanSlide)
+  const zip = await JSZip.loadAsync(data);
   const names = Object.keys(zip.files).filter(n => /^ppt\/slides\/slide\d+\.xml$/.test(n));
   for (const n of names){
+    const [a, b] = stops[+n.match(/(\d+)\.xml$/)[1]] || [0, 100000];
+    const fill = `<a:gradFill rotWithShape="1"><a:gsLst><a:gs pos="${a}"><a:srgbClr val="FFFFFF"/></a:gs><a:gs pos="${b}"><a:srgbClr val="C9B282"/></a:gs></a:gsLst><a:lin ang="0" scaled="0"/></a:gradFill>`;
     const x = await zip.file(n).async('string');
     zip.file(n, x.replace(new RegExp(`(<a:rPr\\b[^>]*>)<a:solidFill><a:srgbClr val="${HL_GOLD}"/></a:solidFill>`, 'g'), `$1${fill}`));
   }
@@ -1997,7 +2001,7 @@ async function addPlanSlide(pptx, slideEl, r, plan, opt = {}, lotusPNG){
     s.addChart(pptx.ChartType.doughnut, [{name: 'Portfolio', labels: ms, values: ms.map(m => +r.raw[m])}], {
       x: sb.x + (cx - R) * sx, y: sb.y + (cy - R) * sx, w: 2 * R * sx, h: 2 * R * sx,
       holeSize: 77, showLegend: false, showValue: false, showPercent: false, showLabel: false, firstSliceAng: 0,
-      chartColors: ms.map(m => hex(col[m])), dataBorder: {pt: 1, color: 'FFFFFF'}, layout: {x: 0, y: 0, w: 1, h: 1}});
+      chartColors: ms.map(m => hex(col[m])), dataBorder: {pt: 1, color: BG}, layout: {x: 0, y: 0, w: 1, h: 1}});
     svg.querySelectorAll('polyline').forEach(pl => {
       const pts = pl.getAttribute('points').trim().split(/\s+/).map(p => p.split(',').map(Number));
       const [x1, y1] = pts[0], [x2, y2] = pts[1];
@@ -2016,6 +2020,8 @@ async function addPlanSlide(pptx, slideEl, r, plan, opt = {}, lotusPNG){
       s.addImage({data: lotusPNG, x: bl.x, y: bl.y, w: bl.w, h: bl.h});
       const h1 = sh.querySelector('.s-h1'), hl = h1.querySelector('.hl');
       const parts = hl ? [{text: h1.textContent.slice(0, h1.textContent.length - hl.textContent.length), options: {color: INK}}, {text: hl.textContent, options: {color: HL}}] : h1.textContent;
+      if (hl && gold){ const hb = box(hl), W = bt.w + 0.6;
+        (pptx._goldHL = pptx._goldHL || {})[s._slideNum] = [(hb.x - bt.x) / W, (hb.x + hb.w - bt.x) / W].map(v => Math.round(Math.min(1, Math.max(0, v)) * 100000)); }
       s.addText(parts, {x: bt.x, y: bt.y - 0.05, w: bt.w + 0.6, h: bt.h + 0.1, margin: 0, fontFace: XB, fontSize: 36, bold: false, color: INK, valign: 'middle'}); }
     // legend
     slideEl.querySelectorAll('.s-legend span').forEach(sp => {
