@@ -469,7 +469,7 @@
 <div class="modal-bg" id="opBg" hidden>
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="opTitle">
     <h2 id="opTitle">เลือกกองที่จะใส่ในตาราง</h2>
-    <p>ตารางใน One Page ใส่ได้สูงสุด 5 กอง กราฟยังแสดงครบทุกเส้น</p>
+    <p>One Page ใส่ได้สูงสุด 5 กอง ทั้งในกราฟและตาราง</p>
     <div id="opList" class="oplist"></div>
     <div class="modal-act"><button class="btn ghost" id="opCancel">ยกเลิก</button><button class="btn primary" id="opGo">ดาวน์โหลด</button></div>
   </div>
@@ -1844,7 +1844,9 @@ async function buildOnePage(tableNames) {
   const all = modelT1(), keepIdx = all.cols.map((c, i) => isFxCol(c) || tableNames.includes(c.name) ? i : -1).filter(i => i >= 0);
   const m = { cols: keepIdx.map(i => all.cols[i]), rows: all.rows.map(([l, vs]) => [l, keepIdx.map(i => vs[i])]) };
   const hero = heroSeries(), heroName = hero ? hero.name : "FIXEDSP", custom = $("title").value.trim();
-  const funds = selected.filter(n => !isHero(byName(n)));
+  // กราฟและบรรทัด "เทียบกับ" แสดงเฉพาะ FIXEDSP กับกองที่อยู่ในตาราง (สีเส้นเหมือนบนหน้าเว็บ)
+  const funds = selected.filter(n => !isHero(byName(n)) && tableNames.includes(n));
+  const chartSel = selected.filter(n => isHero(byName(n)) || tableNames.includes(n));
   const si = startInfo();
   const pptx = new PptxGenJS(); pptx.defineLayout({ name: "A4L", width: OP.W / 72, height: OP.H / 72 }); pptx.layout = "A4L";
   const s = pptx.addSlide(), I = (v) => v / 72, NV = hex6(NAVY), MUT = "5B6578", BL = hex6(colorOf(heroName));
@@ -1880,7 +1882,9 @@ async function buildOnePage(tableNames) {
   s.addText(`ผลตอบแทนสะสม ${span}`, { x: I(M + pad + 2), y: I(cY + pad - 2), w: I(TW - 2 * pad), h: I(capH), fontFace: TB, bold: true, fontSize: 11, color: NV, margin: 0, valign: "middle" });
   const iw = TW - 2 * pad, ih = cH - capH - pad * 1.5, show = $("showTitle").checked;
   $("showTitle").checked = false;
-  let img; try { img = exportCanvas(3, Math.round(ih * W / iw)).toDataURL("image/png"); } finally { $("showTitle").checked = show; }
+  const keepSel = selected, keepColors = COLORS;
+  COLORS = { ...Object.fromEntries(chartSel.map(n => [n, colorOf(n)])), ...COLORS }; selected = chartSel;
+  let img; try { img = exportCanvas(3, Math.round(ih * W / iw)).toDataURL("image/png"); } finally { $("showTitle").checked = show; selected = keepSel; COLORS = keepColors; }
   s.addImage({ data: img, x: I(M + pad), y: I(cY + pad + capH), w: I(iw), h: I(ih) });
   const blob = await pptx.write({ outputType: "blob" });
   const JSZip = await loadJSZip();
