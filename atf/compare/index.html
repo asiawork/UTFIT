@@ -1842,7 +1842,9 @@ function opTable(m, maxH) {
 async function buildOnePage(tableNames) {
   await loadScript("https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js", () => window.PptxGenJS);
   const all = modelT1(), keepIdx = all.cols.map((c, i) => isFxCol(c) || tableNames.includes(c.name) ? i : -1).filter(i => i >= 0);
-  const m = { cols: keepIdx.map(i => all.cols[i]), rows: all.rows.map(([l, vs]) => [l, keepIdx.map(i => vs[i])]) };
+  // ระยะเวลาถือ: ตัด "แนะนำประมาณ" ออกให้อยู่บรรทัดเดียว (เช่น "1 เดือนขึ้นไป")
+  const short = (l, v) => l === "ระยะเวลาที่ควรถือลงทุน" && v ? String(v).replace(/^\s*(แนะนำ)?\s*(ประมาณ)?\s*/, "") : v;
+  const m = { cols: keepIdx.map(i => all.cols[i]), rows: all.rows.map(([l, vs]) => [l, keepIdx.map(i => short(l, vs[i]))]) };
   const hero = heroSeries(), heroName = hero ? hero.name : "FIXEDSP", custom = $("title").value.trim();
   // กราฟและบรรทัด "เทียบกับ" แสดงเฉพาะ FIXEDSP กับกองที่อยู่ในตาราง (สีเส้นเหมือนบนหน้าเว็บ)
   const funds = selected.filter(n => !isHero(byName(n)) && tableNames.includes(n));
