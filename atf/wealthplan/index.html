@@ -463,9 +463,6 @@ body.capturing .print-head.printonly{display:flex;padding:4px 2px 6px;background
 .foot{position:absolute;right:34px;bottom:12px;text-align:right;font-family:var(--body);font-size:11px;color:#333;line-height:1.7}
 .foot b{font-weight:700}
 .s-h1 .hl{color:inherit}
-/* ธีมขาว หัวข้อไล่สีกรมท่า (ใช้ในรายงานประจำเดือน) */
-.slide.rep:not(.navy) .s-title{background:linear-gradient(180deg,#3d5585 0%,#22324f 45%,#16233a 100%)}
-.slide.rep:not(.navy) .box h4{background:linear-gradient(90deg,#3d5585,#16233a)}
 /* ธีมกรมท่า-ทอง (ใช้ในรายงานประจำเดือน) */
 .slide.navy{background:#0b1d42;color:#fff;--gold:#c9b282;--goldl:#f4eedf}
 .slide.navy .s-h1{color:#fff}
@@ -1960,13 +1957,24 @@ function svgToPNG(svg, w, h, scale = 4){
     img.onerror = bad; img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg); });
 }
 /* one Portfolio Overview slide (editable shapes) from a rendered .slide element; opt.theme 'navy' = กรมท่า-ทอง */
-const GRAD = {gold: {v: [[0, '#ffffff'], [.45, '#efe7d4'], [1, '#c9b282']], h: [[0, '#f4eedf'], [1, '#c9b282']]},
-              navy: {v: [[0, '#3d5585'], [.45, '#22324f'], [1, '#16233a']], h: [[0, '#3d5585'], [1, '#16233a']]}};
-function gradPNG(dir, tone = 'gold'){
+function gradPNG(dir){
   const c = document.createElement('canvas'); c.width = dir === 'v' ? 8 : 400; c.height = dir === 'v' ? 200 : 8;
   const x = c.getContext('2d'), g = dir === 'v' ? x.createLinearGradient(0, 0, 0, 200) : x.createLinearGradient(0, 0, 400, 0);
-  GRAD[tone][dir].forEach(([o, col]) => g.addColorStop(o, col));
+  if (dir === 'v'){ g.addColorStop(0, '#ffffff'); g.addColorStop(.45, '#efe7d4'); g.addColorStop(1, '#c9b282'); }
+  else { g.addColorStop(0, '#f4eedf'); g.addColorStop(1, '#c9b282'); }
   x.fillStyle = g; x.fillRect(0, 0, c.width, c.height); return c.toDataURL('image/png');
+}
+/* สีทองของชื่อแผนบนหัวสไลด์กรมท่า PptxGenJS ใส่ gradient ให้ตัวหนังสือไม่ได้
+   หน้ารายงานประจำเดือนจึงเปลี่ยนสีนี้เป็น gradFill ในไฟล์ที่สร้างเสร็จ (goldTextGradient) */
+const HL_GOLD = 'D9C79C';
+async function goldTextGradient(data){
+  const zip = await JSZip.loadAsync(data), fill = '<a:gradFill rotWithShape="1"><a:gsLst><a:gs pos="0"><a:srgbClr val="EFE3C4"/></a:gs><a:gs pos="100000"><a:srgbClr val="C9B282"/></a:gs></a:gsLst><a:lin ang="5400000" scaled="0"/></a:gradFill>';
+  const names = Object.keys(zip.files).filter(n => /^ppt\/slides\/slide\d+\.xml$/.test(n));
+  for (const n of names){
+    const x = await zip.file(n).async('string');
+    zip.file(n, x.replace(new RegExp(`(<a:rPr\\b[^>]*>)<a:solidFill><a:srgbClr val="${HL_GOLD}"/></a:solidFill>`, 'g'), `$1${fill}`));
+  }
+  return zip.generateAsync({type: 'blob', mimeType: 'application/vnd.openxmlformats-officedocument.presentationml.presentation'});
 }
 async function addPlanSlide(pptx, slideEl, r, plan, opt = {}, lotusPNG){
     const k = slideEl.getBoundingClientRect().width / 1280;
@@ -1975,7 +1983,7 @@ async function addPlanSlide(pptx, slideEl, r, plan, opt = {}, lotusPNG){
       return {x: IN((b.left - a.left) / k), y: IN((b.top - a.top) / k), w: IN(b.width / k), h: IN(b.height / k)}; };
     const gold = opt.theme === 'navy';
     const HF = 'BLS Bold', XB = 'BLS ExtraBold', BF = 'BLS Text', NAVY = '16233A', GREY = '8B93A3', GOLD = 'C9B282';
-    const BG = gold ? '0B1D42' : 'FFFFFF', INK = gold ? 'FFFFFF' : NAVY, HL = gold ? 'D9C79C' : NAVY, SUB = gold ? 'DFE5EF' : '333333';
+    const BG = gold ? '0B1D42' : 'FFFFFF', INK = gold ? 'FFFFFF' : NAVY, HL = gold ? HL_GOLD : NAVY, SUB = gold ? 'DFE5EF' : '333333';
     const LINE = gold ? GOLD : GREY, BAR = gold ? GOLD : NAVY, POS = gold ? '22C55E' : '16A34A', NEG = gold ? 'FF2D2D' : 'E3191B';
     const s = pptx.addSlide(opt.section ? {sectionTitle: opt.section} : undefined); s.background = {color: BG};
     const meta = planMeta(plan);
@@ -2017,7 +2025,7 @@ async function addPlanSlide(pptx, slideEl, r, plan, opt = {}, lotusPNG){
     });
     // title block
     const tb = box(slideEl.querySelector('.s-title'));
-    if (gold || opt.report) s.addImage({data: gradPNG('v', gold ? 'gold' : 'navy'), x: tb.x, y: tb.y, w: tb.w, h: tb.h});
+    if (gold) s.addImage({data: gradPNG('v'), x: tb.x, y: tb.y, w: tb.w, h: tb.h});
     else s.addShape(pptx.ShapeType.rect, {x: tb.x, y: tb.y, w: tb.w, h: tb.h, fill: {color: NAVY}, line: {type: 'none'}});
     s.addText(meta.risk ? [{text: meta.name, options: {fontFace: XB, fontSize: 33, breakLine: true}},
                {text: `- Risk Profile: ${meta.risk} -`, options: {fontFace: BF, fontSize: 12, color: gold ? NAVY : 'DFE5EF'}}]
@@ -2051,7 +2059,7 @@ async function addPlanSlide(pptx, slideEl, r, plan, opt = {}, lotusPNG){
     // four boxes
     slideEl.querySelectorAll('.box').forEach(bx => {
       const h4 = box(bx.querySelector('h4')), bb = box(bx);
-      if (gold || opt.report) s.addImage({data: gradPNG('h', gold ? 'gold' : 'navy'), x: h4.x, y: h4.y, w: h4.w, h: h4.h});
+      if (gold) s.addImage({data: gradPNG('h'), x: h4.x, y: h4.y, w: h4.w, h: h4.h});
       else s.addShape(pptx.ShapeType.rect, {x: h4.x, y: h4.y, w: h4.w, h: h4.h, fill: {color: NAVY}, line: {type: 'none'}});
       s.addText(bx.querySelector('h4').textContent.trim(), {x: h4.x, y: h4.y, w: h4.w, h: h4.h, margin: 0, fontFace: HF, fontSize: 13.5, bold: true, color: gold ? NAVY : 'FFFFFF', align: 'center', valign: 'middle'});
       bx.querySelectorAll('.brow').forEach((rw, i, all) => {
@@ -2133,7 +2141,7 @@ window.addEventListener('afterprint', fit);
 if (window.ResizeObserver) new ResizeObserver(fit).observe(document.body);
 
 /* ใช้โดยหน้ารายงานประจำเดือน (monthly/) */
-window.WPAPI = {PLANS, state, compute, slideHTML, stretchTable, addPlanSlide, svgToPNG, BRAND, setPeriod, SLIDE_PERIOD,
+window.WPAPI = {PLANS, state, compute, slideHTML, stretchTable, addPlanSlide, goldTextGradient, svgToPNG, BRAND, setPeriod, SLIDE_PERIOD,
   ready: () => !!(DATA && DATA.csv && FULL), lastDate: () => lastDate(), csvName: () => DATA && DATA.csvName};
 
 /* boot */

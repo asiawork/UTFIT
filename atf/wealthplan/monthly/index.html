@@ -93,7 +93,7 @@ function build(api){
       st.plan = p.id; st.weights[p.id] = {...p.w};
       const r = api.compute(); r0 = r0 || r;
       const cell = D.createElement('div'); cell.className = 'cell';
-      const el = D.createElement('div'); el.className = 'slide rep' + (v.theme === 'navy' ? ' navy' : '');
+      const el = D.createElement('div'); el.className = 'slide' + (v.theme === 'navy' ? ' navy' : '');
       el.innerHTML = api.slideHTML(p, r, {...v, report: true});
       cell.appendChild(el); grid.appendChild(cell);
       ITEMS.push({el, r, p, v});
@@ -123,7 +123,10 @@ async function download(){
       await api.addPlanSlide(pptx, it.el, it.r, it.p, {...it.v, section: it.v.label}, lotus[it.v.theme]);
     }
     const end = ITEMS[0].r.end;
-    await pptx.writeFile({fileName: `Wealth Solution Plan ข้อมูลถึง ${thDate(end)}.pptx`});
+    const blob = await api.goldTextGradient(await pptx.write({outputType: 'arraybuffer'}));
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = `Wealth Solution Plan ข้อมูลถึง ${thDate(end)}.pptx`; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 10000);
     $('msg').textContent = '';
   }catch(e){ console.error(e); $('msg').textContent = 'สร้างไฟล์ไม่สำเร็จ: ' + (e.message || e); }
   btn.disabled = false;
