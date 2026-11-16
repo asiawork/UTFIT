@@ -466,7 +466,7 @@ body.capturing .print-head.printonly{display:flex;padding:4px 2px 6px;background
 /* ธีมกรมท่า-ทอง (ใช้ในรายงานประจำเดือน) */
 .slide.navy{background:#0b1d42;color:#fff;--gold:#c9b282;--goldl:#f4eedf}
 .slide.navy .s-h1{color:#fff}
-.slide.navy .s-h1 .hl{background:linear-gradient(180deg,#efe3c4,#c9b282);-webkit-background-clip:text;background-clip:text;color:transparent}
+.slide.navy .s-h1 .hl{background:linear-gradient(180deg,#fbf3dc 0%,#e2cf9f 45%,#a8864a 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
 .slide.navy .s-legend{color:#fff}
 .slide.navy .s-title{background:linear-gradient(180deg,#ffffff 0%,#efe7d4 45%,#c9b282 100%);color:#0b1d42}
 .slide.navy .s-title .r{color:#0b1d42}
@@ -1968,7 +1968,7 @@ function gradPNG(dir){
    หน้ารายงานประจำเดือนจึงเปลี่ยนสีนี้เป็น gradFill ในไฟล์ที่สร้างเสร็จ (goldTextGradient) */
 const HL_GOLD = 'D9C79C';
 async function goldTextGradient(data){
-  const zip = await JSZip.loadAsync(data), fill = '<a:gradFill rotWithShape="1"><a:gsLst><a:gs pos="0"><a:srgbClr val="EFE3C4"/></a:gs><a:gs pos="100000"><a:srgbClr val="C9B282"/></a:gs></a:gsLst><a:lin ang="5400000" scaled="0"/></a:gradFill>';
+  const zip = await JSZip.loadAsync(data), fill = '<a:gradFill rotWithShape="1"><a:gsLst><a:gs pos="0"><a:srgbClr val="FBF3DC"/></a:gs><a:gs pos="45000"><a:srgbClr val="E2CF9F"/></a:gs><a:gs pos="100000"><a:srgbClr val="A8864A"/></a:gs></a:gsLst><a:lin ang="5400000" scaled="0"/></a:gradFill>';
   const names = Object.keys(zip.files).filter(n => /^ppt\/slides\/slide\d+\.xml$/.test(n));
   for (const n of names){
     const x = await zip.file(n).async('string');
