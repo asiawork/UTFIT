@@ -14,7 +14,7 @@
 /* Layout: tool controls on top, a fixed 1280x720 "slide" scaled to fit, weights editor beside it. */
 @font-face{font-family:'BLS';src:url('fonts/BLS-Bold.ttf');font-weight:700;font-display:swap}
 @font-face{font-family:'BLS';src:url('fonts/BLS-Regular.ttf');font-weight:400;font-display:swap}
-@font-face{font-family:'BLS XB';src:local('BLS Extra Bold'),local('BLS ExtraBold'),local('BLS-ExtraBold'),local('BLSExtraBold'),local('BLS Bold');font-weight:800;font-display:swap}
+@font-face{font-family:'BLS XB';src:local('BLS ExtraBold'),local('BLS Extra Bold'),local('BLS-ExtraBold'),local('BLSExtraBold'),local('BLS Bold');font-weight:800;font-display:swap}
 @font-face{font-family:'BLS Text';src:url('fonts/BLS_Text-Regular.ttf');font-weight:400;font-display:swap}
 @font-face{font-family:'BLS Text';src:url('fonts/BLS_Text-Bold.ttf');font-weight:700;font-display:swap}
 :root{
@@ -1935,7 +1935,7 @@ async function exportPPTX(){
     const IN = px => px / 96;                       // 1280 px slide = 13.333 in
     const box = el => { const a = slideEl.getBoundingClientRect(), b = el.getBoundingClientRect();
       return {x: IN((b.left - a.left) / k), y: IN((b.top - a.top) / k), w: IN(b.width / k), h: IN(b.height / k)}; };
-    const HF = 'BLS Bold', XB = 'BLS Extra Bold', BF = 'BLS Text', NAVY = '16233A', POS = '16A34A', NEG = 'E3191B', GREY = '8B93A3';
+    const HF = 'BLS Bold', XB = 'BLS ExtraBold', BF = 'BLS Text', NAVY = '16233A', POS = '16A34A', NEG = 'E3191B', GREY = '8B93A3';
     const pick = new Set(dlPicked());
     if (!pick.size){ exMsg('เลือกอย่างน้อย 1 ส่วน'); return; }
     const pptx = new PptxGenJS(); pptx.layout = 'LAYOUT_WIDE';
