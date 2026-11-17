@@ -1331,7 +1331,7 @@ const FIXEDSP_INFO = {
   "Average Credit Rating": "AA",
   "ระยะเวลาที่ควรถือลงทุน": "แนะนำประมาณ 1 เดือนขึ้นไป",
   "ค่าธรรมเนียมขาย (Front-End Fee)": "ปัจจุบันไม่เรียกเก็บ",
-  "ค่าธรรมเนียมการจัดการ + อื่น ๆ": "0.22%",
+  "ค่าธรรมเนียมการจัดการ + อื่น ๆ": "0.32%",   // แก้ที่นี่ที่เดียว ใช้ทั้งตารางบนเว็บ ทุกไฟล์ดาวน์โหลด และสไลด์รายละเอียดพอร์ต FIXEDSP
   "ระยะเวลารับเงินค่าขายคืน": "T+2**",
   "ทีมผู้เชี่ยวชาญดูแล": "ปรับพอร์ตให้ตามสถานการณ์ มีคนดูแล",
 };
@@ -1606,6 +1606,24 @@ function fillTable(doc, m) {
   others.forEach(() => { const g = doc.createElementNS(NS_A, "a:gridCol"); g.setAttribute("w", String(wO)); grid.insertBefore(g, gcs.at(-1)); });
   return oldNames.join(" / ");
 }
+// สไลด์ "รายละเอียดพอร์ต FIXEDSP" ในแม่แบบ: ใช้ค่าธรรมเนียมจาก FIXEDSP_INFO (ไม่ต้องแก้ไฟล์แม่แบบ)
+const FX_DETAIL_SYNC = ["ค่าธรรมเนียมการจัดการ + อื่น ๆ"];
+function syncFxDetail(doc) {
+  const tbl = doc.getElementsByTagNameNS(NS_A, "tbl")[0]; if (!tbl) return false;
+  let hit = false;
+  for (const tr of tbl.getElementsByTagNameNS(NS_A, "tr")) {
+    const tcs = [...tr.children].filter(e => e.localName === "tc"); if (tcs.length < 2) continue;
+    const label = FX_DETAIL_SYNC.find(l => keyOf(textOf(tcs[0])) === keyOf(l));
+    if (label) { setCellText(tcs.at(-1), FIXEDSP_INFO[label]); hit = true; }
+  }
+  return hit;
+}
+async function syncFxDetailSlides(zip, paths) {
+  for (const p of paths) {
+    const str = await zip.file(p).async("string"); if (!str.includes("รายละเอียดพอร์ตการลงทุน")) continue;
+    const doc = xmlOf(str); if (syncFxDetail(doc)) zip.file(p, strOf(doc));
+  }
+}
 async function buildPptx(file) {
   const JSZip = await loadJSZip();
   const zip = await JSZip.loadAsync(await file.arrayBuffer());
@@ -1621,6 +1639,7 @@ async function buildPptx(file) {
   await swapPicture(zip, paths[1], docs[1], exportCanvas(3, await fillHeight(zip, docs[1])), "compare_line_" + stamp);
   await swapPicture(zip, paths[2], docs[2], exportBars(3), "compare_bar_" + stamp);
   docs.forEach((d, i) => zip.file(paths[i], strOf(d)));
+  await syncFxDetailSlides(zip, paths.slice(4));
   return { zip, name: `Review Portfolio กองทุนตราสารหนี้ ${names.replace(/ \/ /g, ", ")}` };
 }
 async function saveZip(zip, name) {
@@ -1675,6 +1694,7 @@ async function buildSpPptx(file) {
   await swapPicture(zip, paths[5], line, c.line, "sp_line_" + stamp);
   swapAsOf(bar); swapAsOf(line);
   zip.file(paths[4], strOf(bar)); zip.file(paths[5], strOf(line));
+  await syncFxDetailSlides(zip, paths.filter((_, i) => i !== 4 && i !== 5));
   return { zip, name: "FIXEDSP_จัดพอร์ตกองทุนรวมตราสารหนี้ระยะสั้นอัตโนมัติ" };
 }
 // ก่อนดาวน์โหลด: เตือนถ้ายังไม่ใส่ค่าเฉลี่ยกลุ่ม YTD / Credit Rating / ระยะเวลาถือ
@@ -1860,12 +1880,12 @@ async function buildOnePage(tableNames) {
   s.addShape(pptx.ShapeType.rect, { x: I(M + 36), y: I(25), w: I(1.6), h: I(31), fill: { color: NV }, line: { color: NV, width: 0 } });
   s.addText(custom ? [{ text: custom }] : [{ text: "ผลตอบแทนโมเดล " }, { text: heroName, options: { color: BL } }],
     { x: I(M + 46), y: I(19), w: I(TW - 46), h: I(26), fontFace: TXB, fontSize: 20, color: NV, margin: 0, valign: "middle" });
-  if (funds.length) s.addText([{ text: "เปรียบเทียบกับ: ", options: { fontFace: TB, bold: true, color: NV } },
+  if (funds.length) s.addText([{ text: "เปรียบเทียบกับ: ", options: { fontFace: TB, color: NV } },
     ...funds.flatMap((n, i) => [...(i ? [{ text: "  |  ", options: { color: "B8C0CE" } }] : []), { text: n }])],
     { x: I(M + 46), y: I(44), w: I(TW - 46), h: I(15), fontFace: TX, fontSize: 11, color: MUT, margin: 0, valign: "middle" });
   // ล่าง: หมายเหตุ แล้วที่มา
   const footY = OP.H - 24, noteY = footY - 30;
-  s.addText([{ text: "* หมายเหตุ: ", options: { bold: true, fontFace: TB } }, { text: OP_NOTES[0], options: { breakLine: true } }, { text: "** " + OP_NOTES[1] }],
+  s.addText([{ text: "* หมายเหตุ: ", options: { fontFace: TB } }, { text: OP_NOTES[0], options: { breakLine: true } }, { text: "** " + OP_NOTES[1] }],
     { x: I(M), y: I(noteY), w: I(TW), h: I(26), fontFace: TX, fontSize: 7.5, color: MUT, margin: 0, valign: "top" });
   s.addShape(pptx.ShapeType.line, { x: I(M), y: I(footY - 3), w: I(TW), h: 0, line: { color: "E3E7EE", width: 0.75 } });
   s.addText(`ที่มา: BLS Top Funds ข้อมูล ณ ${thDate(si.e)}`, { x: I(M), y: I(footY), w: I(TW / 2), h: I(12), fontFace: TX, fontSize: 7.5, color: MUT, margin: 0, valign: "middle" });
@@ -1875,15 +1895,15 @@ async function buildOnePage(tableNames) {
   const t = opTable(m, bottom - top - gap - minChart), tY = bottom - t.h;
   const bd = (c) => ({ type: "solid", pt: 0.75, color: c });
   const rowsX = t.rows.map(([l, vs], r) => [
-    { text: l, options: { fill: { color: NV }, color: "FFFFFF", fontFace: TB, bold: true, fontSize: t.fs, border: [bd("FFFFFF"), bd("C9D3E3"), bd("FFFFFF"), bd(NV)] } },
+    { text: l, options: { fill: { color: NV }, color: "FFFFFF", fontFace: TB, fontSize: t.fs, border: [bd("FFFFFF"), bd("C9D3E3"), bd("FFFFFF"), bd(NV)] } },
     ...vs.map((v, i) => { const fx = isFxCol(m.cols[i]);
-      return { text: v || "", options: { fill: { color: fx ? hex6(SLIDE_T.fxBg) : "FFFFFF" }, color: NV, fontFace: fx || r === 0 ? TB : TX, bold: fx || r === 0, fontSize: Math.floor((fx ? t.fs + 0.5 : t.fs) * t.K[r] * 4) / 4, border: [bd("C9D3E3"), bd("C9D3E3"), bd("C9D3E3"), bd("C9D3E3")] } }; })]);
+      return { text: v || "", options: { fill: { color: fx ? hex6(SLIDE_T.fxBg) : "FFFFFF" }, color: NV, fontFace: fx || r === 0 ? TB : TX, fontSize: Math.floor((fx ? t.fs + 0.5 : t.fs) * t.K[r] * 4) / 4, border: [bd("C9D3E3"), bd("C9D3E3"), bd("C9D3E3"), bd("C9D3E3")] } }; })]);
   s.addTable(rowsX, { x: I(M), y: I(tY), w: I(TW), colW: [I(t.labW), ...m.cols.map(() => I(t.colW))], rowH: t.H.map(I), align: "center", valign: "middle", margin: [2, 4, 2, 4] });
   // กราฟเส้นในกรอบ
   const cY = top, cH = tY - gap - top, pad = 8, capH = 16;
   s.addShape(pptx.ShapeType.roundRect, { x: I(M), y: I(cY), w: I(TW), h: I(cH), fill: { color: "FFFFFF" }, line: { color: "E3E7EE", width: 0.75 }, rectRadius: I(6) });
   const span = si.s && si.e ? `${thDate(si.s)} – ${thDate(si.e)}` : "";
-  s.addText(`ผลตอบแทนสะสม ${span}`, { x: I(M + pad + 2), y: I(cY + pad - 2), w: I(TW - 2 * pad), h: I(capH), fontFace: TB, bold: true, fontSize: 11, color: NV, margin: 0, valign: "middle" });
+  s.addText(`ผลตอบแทนสะสม ${span}`, { x: I(M + pad + 2), y: I(cY + pad - 2), w: I(TW - 2 * pad), h: I(capH), fontFace: TB, fontSize: 11, color: NV, margin: 0, valign: "middle" });
   const iw = TW - 2 * pad, ih = cH - capH - pad * 1.5, show = $("showTitle").checked;
   $("showTitle").checked = false;
   const keepSel = selected, keepColors = COLORS;
