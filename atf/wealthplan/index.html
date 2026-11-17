@@ -2148,7 +2148,7 @@ if (window.ResizeObserver) new ResizeObserver(fit).observe(document.body);
 
 /* ใช้โดยหน้ารายงานประจำเดือน (monthly/) */
 window.WPAPI = {PLANS, state, compute, slideHTML, stretchTable, addPlanSlide, goldTextGradient, svgToPNG, BRAND, setPeriod, SLIDE_PERIOD,
-  ready: () => !!(DATA && DATA.csv && FULL), lastDate: () => lastDate(), csvName: () => DATA && DATA.csvName};
+  ready: () => !!(DATA && DATA.csv && FULL), lastDate: () => lastDate(), dates: () => DATA.csv.dates.slice(), csvName: () => DATA && DATA.csvName};
 
 /* boot */
 (async () => {
