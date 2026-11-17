@@ -2107,7 +2107,13 @@ async function addPlanSlide(pptx, slideEl, r, plan, opt = {}, lotusPNG){
           const a1 = a0 + +r.raw[m] / tot * 2 * Math.PI, am = (a0 + a1) / 2; a0 = a1;
           const lx = cx + (R + ri) / 2 * Math.cos(am) + RL.dl[m][0] * fw, ly = cy + (R + ri) / 2 * Math.sin(am) + RL.dl[m][1] * fh;
           const baht = Math.round(opt.amount * 1e6 * +r.raw[m] / tot).toLocaleString('en-US');
-          s.addText(`(${baht})`, {x: IN(lx - 70), y: IN(ly + 15), w: IN(140), h: IN(20), margin: 0, align: 'center', valign: 'middle',
+          // ชิดขอบนอกของป้าย % (ฝั่งซ้ายชิดขวา ฝั่งขวาชิดซ้าย) ไม่ให้ยื่นเข้าไปทับวง
+          // ถ้ายังชนวง (เช่น TCT แผน 3) เลื่อนออกด้านนอกจนห่างวงอย่างน้อย 6 px (ความกว้างตัวเลขประมาณ 6 px ต่อตัวอักษร)
+          const left = lx < cx, tw = (baht.length + 2) * 6.2, gap = (x0) => { const x1 = x0 + tw, px = Math.min(Math.max(cx, x0), x1), py = Math.min(Math.max(cy, ly + 15), ly + 35); return Math.hypot(px - cx, py - cy) - R; };
+          let tx0 = left ? lx + 24 - tw : lx - 24;
+          for (let k = 0; k < 60 && gap(tx0) < 6; k++) tx0 += left ? -2 : 2;
+          const ax = left ? tx0 + tw - 140 : tx0;
+          s.addText(`(${baht})`, {x: IN(ax), y: IN(ly + 15), w: IN(140), h: IN(20), margin: 0, align: left ? 'right' : 'left', valign: 'middle',
             fontFace: BF, fontSize: 10.5, color: ink});
         });
       }
