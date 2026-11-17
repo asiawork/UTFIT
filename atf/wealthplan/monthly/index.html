@@ -132,15 +132,36 @@ function build(api){
       ITEMS.push({el, r, p, v});
     });
   });
+  // หน้ารายละเอียดแผน (เฉพาะไฟล์พื้นขาว 10 ล้านบาท)
+  const dp = plans.find(p => p.no === DETAIL_PLAN);
+  if (dp) DETAIL.forEach(v => {
+    root.insertAdjacentHTML('beforeend', `<h3>${v.label}<span>${v.desc}</span></h3><div class="grid"></div>`);
+    const grid = root.lastElementChild;
+    st.plan = dp.id; st.weights[dp.id] = {...dp.w};
+    const r = api.compute();
+    api.DETAIL_PAGES.forEach(pg => {
+      const cell = D.createElement('div'); cell.className = 'cell';
+      const el = D.createElement('div'); el.className = 'slide';
+      el.innerHTML = api.detailSlideHTML(dp, r, pg, v.lang);
+      cell.appendChild(el); grid.appendChild(cell);
+      ITEMS.push({el, r, p: dp, v, detail: true});
+    });
+  });
   // stretchTable วัดที่ขนาดจริง ก่อนย่อ
-  ITEMS.forEach(it => { it.el.style.transform = 'none'; api.stretchTable(it.el); });
+  ITEMS.forEach(it => { it.el.style.transform = 'none'; if (it.detail) api.fitDetailHead(it.el); else api.stretchTable(it.el); });
   scale();
-  $('sub').innerHTML = `ข้อมูล <b>${thDate(r0.start)} – ${thDate(r0.end)}</b>  ไทยและอังกฤษ พื้นขาวและกรมท่า รวม ${ITEMS.length} สไลด์`;
+  $('sub').innerHTML = `ข้อมูล <b>${thDate(r0.start)} – ${thDate(r0.end)}</b>  ไทยและอังกฤษ พื้นขาวและกรมท่า รวม ${ITEMS.filter(it => !it.detail).length} สไลด์`;
   $('go').disabled = false; $('go10').disabled = false;
 }
 
 /* แบบ 10 ล้าน: เฉพาะพื้นขาว (P และ ENP) ใส่ Portfolio Value 10 ล้านบาท และจำนวนเงินของแต่ละโมเดลตามสัดส่วน */
 const AMOUNT = 10;
+/* หน้ารายละเอียดแผน 3 หน้า (ผลตอบแทน Drawdown ระยะเวลาถือครอง) ต่อท้ายไฟล์พื้นขาว 10 ล้านบาท เปลี่ยนแผนได้ที่ DETAIL_PLAN */
+const DETAIL_PLAN = 4;
+const DETAIL = [
+  {lang: 'th', theme: 'white', label: 'P Plan ' + DETAIL_PLAN,   desc: 'รายละเอียดแผน ' + DETAIL_PLAN + ' ไทย (เฉพาะไฟล์พื้นขาว 10 ล้านบาท)'},
+  {lang: 'en', theme: 'white', label: 'ENP Plan ' + DETAIL_PLAN, desc: 'รายละเอียดแผน ' + DETAIL_PLAN + ' อังกฤษ (เฉพาะไฟล์พื้นขาว 10 ล้านบาท)'},
+];
 async function download(withAmount){
   const api = W.WPAPI, btn = $(withAmount ? 'go10' : 'go');
   if (!W.PptxGenJS){ $('msg').textContent = 'โหลดตัวช่วยสร้าง PowerPoint ไม่สำเร็จ ลองรีเฟรชหน้า'; return; }
@@ -153,6 +174,11 @@ async function download(withAmount){
     vers.forEach(v => pptx.addSection({title: v.label}));
     for (const it of ITEMS.filter(it => vers.includes(it.v))){
       await api.addPlanSlide(pptx, it.el, it.r, it.p, {...it.v, report: true, section: it.v.label, amount: withAmount ? AMOUNT : 0}, lotus[it.v.theme]);
+    }
+    // ต่อท้ายด้วยหน้ารายละเอียดแผน (section ใหม่ ไม่กระทบสไลด์พอร์ตด้านบน)
+    if (withAmount){
+      DETAIL.forEach(v => pptx.addSection({title: v.label}));
+      for (const it of ITEMS.filter(it => it.detail)) await api.addDetailSlide(pptx, it.el, {section: it.v.label}, lotus.white);
     }
     const end = ITEMS[0].r.end;
     const blob = await api.goldTextGradient(await pptx.write({outputType: 'arraybuffer'}), pptx._goldHL, pptx._repChart);

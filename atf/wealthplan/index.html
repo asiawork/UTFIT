@@ -463,6 +463,23 @@ body.capturing .print-head.printonly{display:flex;padding:4px 2px 6px;background
 .brow .v.dark{color:var(--ink)}
 .foot{position:absolute;right:34px;bottom:12px;text-align:right;font-family:var(--body);font-size:11px;color:#333;line-height:1.7}
 .foot b{font-weight:700}
+/* หน้ารายละเอียดแผน (รายงานประจำเดือน พื้นขาว) */
+.slide .s-head.dp{right:34px} .slide .s-head.dp .s-h1{white-space:nowrap}
+.dp-panel{position:absolute;border-bottom:4px solid var(--navy)}
+.dp-panel h4{margin:0;background:var(--navy);color:#fff;font-weight:600;font-size:18px;padding:0 16px;height:40px;display:flex;align-items:center;justify-content:space-between}
+.dp-panel h4 em{font-style:normal;font-family:var(--body);font-weight:400;font-size:14px;color:#dfe5ef}
+.dp-chart{display:block;background:#fff}
+.dp-chart svg{display:block;font-family:var(--body)}
+.dp-note{font-family:var(--body);font-size:13px;color:#333;line-height:1.45;padding:2px 16px 8px}
+.dp-tbl{width:100%;border-collapse:collapse;font-size:16px}
+.dp-tbl th{background:#e8ebf1;color:var(--navy);font-weight:600;font-size:14px;padding:8px 4px;line-height:1.2}
+.dp-tbl td{text-align:center;padding:0 4px;height:38px;border-bottom:1.5px solid #8b93a3;font-weight:700;font-variant-numeric:tabular-nums}
+.dp-tbl td:first-child{font-weight:600;color:var(--navy);white-space:nowrap;padding:0 8px}
+.dp-tbl tr:last-child td{border-bottom:0}
+.dp-stats{position:absolute;display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.dp-stat{border-bottom:4px solid var(--navy)}
+.dp-stat h4{margin:0;background:var(--navy);color:#fff;text-align:center;font-weight:600;font-size:16px;height:36px;line-height:36px}
+.dp-stat .v{text-align:center;font-size:30px;font-weight:700;height:58px;line-height:58px;font-variant-numeric:tabular-nums}
 .s-h1 .hl{color:inherit}
 /* ธีมกรมท่า-ทอง (ใช้ในรายงานประจำเดือน) */
 .slide.navy{background:#0b1d42;color:#fff;--gold:#c9b282;--goldl:#f4eedf}
@@ -2023,6 +2040,209 @@ function svgToPNG(svg, w, h, scale = 4){
     img.onload = () => { const c = document.createElement('canvas'); c.width = w * scale; c.height = h * scale; c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); ok(c.toDataURL('image/png')); };
     img.onerror = bad; img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg); });
 }
+/* ================= รายงานประจำเดือน: หน้ารายละเอียดแผน =================
+   3 หน้า ผลตอบแทน / Drawdown / ระยะเวลาถือครอง ภาษาไทยและอังกฤษ หน้าตาแบบเดียวกับสไลด์พอร์ตพื้นขาว
+   ใน PowerPoint หัวข้อ แถบหัวกล่อง ตาราง ตัวเลข และหมายเหตุเป็นข้อความแก้ได้ ส่วนกราฟเป็นรูป (addDetailSlide) */
+const DETAIL_PAGES = ['perf', 'dd', 'hold'];
+const enDate = s => { const [y,m,d] = s.split('-'); return `${+d} ${EN_MON[+m-1]} ${y}`; };
+const DT = {
+  th: {perf: 'ผลตอบแทน', dd: 'Drawdown', hold: 'ระยะเวลาถือครอง', cum: 'ผลตอบแทนสะสม', port: 'พอร์ต', cal: 'ผลตอบแทนรายปี',
+       partial: (a, b) => `* ไม่เต็มปี: ${a.y} ตั้งแต่ ${a.d}${b ? ` และ ${b.y} ถึง ${b.d}` : ''}`,
+       mdd: 'Max Drawdown', med: 'Median Drawdown', mon: 'เดือน', yr: 'ปี', notRec: 'ยังไม่กลับถึงจุดสูงสุดเดิม',
+       mddNote: (dd, a, b, rec, t) => `ลดลงมากที่สุด ${dd} จากจุดสูงสุด ${a} ถึงจุดต่ำสุด ${b} ` + (rec ? `และกลับถึงจุดสูงสุดเดิม ${rec} ใช้เวลา ${t}` : 'ยังไม่กลับถึงจุดสูงสุดเดิม'),
+       medNote: (thr, n, med) => `แต่ละแท่งคือวันที่เข้าลงทุนแล้วพอร์ตลดลงเกิน ${thr}% ภายใน 84 วันทำการ (ประมาณ 4 เดือน) ความสูงแท่งคือจุดต่ำสุดเทียบกับมูลค่าวันที่เข้า นับได้ ${n} ครั้ง ค่ากลาง (Median) ${med}`,
+       noCyc: thr => `ไม่มีช่วงที่พอร์ตลดลงเกิน ${thr}% ภายใน 84 วันทำการ`,
+       holdOf: h => `ผลตอบแทนเมื่อถือครบ ${h}`, holdAll: 'สรุปทุกระยะเวลาถือครอง',
+       cols: ['ถือครอง', 'โอกาสกำไร', 'โอกาสขาดทุน', 'เฉลี่ย', 'แย่ที่สุด', 'ดีที่สุด'], stat: ['โอกาสกำไร', 'โอกาสขาดทุน', 'ผลตอบแทนเฉลี่ย', 'แย่ที่สุด'],
+       h: m => m < 12 ? m + ' เดือน' : m / 12 + ' ปี',
+       holdNote: (a, b) => `คิดจากมูลค่าพอร์ต ณ สิ้นเดือน ทุกเดือนที่เป็นไปได้ในช่วง ${a} – ${b} จึงไม่รวมความผันผวนระหว่างเดือน`,
+       noData: 'ข้อมูลไม่พอ', date: thDate},
+  en: {perf: 'Performance', dd: 'Drawdown', hold: 'Holding Period', cum: 'Cumulative Return', port: 'Portfolio', cal: 'Calendar Year Returns',
+       partial: (a, b) => `* Partial year: ${a.y} from ${a.d}${b ? ` and ${b.y} to ${b.d}` : ''}`,
+       mdd: 'Max Drawdown', med: 'Median Drawdown', mon: 'months', yr: 'years', notRec: 'Not yet recovered',
+       mddNote: (dd, a, b, rec, t) => `Largest decline of ${dd} from the peak on ${a} to the trough on ${b}` + (rec ? `, back to the previous peak on ${rec} after ${t}` : ', not yet back to the previous peak'),
+       medNote: (thr, n, med) => `Each bar is an entry date after which the portfolio fell more than ${thr}% within 84 trading days (about 4 months). Bar height is the lowest value against the entry value. ${n} cycles counted, median ${med}`,
+       noCyc: thr => `The portfolio never fell more than ${thr}% within 84 trading days`,
+       holdOf: h => `Return after holding ${h}`, holdAll: 'All Holding Periods',
+       cols: ['Holding', 'Chance of Gain', 'Chance of Loss', 'Average', 'Worst', 'Best'], stat: ['Chance of Gain', 'Chance of Loss', 'Average Return', 'Worst'],
+       h: m => m < 12 ? m + ' months' : m === 12 ? '1 year' : m / 12 + ' years',
+       holdNote: (a, b) => `Based on month-end portfolio values for every possible start month from ${a} to ${b}, so moves within a month are not included`,
+       noData: 'Not enough data', date: enDate},
+};
+function dpAxis(W, H, pad, yf, ticks, fmt, xs){
+  return ticks.map(v => `<line x1="${pad.l}" x2="${W-pad.r}" y1="${yf(v)}" y2="${yf(v)}" stroke="${Math.abs(v) < 1e-12 ? '#8b93a3' : '#e6e9ef'}"/><text x="${pad.l-8}" y="${yf(v)+4.5}" text-anchor="end" font-size="13" fill="#5d6678">${fmt(v)}</text>`).join('')
+    + (xs || []).map(o => `${o.line ? `<line x1="${o.x}" x2="${o.x}" y1="${pad.t}" y2="${H-pad.b}" stroke="#eef0f4"/>` : ''}<text x="${o.x}" y="${H-8}" text-anchor="middle" font-size="13" fill="#5d6678">${o.t}</text>`).join('');
+}
+const dpTicks = (a, b, s) => { const o = []; for (let v = a; v <= b + 1e-12; v += s) o.push(+v.toFixed(10)); return o; };
+const dpPct = s => v => { const d = s * 100 < 1 ? (s * 100 < 0.1 ? 2 : 1) : 0; return (v > 0 ? '+' : '') + (v * 100).toFixed(d) + '%'; };
+function dpPanel(x, y, w, title, right, inner){
+  return `<div class="dp-panel" style="left:${x}px;top:${y}px;width:${w}px"><h4><span>${title}</span>${right ? `<em>${right}</em>` : ''}</h4>${inner}</div>`;
+}
+function dpYears(pf, xf){
+  const out = []; let last = pf.dates[0].slice(0, 4);
+  pf.dates.forEach((d, i) => { const y = d.slice(0, 4); if (y !== last){ out.push({x: xf(i), t: y, line: true}); last = y; } });
+  return out;
+}
+function detailSlideHTML(plan, r, page, lang = 'th'){
+  const T = DT[lang] || DT.th, D = T.date, meta = planMeta(plan), pf = r.pf, n = pf.dates.length;
+  const L = 44, PW = 1192, range = `${D(r.start)} – ${D(r.end)}`;
+  const head = `<div class="s-head dp"><span class="s-lotus">${BRAND.lotus.replace('<svg ', '<svg style="height:62px;width:auto;display:block" ')}</span><span class="s-h1">${T[page]}: Wealth Plan ${plan.no} ${esc(meta.name)}</span></div>`;
+  const recTxt = d => { const q = recLong(d); return q.v + ' ' + (q.u === 'months' ? T.mon : T.yr); };
+  const svg = (W, H, body) => `<div class="dp-chart" style="width:${W}px;height:${H}px"><svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${body}</svg></div>`;
+  let body = '';
+  if (page === 'perf'){
+    // ผลตอบแทนสะสม
+    const W = PW, H = 214, pad = {l: 64, r: 30, t: 16, b: 30}, xf = i => pad.l + (W - pad.l - pad.r) * i / (n - 1);
+    const v = pf.nav.map(x => x / pf.nav[0] - 1);
+    let lo = Math.min(0, ...v), hi = Math.max(0, ...v); const st = niceStep(hi - lo || 0.01, 5); lo = Math.floor(lo / st) * st; hi = Math.ceil(hi / st) * st;
+    const yf = x => pad.t + (H - pad.t - pad.b) * (hi - x) / (hi - lo);
+    const path = v.map((x, i) => (i ? 'L' : 'M') + xf(i).toFixed(1) + ',' + yf(x).toFixed(1)).join('');
+    const ex = xf(n - 1), ey = yf(v[n - 1]);
+    const c1 = svg(W, H, dpAxis(W, H, pad, yf, dpTicks(lo, hi, st), dpPct(st), dpYears(pf, xf))
+      + `<path d="${path}" fill="none" stroke="#16233a" stroke-width="2.4" stroke-linejoin="round"/><circle cx="${ex}" cy="${ey}" r="4.5" fill="#16233a"/>`
+      + `<text x="${ex - 10}" y="${ey - 11}" text-anchor="end" font-size="16" font-weight="700" fill="#16233a" stroke="#fff" stroke-width="5" paint-order="stroke">${pct(v[n - 1])}</text>`
+      + `<line x1="${pad.l + 6}" x2="${pad.l + 30}" y1="${pad.t + 6}" y2="${pad.t + 6}" stroke="#16233a" stroke-width="2.4"/><text x="${pad.l + 38}" y="${pad.t + 10.5}" font-size="13" fill="#16233a" stroke="#fff" stroke-width="4" paint-order="stroke">${T.port}</text>`);
+    body += dpPanel(L, 116, PW, T.cum, range, c1);
+    // ผลตอบแทนรายปี
+    const last = {}, first = {};
+    pf.dates.forEach((d, i) => { const y = d.slice(0, 4); if (!(y in first)) first[y] = i; last[y] = i; });
+    const years = Object.keys(last).sort(); let prev = pf.nav[0];
+    const rows = years.map((y, k) => { const e = pf.nav[last[y]], s0 = k ? prev : pf.nav[0]; prev = e;
+      const partial = (k === 0 && pf.dates[first[y]].slice(5) > '01-07') || (k === years.length - 1 && pf.dates[last[y]].slice(5) < '12-24');
+      return {y, r: e / s0 - 1, partial, to: pf.dates[last[y]]}; });
+    const H2 = 190, pad2 = {l: 64, r: 30, t: 26, b: 30};
+    let lo2 = Math.min(0, ...rows.map(x => x.r)), hi2 = Math.max(0, ...rows.map(x => x.r));
+    const st2 = niceStep((hi2 - lo2) || 0.01, 4), mn2 = lo2, mx2 = hi2; lo2 = Math.floor(lo2 / st2) * st2; hi2 = Math.ceil(hi2 / st2) * st2;
+    let y2 = x => pad2.t + (H2 - pad2.t - pad2.b) * (hi2 - x) / (hi2 - lo2);
+    // เผื่อที่ให้ป้าย % ของแท่งติดลบ ไม่ให้ทับปีด้านล่าง
+    if (mn2 < 0 && y2(mn2) + 20 > H2 - pad2.b){ lo2 -= st2; y2 = x => pad2.t + (H2 - pad2.t - pad2.b) * (hi2 - x) / (hi2 - lo2); }
+    const slot = (W - pad2.l - pad2.r) / rows.length, bw = Math.min(70, slot * 0.6);
+    const bars = rows.map((x, i) => { const cx = pad2.l + slot * (i + 0.5), a = y2(0), b = y2(x.r), pos = x.r >= 0;
+      return `<rect x="${cx - bw/2}" y="${Math.min(a, b)}" width="${bw}" height="${Math.max(1, Math.abs(b - a))}" fill="${pos ? '#16a34a' : '#e3191b'}" opacity="${x.partial ? .45 : 1}"/>`
+        + `<text x="${cx}" y="${pos ? b - 7 : b + 17}" text-anchor="middle" font-size="15" font-weight="700" fill="${pos ? '#15803d' : '#c81e1e'}">${pct(x.r)}</text>`; }).join('');
+    const xs = rows.map((x, i) => ({x: pad2.l + slot * (i + 0.5), t: x.y + (x.partial ? '*' : '')}));
+    const part = rows.filter(x => x.partial), p0 = part.find(x => x === rows[0]), p1 = part.find(x => x !== rows[0]);
+    const note = part.length ? T.partial(p0 ? {y: p0.y, d: D(pf.dates[0])} : {y: p1.y, d: D(p1.to)}, p0 && p1 ? {y: p1.y, d: D(p1.to)} : null) : '';
+    body += dpPanel(L, 392, PW, T.cal, range, svg(W, H2, dpAxis(W, H2, pad2, y2, dpTicks(lo2, hi2, st2), dpPct(st2), xs) + bars) + (note ? `<div class="dp-note">${note}</div>` : ''));
+  }
+  if (page === 'dd'){
+    const W = PW, H = 196, pad = {l: 64, r: 30, t: 14, b: 30}, xf = i => pad.l + (W - pad.l - pad.r) * i / (n - 1);
+    let pk = -Infinity; const dd = pf.nav.map(x => { if (x > pk) pk = x; return x / pk - 1; });
+    let mi = 0; dd.forEach((x, i) => { if (x < dd[mi]) mi = i; });
+    let pi = mi; while (pi > 0 && dd[pi] < 0) pi--;
+    const ri = r.mdd.recovered ? pf.dates.indexOf(r.mdd.rec) : n - 1;
+    const st = niceStep(-Math.min(...dd) || 0.001, 3), lo = Math.floor(Math.min(...dd) / st) * st || -st;
+    const yf = v => pad.t + (H - pad.t - pad.b - 34) * (0 - v) / (0 - lo);
+    const path = dd.map((x, i) => (i ? 'L' : 'M') + xf(i).toFixed(1) + ',' + yf(x).toFixed(1)).join('');
+    const ay = yf(dd[mi]) + 18, right = xf(ri) + 10 + 330 < W - pad.r;
+    const lbl = `Max ${pct(dd[mi])}  ${r.mdd.recovered ? 'Recovery ' + recTxt(r.mdd.days) : T.notRec}`;
+    const c1 = svg(W, H, `<rect x="${xf(pi)}" y="${pad.t}" width="${Math.max(2, xf(ri) - xf(pi))}" height="${H - pad.t - pad.b}" fill="rgba(227,25,27,.09)"/>`
+      + dpAxis(W, H, pad, yf, dpTicks(lo, 0, st), dpPct(st), dpYears(pf, xf))
+      + `<path d="${path}L${xf(n-1)},${yf(0)}L${xf(0)},${yf(0)}Z" fill="rgba(227,25,27,.2)"/><path d="${path}" fill="none" stroke="#e3191b" stroke-width="1.5"/>`
+      + `<circle cx="${xf(mi)}" cy="${yf(dd[mi])}" r="4.5" fill="#e3191b"/>`
+      + `<defs><marker id="dpArw" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="#16233a"/></marker></defs>`
+      + `<line x1="${xf(pi)}" x2="${xf(pi)}" y1="${yf(0)}" y2="${ay + 5}" stroke="#16233a" stroke-dasharray="2 2"/><line x1="${xf(ri)}" x2="${xf(ri)}" y1="${yf(0)}" y2="${ay + 5}" stroke="#16233a" stroke-dasharray="2 2"/>`
+      + `<line x1="${xf(pi)}" x2="${xf(ri)}" y1="${ay}" y2="${ay}" stroke="#16233a" stroke-width="1.5" marker-start="url(#dpArw)" ${r.mdd.recovered ? 'marker-end="url(#dpArw)"' : ''}/>`
+      + `<text x="${right ? xf(ri) + 10 : xf(pi) - 10}" y="${ay + 5}" text-anchor="${right ? 'start' : 'end'}" font-size="15" font-weight="700" fill="#16233a" stroke="#fff" stroke-width="5" paint-order="stroke">${lbl}</text>`);
+    const note1 = T.mddNote(pct(r.mdd.dd), D(r.mdd.peak), D(r.mdd.trough), r.mdd.recovered ? D(r.mdd.rec) : null, recTxt(r.mdd.days));
+    body += dpPanel(L, 116, PW, T.mdd, range, c1 + `<div class="dp-note">${note1}</div>`);
+    // Median Drawdown: 1 แท่งต่อ 1 cycle
+    const cyc = WP.cycles(pf, r.thr), thrTxt = (r.thr * 100).toFixed(3).replace(/0+$/, '').replace(/\.$/, '');
+    let c2 = '', note2 = T.noCyc(thrTxt);
+    if (cyc.length){
+      const H2 = 176, ext = Math.min(...cyc.map(c => c.dd)), s3 = niceStep(-ext || 0.001, 3), lo3 = Math.floor(ext / s3) * s3;
+      const y3 = v => pad.t + (H2 - pad.t - pad.b) * (0 - v) / (0 - lo3), bw = Math.max(1, (W - pad.l - pad.r) / n), med = r.port.cycDDMedian, my = y3(med);
+      c2 = svg(W, H2, dpAxis(W, H2, pad, y3, dpTicks(lo3, 0, s3), dpPct(s3), dpYears(pf, xf))
+        + cyc.map(c => `<rect x="${(xf(c.i) - bw/2).toFixed(1)}" y="${y3(0).toFixed(1)}" width="${bw.toFixed(2)}" height="${(y3(c.dd) - y3(0)).toFixed(1)}" fill="rgba(227,25,27,.55)"/>`).join('')
+        + `<line x1="${pad.l}" x2="${W-pad.r}" y1="${my}" y2="${my}" stroke="#16233a" stroke-width="2" stroke-dasharray="7 4"/>`
+        + `<rect x="${W-pad.r-170}" y="${my-25}" width="170" height="21" fill="#16233a"/><text x="${W-pad.r-85}" y="${my-9.5}" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">Median ${pct(med)}</text>`);
+      note2 = T.medNote(thrTxt, cyc.length.toLocaleString('en-US'), pct(med));
+    }
+    body += dpPanel(L, 400, PW, T.med, range, c2 + `<div class="dp-note">${note2}</div>`);
+  }
+  if (page === 'hold'){
+    const sumOf = rows => { if (!rows.length) return null; let pos = 0, neg = 0, sm = 0, mn = Infinity, mx = -Infinity;
+      rows.forEach(x => { if (x.r > 0) pos++; else if (x.r < 0) neg++; sm += x.r; mn = Math.min(mn, x.r); mx = Math.max(mx, x.r); });
+      const d = pos + neg || 1; return {n: rows.length, pPos: pos / d, pNeg: neg / d, avg: sm / rows.length, mn, mx}; };
+    const all = HOLD_ALL.map(([k, m]) => { const rows = holdingMonthly(pf, m); return {k, m, rows, st: sumOf(rows)}; }).filter(o => o.st);
+    const cur = all.find(o => o.k === '1Y') || all[0];
+    const CW = 720, W = CW, H = 300, pad = {l: 60, r: 18, t: 16, b: 30};
+    let chart = `<div class="dp-note" style="padding-top:12px">${T.noData}</div>`;
+    if (cur){
+      const rows = cur.rows, m = rows.length;
+      let lo = Math.min(0, cur.st.mn), hi = Math.max(0, cur.st.mx); const st = niceStep((hi - lo) || 0.01, 5); lo = Math.floor(lo / st) * st; hi = Math.ceil(hi / st) * st;
+      const yf = v => pad.t + (H - pad.t - pad.b) * (hi - v) / (hi - lo), y0 = yf(0), slot = (W - pad.l - pad.r) / m, bw = Math.max(1.5, slot * 0.72);
+      const xs = []; let ly = null; rows.forEach((p, i) => { const y = p.d.slice(0, 4); if (y !== ly && p.d.slice(5, 7) === '01'){ xs.push({x: pad.l + slot * (i + 0.5), t: y, line: true}); } ly = y; });
+      chart = svg(W, H, dpAxis(W, H, pad, yf, dpTicks(lo, hi, st), dpPct(st), xs)
+        + rows.map((p, i) => { const cx = pad.l + slot * (i + 0.5), yy = yf(p.r);
+          return `<rect x="${(cx - bw/2).toFixed(1)}" y="${Math.min(y0, yy).toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(0.8, Math.abs(yy - y0)).toFixed(1)}" fill="${p.r >= 0 ? '#16a34a' : '#e3191b'}"/>`; }).join(''));
+    }
+    body += dpPanel(L, 116, CW, cur ? T.holdOf(T.h(cur.m)) : T.hold, '', chart);
+    if (cur){
+      const s = cur.st, v = [[Math.round(s.pPos * 100) + '%', 'pos'], [Math.round(s.pNeg * 100) + '%', 'neg'], [pct(s.avg), cls(s.avg)], [pct(s.mn), cls(s.mn)]];
+      body += `<div class="dp-stats" style="left:${L}px;top:${116 + 40 + H + 22}px;width:${CW}px">${T.stat.map((t, i) => `<div class="dp-stat"><h4>${t}</h4><div class="v ${v[i][1]}">${v[i][0]}</div></div>`).join('')}</div>`;
+    }
+    const TX = L + CW + 24, TW = L + PW - TX;
+    const tbl = `<table class="dp-tbl"><thead><tr>${T.cols.map(c => `<th>${c}</th>`).join('')}</tr></thead><tbody>${all.map(o => `<tr><td>${T.h(o.m)}</td>
+      <td class="pos">${Math.round(o.st.pPos * 100)}%</td><td class="neg">${Math.round(o.st.pNeg * 100)}%</td>
+      <td class="${cls(o.st.avg)}">${pct(o.st.avg)}</td><td class="${cls(o.st.mn)}">${pct(o.st.mn)}</td><td class="${cls(o.st.mx)}">${pct(o.st.mx)}</td></tr>`).join('')}</tbody></table>`;
+    body += dpPanel(TX, 116, TW, T.holdAll, '', tbl);
+    body += `<div class="dp-note dp-free" style="position:absolute;left:${L - 16}px;top:${116 + 40 + H + 22 + 98 + 8}px;width:${CW + 32}px">${T.holdNote(D(r.start), D(r.end))}</div>`;
+  }
+  const foot = lang === 'en'
+    ? `<b>Historical performance</b> calculated based on data from ${enMonYear(r.start)} – ${enMonYear(r.end)}<br>Disclaimer: Past performance is not indicative of future results. Investors should understand the product characteristics, return conditions, and associated risks before making an investment decision.`
+    : `<b>ผลการดำเนินงานย้อนหลัง</b> คำนวณจากข้อมูล ${thMonYear(r.start)} – ${thMonYear(r.end)}<br>หมายเหตุ : ${DISCLAIMER}`;
+  return head + body + `<div class="foot">${foot}</div>`;
+}
+/* หัวข้อยาว ย่อตัวอักษรจนพอดีความกว้างสไลด์ */
+function fitDetailHead(el){
+  const h = el.querySelector('.s-head.dp .s-h1'); if (!h) return;
+  const room = 1280 - 34 - h.offsetLeft - 2; let fs = 48;
+  while (h.offsetWidth > room && fs > 30){ fs -= 1; h.style.fontSize = fs + 'px'; }
+}
+/* สไลด์หน้ารายละเอียดแผน จาก element ที่ render ด้วย detailSlideHTML */
+async function addDetailSlide(pptx, slideEl, opt = {}, lotusPNG){
+  const k = slideEl.getBoundingClientRect().width / 1280, IN = px => px / 96;
+  const box = el => { const a = slideEl.getBoundingClientRect(), b = el.getBoundingClientRect();
+    return {x: IN((b.left - a.left) / k), y: IN((b.top - a.top) / k), w: IN(b.width / k), h: IN(b.height / k)}; };
+  const HF = 'BLS Bold', XB = 'BLS ExtraBold', BF = 'BLS Text', NAVY = '16233A', POS = '16A34A', NEG = 'E3191B';
+  const pt = el => +getComputedStyle(el).fontSize.replace('px', '') * 0.75;
+  const colOf = el => el.classList.contains('pos') ? POS : el.classList.contains('neg') ? NEG : NAVY;
+  const s = pptx.addSlide(opt.section ? {sectionTitle: opt.section} : undefined); s.background = {color: 'FFFFFF'};
+  const bl = box(slideEl.querySelector('.s-lotus svg')), h1 = slideEl.querySelector('.s-h1'), bt = box(h1);
+  s.addImage({data: lotusPNG, x: bl.x, y: bl.y, w: bl.w, h: bl.h});
+  s.addText(h1.textContent, {x: bt.x, y: bt.y - 0.05, w: bt.w + 0.6, h: bt.h + 0.1, margin: 0, fontFace: XB, fontSize: pt(h1), bold: false, color: NAVY, valign: 'middle'});
+  const bar = (b, h) => s.addShape(pptx.ShapeType.rect, {x: b.x, y: b.y + b.h - IN(h), w: b.w, h: IN(h), fill: {color: NAVY}, line: {type: 'none'}});
+  for (const p of slideEl.querySelectorAll('.dp-panel, .dp-stat')){
+    const pb = box(p), h4 = p.querySelector('h4'), hb = box(h4), sp = h4.querySelector('span'), em = h4.querySelector('em');
+    s.addShape(pptx.ShapeType.rect, {x: hb.x, y: hb.y, w: hb.w, h: hb.h, fill: {color: NAVY}, line: {type: 'none'}});
+    if (sp){ s.addText(sp.textContent, {x: hb.x + IN(16), y: hb.y, w: hb.w - IN(32), h: hb.h, margin: 0, fontFace: HF, fontSize: pt(h4), color: 'FFFFFF', valign: 'middle'});
+      if (em) s.addText(em.textContent, {x: hb.x + IN(16), y: hb.y, w: hb.w - IN(32), h: hb.h, margin: 0, fontFace: BF, fontSize: pt(em), color: 'DFE5EF', align: 'right', valign: 'middle'}); }
+    else s.addText(h4.textContent, {x: hb.x, y: hb.y, w: hb.w, h: hb.h, margin: 0, fontFace: HF, fontSize: pt(h4), color: 'FFFFFF', align: 'center', valign: 'middle'});
+    const v = p.querySelector(':scope > .v');
+    if (v){ const vb = box(v); s.addText(v.textContent, {x: vb.x, y: vb.y, w: vb.w, h: vb.h, margin: 0, fontFace: HF, fontSize: pt(v), color: colOf(v), align: 'center', valign: 'middle'}); }
+    for (const c of p.querySelectorAll('.dp-chart')){
+      const cb = box(c), url = await htmlToImage.toPng(c, {pixelRatio: 3, backgroundColor: '#ffffff'});
+      s.addImage({data: url, x: cb.x, y: cb.y, w: cb.w, h: cb.h});
+    }
+    const t = p.querySelector('table');
+    if (t){
+      const tb = box(t), none = {type: 'none'}, thin = {type: 'solid', pt: 1, color: '8B93A3'}, trs = [...t.rows];
+      const rows = trs.map((tr, ri) => [...tr.cells].map((c, ci) => ({text: c.textContent.trim(), options: ri === 0
+        ? {fill: {color: 'E8EBF1'}, color: NAVY, fontFace: HF, fontSize: pt(c), align: 'center', valign: 'middle', border: none}
+        : {color: ci === 0 ? NAVY : colOf(c), fontFace: HF, fontSize: pt(c), align: 'center', valign: 'middle', border: [none, none, ri < trs.length - 1 ? thin : none, none]}})));
+      s.addTable(rows, {x: tb.x, y: tb.y, w: tb.w, colW: [...trs[0].cells].map(c => box(c).w), rowH: trs.map(tr => box(tr).h), margin: 0.02, autoPage: false});
+    }
+    for (const nEl of p.querySelectorAll('.dp-note')){ const nb = box(nEl), cs = getComputedStyle(nEl), pl = IN(parseFloat(cs.paddingLeft));
+      s.addText(nEl.textContent.trim(), {x: nb.x + pl, y: nb.y, w: nb.w - 2 * pl, h: nb.h, margin: 0, fontFace: BF, fontSize: pt(nEl), color: '333333', valign: 'middle'}); }
+    bar(pb, 4);
+  }
+  for (const nEl of slideEl.querySelectorAll('.dp-free')){ const nb = box(nEl), pl = IN(16);
+    s.addText(nEl.textContent.trim(), {x: nb.x + pl, y: nb.y, w: nb.w - 2 * pl, h: nb.h, margin: 0, fontFace: BF, fontSize: pt(nEl), color: '333333', valign: 'top'}); }
+  const ft = slideEl.querySelector('.foot'), fb = box(ft), lines = ft.innerText.split('\n');
+  s.addText(lines.map((l, i) => ({text: l, options: {breakLine: i < lines.length - 1}})),
+    {x: fb.x - 0.2, y: fb.y, w: fb.w + 0.2, h: fb.h, margin: 0, fontFace: BF, fontSize: 8, color: '333333', align: 'right', valign: 'middle'});
+}
 /* one Portfolio Overview slide (editable shapes) from a rendered .slide element; opt.theme 'navy' = กรมท่า-ทอง */
 function gradPNG(dir){
   const c = document.createElement('canvas'); c.width = dir === 'v' ? 8 : 400; c.height = dir === 'v' ? 200 : 8;
@@ -2278,7 +2498,7 @@ window.addEventListener('afterprint', fit);
 if (window.ResizeObserver) new ResizeObserver(fit).observe(document.body);
 
 /* ใช้โดยหน้ารายงานประจำเดือน (monthly/) */
-window.WPAPI = {PLANS, state, compute, slideHTML, stretchTable, addPlanSlide, goldTextGradient, svgToPNG, BRAND, setPeriod, SLIDE_PERIOD,
+window.WPAPI = {PLANS, state, compute, slideHTML, stretchTable, addPlanSlide, detailSlideHTML, fitDetailHead, addDetailSlide, DETAIL_PAGES, goldTextGradient, svgToPNG, BRAND, setPeriod, SLIDE_PERIOD,
   ready: () => !!(DATA && DATA.csv && FULL), lastDate: () => lastDate(), dates: () => DATA.csv.dates.slice(), csvName: () => DATA && DATA.csvName};
 
 /* boot */
