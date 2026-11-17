@@ -2096,6 +2096,20 @@ async function addPlanSlide(pptx, slideEl, r, plan, opt = {}, lotusPNG){
       ms.forEach(m => { const [x, y, w, al] = RL.name[m]; tb(m, [x, y, w], {h: 28.41, fs: 10.5, b: true, al: al === 'ctr' ? 'center' : 'right', rIns: al === 'ctr' ? 0 : 17}); });
       tb('Portfolio Value', REP_TEXT.pv, {h: 35.34, fs: 14, al: 'center', sh: true});
       tb(opt.lang === 'en' ? 'THB Mn' : 'ล้านบาท', REP_TEXT.unit, {h: 43.26, fs: 18, al: 'center', sh: true});
+      if (opt.amount > 0){
+        // จำนวนเงินกลางวง และ (บาท) ใต้ป้าย % ของแต่ละโมเดล (ตำแหน่งป้ายตามที่ PowerPoint วาดจาก manualLayout)
+        const {cx, cy, R, r: ri} = repGeom(RL), [, , fw, fh] = RL.frame, tot = ms.reduce((a, m) => a + +r.raw[m], 0);
+        s.addText(fmtMoney(opt.amount), {x: IN(REP_TEXT.pv[0]), y: IN(244), w: IN(REP_TEXT.pv[2]), h: IN(52), margin: 0, align: 'center', valign: 'middle',
+          fontFace: HF, fontSize: 32, bold: true, color: ink});
+        let a0 = -Math.PI / 2;
+        ms.forEach((m, i) => {
+          const a1 = a0 + +r.raw[m] / tot * 2 * Math.PI, am = (a0 + a1) / 2; a0 = a1;
+          const lx = cx + (R + ri) / 2 * Math.cos(am) + RL.dl[m][0] * fw, ly = cy + (R + ri) / 2 * Math.sin(am) + RL.dl[m][1] * fh;
+          const baht = Math.round(opt.amount * 1e6 * +r.raw[m] / tot).toLocaleString('en-US');
+          s.addText(`(${baht})`, {x: IN(lx - 70), y: IN(ly + 15), w: IN(140), h: IN(20), margin: 0, align: 'center', valign: 'middle',
+            fontFace: BF, fontSize: 10.5, color: ink});
+        });
+      }
     } else {
     // donut (editable chart) + labels from the on-screen layout
     // viewBox 500x420 ย่อแบบ meet ในกล่อง svg จึงต้องใช้สเกลเดียวกันและชดเชยระยะขอบ ไม่งั้นวงใหญ่เกินจนทับ legend
