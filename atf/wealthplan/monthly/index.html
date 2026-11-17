@@ -44,7 +44,7 @@
     </div>
   </div>
   <div class="empty" id="empty" hidden>ยังไม่มีไฟล์ Model Performance ในเบราว์เซอร์นี้ อัปโหลดได้ที่หน้า <a href="../../">Auto Top Funds</a></div>
-  <iframe id="view" src="../" title="ตัวอย่างสไลด์"></iframe>
+  <iframe id="view" title="ตัวอย่างสไลด์"></iframe>
 </main>
 <script>
 /* หน้านี้ไม่มีลิงก์จากหน้าอื่น ใช้คนเดียว
@@ -169,6 +169,8 @@ frame.addEventListener('load', async () => {
   if (!api || !api.ready()){ $('sub').textContent = ''; $('empty').hidden = false; frame.hidden = true; return; }
   setup(api);
 });
+// โหลดหน้า Wealth Solution Plan ใหม่ทุกครั้ง ไม่ใช้ของที่เบราว์เซอร์เก็บไว้ ไม่งั้นโค้ดสร้างสไลด์อาจเป็นรุ่นเก่ากว่าหน้านี้
+frame.src = '../?v=' + Date.now();
 $('go').onclick = () => download(false);
 $('go10').onclick = () => download(true);
 </script>
