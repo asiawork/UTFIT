@@ -2055,7 +2055,7 @@ async function addPlanSlide(pptx, slideEl, r, plan, opt = {}, lotusPNG){
         else if (td.classList.contains('model')) row.push({text: [{text: '● ', options: {color: hex(td.querySelector('i').style.background), fontSize: 14}},
                                                                      {text: td.textContent.trim(), options: {bold: true, fontFace: HF}}], options: {...base, align: 'left'}});
         else { const dv = td.querySelector('.dv'), c = td.classList.contains('pos') ? POS : td.classList.contains('neg') ? NEG : INK;
-          row.push({text: dv ? [{text: td.firstChild.textContent, options: {breakLine: true}}, {text: dv.textContent, options: {fontSize: 8, color: SUB}}] : td.textContent.trim(), options: {...base, color: c}}); }
+          row.push({text: dv ? [{text: td.firstChild.textContent, options: {breakLine: true}}, {text: dv.textContent, options: {fontSize: 8, color: SUB, bold: false, fontFace: BF}}] : td.textContent.trim(), options: {...base, fontFace: HF, bold: true, color: c}}); }
       });
       rows.push(row);
     });
