@@ -1961,9 +1961,9 @@ async function exportPDF(){
   try{
     const pdf = new jspdf.jsPDF({orientation: 'landscape', unit: 'mm', format: 'a4'});
     const PW = 297, PH = 210, M = 10, CW = PW - 2 * M, PX = 1123, mm = px => px * PW / PX;
-    const pick = new Set(dlPicked()), info = reportInfo();
-    const pages = [['slide'], ['perf', 'cal'], ['dd', 'secMed'], ['hold']].map(g => g.filter(id => pick.has(id))).filter(g => g.length);
-    if (!pages.length && !pick.has('cover')){ exMsg('เลือกอย่างน้อย 1 ส่วน'); return; }
+    const pick = new Set(dlPicked()), info = reportInfo(), r0 = compute();
+    const pages = pick.has('slide') ? [['slide']] : [], dps = r0.port && r0.pf ? detailPicked() : [];
+    if (!pages.length && !dps.length && !pick.has('cover')){ exMsg('เลือกอย่างน้อย 1 ส่วน'); return; }
     let n = 0;
     const newPage = () => { if (n++) pdf.addPage(); };
     if (pick.has('cover')){ const c = await captureHTML(coverHTML(), PX, 794); newPage(); pdf.addImage(c.url, 'PNG', 0, 0, PW, PH, undefined, 'FAST'); }
@@ -1982,6 +1982,11 @@ async function exportPDF(){
       const k = Math.min(1, avail / natH);
       let y = top;
       caps.forEach(c => { const w = CW * k, h = CW * c.h / c.w * k; pdf.addImage(c.url, 'PNG', M + (CW - w) / 2, y, w, h, undefined, 'FAST'); y += h + gap; });
+    }
+    // หน้ารายละเอียด: สไลด์ 16:9 เต็มความกว้างหน้า
+    for (const pg of dps){
+      const url = await withDetailSlide(r0, pg, el => htmlToImage.toPng(el, {width: 1280, height: 720, pixelRatio: 2, backgroundColor: '#ffffff'}));
+      newPage(); const h = PW * 720 / 1280; pdf.addImage(url, 'PNG', 0, (PH - h) / 2, PW, h, undefined, 'FAST');
     }
     pdf.save(exportName('pdf'));
     exMsg('');
@@ -2088,7 +2093,7 @@ function dpYears(pf, xf){
 function detailSlideHTML(plan, r, page, lang = 'th'){
   const T = DT[lang] || DT.th, D = T.date, meta = planMeta(plan), pf = r.pf, n = pf.dates.length;
   const L = 44, PW = 1192, range = `${D(r.start)} – ${D(r.end)}`;
-  const head = `<div class="s-head dp"><span class="s-lotus">${BRAND.lotus.replace('<svg ', '<svg style="height:62px;width:auto;display:block" ')}</span><span class="s-h1">${T[page]}: Wealth Plan ${plan.no}</span></div>`;
+  const head = `<div class="s-head dp"><span class="s-lotus">${BRAND.lotus.replace('<svg ', '<svg style="height:62px;width:auto;display:block" ')}</span><span class="s-h1">${T[page]}: ${plan.no ? 'Wealth Plan ' + plan.no : esc(meta.name)}</span></div>`;
   const recTxt = d => { const q = recLong(d); return q.v + ' ' + (q.u === 'months' ? T.mon : T.yr); };
   const svg = (W, H, body) => `<div class="dp-chart" style="width:${W}px;height:${H}px"><svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${body}</svg></div>`;
   let body = '';
@@ -2195,6 +2200,16 @@ function detailSlideHTML(plan, r, page, lang = 'th'){
     ? `<b>Historical performance</b> calculated based on data from ${enMonYear(r.start)} – ${enMonYear(r.end)}<br>Disclaimer: Past performance is not indicative of future results. Investors should understand the product characteristics, return conditions, and associated risks before making an investment decision.`
     : `<b>ผลการดำเนินงานย้อนหลัง</b> คำนวณจากข้อมูล ${thMonYear(r.start)} – ${thMonYear(r.end)}<br>หมายเหตุ : ${DISCLAIMER}`;
   return head + body + `<div class="foot">${foot}</div>`;
+}
+/* หน้ารายละเอียดของแผนที่เลือกอยู่ ใช้ในไฟล์ดาวน์โหลดของหน้านี้ (แบบเดียวกับรายงานประจำเดือน) */
+const DETAIL_OF = {pgPerf: 'perf', pgDD: 'dd', hold: 'hold'};
+function detailPicked(){ return DL_PARTS.filter(x => DETAIL_OF[x[0]] && state.dlSel[x[0]] !== false).map(x => DETAIL_OF[x[0]]); }
+async function withDetailSlide(r, page, fn){
+  const box = document.createElement('div'), el = document.createElement('div');
+  box.style.cssText = 'position:fixed;left:-20000px;top:0'; el.className = 'slide';
+  el.innerHTML = detailSlideHTML(PLANS.find(p => p.id === state.plan), r, page, 'th');
+  box.appendChild(el); document.body.appendChild(box);
+  try{ fitDetailHead(el); return await fn(el); } finally { box.remove(); }
 }
 /* หัวข้อยาว ย่อตัวอักษรจนพอดีความกว้างสไลด์ */
 function fitDetailHead(el){
@@ -2465,24 +2480,9 @@ async function exportPPTX(){
       c.addText('Exclusive Investment Strategy', {x: 0.6, y: 2.85, w: 9, h: 0.6, margin: 0, fontFace: BF, fontSize: 26, color: '1F3A63'});
     }
     if (pick.has('slide')) await addPlanSlide(pptx, document.getElementById('slide'), r, PLANS.find(p => p.id === state.plan), {}, lotusPNG);
-    // further slides: grouped like the PDF pages, with a title bar and page number
-    if (window.htmlToImage){
-      let n = (pick.has('cover') ? 1 : 0) + (pick.has('slide') ? 1 : 0);
-      for (const ids of [['perf', 'cal'], ['dd', 'secMed'], ['hold']].map(g => g.filter(id => pick.has(id))).filter(g => g.length)){
-        const caps = await capturePage(ids, (13.333 - 0.9) / 6.0);
-        if (!caps.length) continue;
-        const sl = pptx.addSlide(); sl.background = {color: 'FFFFFF'}; n++;
-        const L = 0.45, CW = 13.333 - 2 * L;
-        sl.addImage({data: lotusPNG, x: L, y: 0.27, w: 0.37, h: 0.5});
-        sl.addText(PAGE_TITLES[ids.join('+')] || PAGE_TITLES[ids[0]], {x: L + 0.5, y: 0.27, w: 9, h: 0.5, margin: 0, fontFace: HF, fontSize: 22, bold: true, color: NAVY, valign: 'middle'});
-        sl.addShape(pptx.ShapeType.line, {x: L, y: 0.85, w: CW, h: 0, line: {color: NAVY, width: 1.5}});
-        sl.addText(String(n), {x: 13.333 - L - 1, y: 7.1, w: 1, h: 0.25, margin: 0, fontFace: BF, fontSize: 9, color: GREY, align: 'right'});
-        const top = 1.0, avail = 7.0 - top, gap = 0.12;
-        const nat = caps.reduce((a, c) => a + CW * c.h / c.w, 0) + gap * (caps.length - 1), k = Math.min(1, avail / nat);
-        let y = top;
-        caps.forEach(c => { const w = CW * k, h = CW * c.h / c.w * k; sl.addImage({data: c.url, x: L + (CW - w) / 2, y, w, h}); y += h + gap; });
-      }
-    }
+    // หน้ารายละเอียด (ผลตอบแทน Drawdown ระยะเวลาถือครอง) แบบเดียวกับรายงานประจำเดือน
+    if (window.htmlToImage) for (const pg of detailPicked())
+      await withDetailSlide(r, pg, el => addDetailSlide(pptx, el, {}, lotusPNG));
     await pptx.writeFile({fileName: exportName('pptx')});
     exMsg('');
   }catch(e){ console.error(e); exMsg('สร้าง PowerPoint ไม่สำเร็จ: ' + (e.message || e)); }
