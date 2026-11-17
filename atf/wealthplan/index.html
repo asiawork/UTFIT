@@ -422,6 +422,7 @@ body.capturing .print-head.printonly{display:flex;padding:4px 2px 6px;background
 .s-head{position:absolute;left:44px;top:26px;right:30px;display:flex;align-items:center;gap:20px}
 .s-h1{font-family:var(--xb);font-weight:800;font-size:48px;color:var(--navy);letter-spacing:-.3px;line-height:1;padding-top:4px}
 .s-donut{position:absolute;left:28px;top:104px;width:500px;height:386px;overflow:visible}
+.s-donut-rep{position:absolute;left:0;top:0;width:1280px;height:720px;overflow:visible;pointer-events:none}
 .s-legend{position:absolute;left:28px;top:446px;width:500px;display:flex;justify-content:center;gap:18px;font-size:15px;font-weight:600;color:var(--navy)}
 .s-legend span{display:inline-flex;align-items:center;gap:6px}
 .s-legend i{width:11px;height:11px;display:inline-block}
@@ -1343,7 +1344,7 @@ function slideHTML(plan, r, opt = {}){
   const meta = planMeta(plan), en = opt.lang === 'en';
   const models = r.models;
   if (!models.length) return `<div class="s-msg">ใส่ % ของโมเดลในแผงด้านขวา</div>`;
-  const col = colorsFor(models, r.raw, opt.theme);
+  const RL = repLayout(plan, opt, models), col = RL ? REP_COL[plan.no][opt.theme === 'navy' ? 'navy' : 'white'] : colorsFor(models, r.raw, opt.theme);
   const dvT = en ? 'Div.' : 'ปันผล', dvB = en ? 'Dividend' : 'เงินปันผล', my = en ? enMonYear : thMonYear;
   const titleBlock = `<div class="s-title"><div class="n">${esc(meta.name)}</div>${meta.risk ? `<div class="r">- Risk Profile: ${esc(meta.risk)} -</div>` : ''}</div>`;
   if (Math.abs(r.sum-100) > 1e-6) return `<div class="s-msg">สัดส่วนรวม ${fmtNum(r.sum)}% — ต้องเท่ากับ 100% ถึงจะคำนวณได้</div>`;
@@ -1369,8 +1370,8 @@ function slideHTML(plan, r, opt = {}){
   const lotus = opt.theme === 'navy' ? BRAND.lotus.replace(/#C10230/g, '#ffffff') : BRAND.lotus;
   return `
     <div class="s-head"><span class="s-lotus">${lotus.replace('<svg ', '<svg style="height:62px;width:auto;display:block" ')}</span><span class="s-h1">${headTxt}</span></div>
-    <svg class="s-donut" viewBox="0 0 500 420" aria-label="สัดส่วนพอร์ต">${donut(models, r.raw, col, opt)}</svg>
-    <div class="s-legend">${models.map(m => `<span><i style="background:${col[m]}"></i>${m}</span>`).join('')}</div>
+    ${RL ? donutRep(models, r.raw, col, opt, RL) : `<svg class="s-donut" viewBox="0 0 500 420" aria-label="สัดส่วนพอร์ต">${donut(models, r.raw, col, opt)}</svg>
+    <div class="s-legend">${models.map(m => `<span><i style="background:${col[m]}"></i>${m}</span>`).join('')}</div>`}
     <div class="s-table">
       ${titleBlock}
       <table class="tbl ${models.length > 3 ? 'compact' : ''}">
@@ -1401,6 +1402,71 @@ function slideHTML(plan, r, opt = {}){
       <b>ผลการดำเนินงานย้อนหลัง</b> คำนวณจากข้อมูล ${thMonYear(r.start)} – ${thMonYear(r.end)} | <b>*1Y Rolling Return</b> แสดงผลข้อมูล ${p.rollStart ? thMonYear(p.rollStart) : '—'} – ${thMonYear(r.end)}<br>
       หมายเหตุ : ผลการดำเนินงานในอดีต มิได้เป็นสิ่งยืนยันถึงผลการดำเนินงานในอนาคต ผู้ลงทุนโปรดทำความเข้าใจลักษณะสินค้า เงื่อนไขผลตอบแทนและความเสี่ยง ก่อนตัดสินใจลงทุน`}
     </div>`;
+}
+
+/* รายงานประจำเดือน: วง pie และป้ายชื่อโมเดลวางตามไฟล์ PowerPoint ต้นฉบับของทีม (Private Exclusive Wealth Solution Plan)
+   ทีมใช้ Power Automate แปะจำนวนเงินตามตำแหน่งป้าย จึงต้องอยู่ที่เดิมทุกเดือนและเหมือนกันทั้ง 4 แบบ
+   หน่วย px บนสไลด์ 1280x720 frame = กรอบกราฟ, dl = ระยะเลื่อนป้าย % (สัดส่วนของกรอบ แบบ manualLayout ของ PowerPoint),
+   leg = ตำแหน่ง legend (สัดส่วนของกรอบ), name = กล่องชื่อโมเดล [x, y, w, จัดชิด] */
+const REP_LAYOUT = {
+  1: {frame: [-84.0, 82.05, 736.0, 429.26], leg: [0.34018, 0.85420, 0.31602, 0.07436],
+      dl: {FIXEDSP: [0.154602, 0.002453], FIXEDTDP: [-0.179455, -0.001535]},
+      name: {FIXEDTDP: [-16.94, 129.69, 144.8, 'r'], FIXEDSP: [381.74, 350.34, 144.8, 'r']}},
+  2: {frame: [-77.66, 86.58, 717.96, 418.74], leg: [0.27889, 0.85420, 0.44416, 0.07436],
+      dl: {FIXEDSP: [0.137888, -0.019836], FIXEDTDP: [-0.290417, 0.001571], MAA: [-0.142752, 0.074328], TCT: [-0.213567, -0.019105]},
+      name: {FIXEDSP: [357.48, 112.86, 144.8, 'r'], FIXEDTDP: [-10.98, 371.61, 144.8, 'r'], MAA: [-35.18, 190.44, 144.8, 'r'], TCT: [39.75, 105.22, 112.23, 'ctr']}},
+  3: {frame: [-73.39, 94.46, 708.22, 405.04], leg: [0.34320, 0.87262, 0.31360, 0.07142],
+      dl: {FIXEDTDP: [0.099762, -0.000408], DAA: [-0.177528, -0.001535], TCT: [-0.138883, -0.002655]},
+      name: {FIXEDTDP: [387.13, 203.57, 144.8, 'r'], DAA: [-60.79, 314.40, 144.8, 'r'], TCT: [31.22, 117.05, 144.8, 'r']}},
+  4: {frame: [-74.83, 98.90, 708.22, 405.04], leg: [0.34930, 0.84958, 0.30140, 0.07142],
+      dl: {FIXEDSP: [0.146828, -0.000408], MAA: [0.227244, -0.001535], TCT: [-0.150179, -0.002655]},
+      name: {TCT: [-46.13, 164.62, 144.8, 'r'], FIXEDSP: [363.67, 139.48, 144.8, 'r'], MAA: [363.67, 365.56, 144.8, 'r']}},
+  5: {frame: [-76.64, 98.90, 708.22, 405.04], leg: [0.42543, 0.84628, 0.16045, 0.07142],
+      dl: {AAA: [0.126119, -0.000408], TCT: [-0.139875, -0.001535]},
+      name: {TCT: [-66.09, 243.46, 144.8, 'r'], AAA: [380.86, 243.46, 144.8, 'r']}},
+};
+/* สีตามไฟล์ต้นฉบับ (navy = พื้นกรมท่า, white = พื้นขาว) */
+const REP_COL = {
+  1: {navy: {FIXEDSP: '#3b7bc2', FIXEDTDP: '#ffffff'}, white: {FIXEDSP: '#3b7bc2', FIXEDTDP: '#a4aebe'}},
+  2: {navy: {FIXEDSP: '#a4aebe', FIXEDTDP: '#3b7bc2', MAA: '#a6a6a6', TCT: '#ffffff'}, white: {FIXEDSP: '#a4aebe', FIXEDTDP: '#3b7bc2', MAA: '#2b4468', TCT: '#dceaf7'}},
+  3: {navy: {FIXEDTDP: '#a4aebe', DAA: '#3b7bc2', TCT: '#ffffff'}, white: {FIXEDTDP: '#a4aebe', DAA: '#3b7bc2', TCT: '#2b4468'}},
+  4: {navy: {FIXEDSP: '#a4aebe', MAA: '#3b7bc2', TCT: '#ffffff'}, white: {FIXEDSP: '#a4aebe', MAA: '#3b7bc2', TCT: '#2b4468'}},
+  5: {navy: {AAA: '#3b7bc2', TCT: '#ffffff'}, white: {AAA: '#3b7bc2', TCT: '#2b4468'}},
+};
+const REP_TEXT = {pv: [123.18, 201.18, 318.43], unit: [178.24, 305.37, 208.32]};
+const repLayout = (plan, opt, models) => opt.report && REP_LAYOUT[plan.no] && models.every(m => REP_LAYOUT[plan.no].dl[m]) ? REP_LAYOUT[plan.no] : null;
+/* วงและตำแหน่งป้ายตามที่ PowerPoint วาดจริง (วัดจากไฟล์ต้นฉบับ: กึ่งกลางกรอบ, cy = 45.4% ของความสูง, R = 36%, รู 75%) */
+function repGeom(L){
+  const [fx, fy, fw, fh] = L.frame;
+  return {cx: fx + fw / 2, cy: fy + 0.454 * fh, R: 0.36 * fh, r: 0.27 * fh};
+}
+function donutRep(models, raw, col, opt, L){
+  const nav = opt.theme === 'navy', ink = nav ? '#ffffff' : '#0e1c37', bg = nav ? '#0b1d42' : '#ffffff';
+  const {cx, cy, R, r} = repGeom(L), [fx, fy, fw, fh] = L.frame;
+  const total = models.reduce((a, m) => a + (+raw[m] || 0), 0);
+  let a0 = -Math.PI / 2, out = '';
+  const pt = (rad, a) => [cx + rad * Math.cos(a), cy + rad * Math.sin(a)];
+  models.forEach(m => {
+    const v = +raw[m] || 0; if (v <= 0) return;
+    const a1 = a0 + v / total * 2 * Math.PI, large = a1 - a0 > Math.PI ? 1 : 0;
+    const [x1,y1] = pt(R,a0), [x2,y2] = pt(R,a1), [x3,y3] = pt(r,a1), [x4,y4] = pt(r,a0);
+    out += `<path d="M${x1},${y1} A${R},${R} 0 ${large} 1 ${x2},${y2} L${x3},${y3} A${r},${r} 0 ${large} 0 ${x4},${y4}Z" fill="${col[m]}"/>`;
+    const am = (a0 + a1) / 2, [sx, sy] = pt((R + r) / 2, am), lx = sx + L.dl[m][0] * fw, ly = sy + L.dl[m][1] * fh;
+    if (Math.hypot(lx - sx, ly - sy) > 30){
+      const ex = lx + (lx < sx ? 24 : -24);
+      out += `<polyline points="${sx},${sy} ${ex},${ly}" fill="none" stroke="#9aa3b2" stroke-width="1"/>`;
+    }
+    out += `<text x="${lx}" y="${ly + 8}" text-anchor="middle" font-size="24" font-weight="700" fill="${ink}">${fmtNum(v)}%</text>`;
+    const [nx, ny, nw, al] = L.name[m];
+    out += al === 'ctr' ? `<text x="${nx + nw / 2}" y="${ny + 25}" text-anchor="middle" font-size="14" font-weight="700" fill="${ink}">${m}</text>`
+                        : `<text x="${nx + nw - 22.7}" y="${ny + 25}" text-anchor="end" font-size="14" font-weight="700" fill="${ink}">${m}</text>`;
+    a0 = a1;
+  });
+  const unit = opt.lang === 'en' ? 'THB Mn' : 'ล้านบาท';
+  out += `<text x="${REP_TEXT.pv[0] + REP_TEXT.pv[2] / 2}" y="${REP_TEXT.pv[1] + 25}" text-anchor="middle" font-size="18.7" font-weight="600" fill="${ink}">Portfolio Value</text>`;
+  out += `<text x="${REP_TEXT.unit[0] + REP_TEXT.unit[2] / 2}" y="${REP_TEXT.unit[1] + 31}" text-anchor="middle" font-size="24" font-weight="700" fill="${ink}">${unit}</text>`;
+  const lg = `<div class="s-legend" style="left:${fx + L.leg[0] * fw}px;top:${fy + L.leg[1] * fh}px;width:${L.leg[2] * fw}px;height:${L.leg[3] * fh}px;align-items:center;font-size:14px;gap:14px">${models.map(m => `<span><i style="background:${col[m]}"></i>${m}</span>`).join('')}</div>`;
+  return `<svg class="s-donut-rep" viewBox="0 0 1280 720" aria-label="สัดส่วนพอร์ต" style="background:${bg}00">${out}</svg>${lg}`;
 }
 
 function donut(models, raw, col, opt = {}){
@@ -1968,11 +2034,34 @@ function gradPNG(dir){
 /* สีทองของชื่อแผนบนหัวสไลด์กรมท่า PptxGenJS ใส่ gradient ให้ตัวหนังสือไม่ได้
    หน้ารายงานประจำเดือนจึงเปลี่ยนสีนี้เป็น gradFill ในไฟล์ที่สร้างเสร็จ (goldTextGradient) */
 const HL_GOLD = 'D9C79C';
-async function goldTextGradient(data, stops = {}){
+function repChartXML(c){
+  const n = c.ms.length, font = (sz, col) => `<a:defRPr sz="${sz}" b="0"><a:solidFill><a:srgbClr val="${col}"/></a:solidFill><a:latin typeface="BLS Bold"/><a:cs typeface="BLS Bold"/></a:defRPr>`;
+  const txPr = (sz) => `<c:txPr><a:bodyPr rot="0" spcFirstLastPara="1" vertOverflow="ellipsis" vert="horz" wrap="square" anchor="ctr" anchorCtr="1"><a:spAutoFit/></a:bodyPr><a:lstStyle/><a:p><a:pPr>${font(sz, c.ink)}</a:pPr><a:endParaRPr lang="th-TH"/></a:p></c:txPr>`;
+  const show = `<c:showLegendKey val="0"/><c:showVal val="1"/><c:showCatName val="0"/><c:showSerName val="0"/><c:showPercent val="0"/><c:showBubbleSize val="0"/>`;
+  const noLn = `<c:spPr><a:noFill/><a:ln><a:noFill/></a:ln></c:spPr>`;
+  return `<c:chart><c:autoTitleDeleted val="1"/><c:plotArea><c:layout/><c:doughnutChart><c:varyColors val="1"/><c:ser><c:idx val="0"/><c:order val="0"/>`
+    + `<c:tx><c:strRef><c:f>Sheet1!$B$1</c:f><c:strCache><c:ptCount val="1"/><c:pt idx="0"><c:v>Portfolio</c:v></c:pt></c:strCache></c:strRef></c:tx>`
+    + c.cols.map((col, i) => `<c:dPt><c:idx val="${i}"/><c:bubble3D val="0"/><c:spPr><a:solidFill><a:srgbClr val="${col}"/></a:solidFill><a:ln><a:noFill/></a:ln></c:spPr></c:dPt>`).join('')
+    + `<c:dLbls>` + c.dl.map(([x, y], i) => `<c:dLbl><c:idx val="${i}"/><c:layout><c:manualLayout><c:x val="${x}"/><c:y val="${y}"/></c:manualLayout></c:layout>${show}</c:dLbl>`).join('')
+    + `<c:numFmt formatCode="0%" sourceLinked="0"/>${noLn}${txPr(1800)}${show}<c:showLeaderLines val="1"/><c:leaderLines><c:spPr><a:ln w="9525"><a:solidFill><a:srgbClr val="9AA3B2"/></a:solidFill></a:ln></c:spPr></c:leaderLines></c:dLbls>`
+    + `<c:cat><c:strRef><c:f>Sheet1!$A$2:$A$${n + 1}</c:f><c:strCache><c:ptCount val="${n}"/>${c.ms.map((m, i) => `<c:pt idx="${i}"><c:v>${m}</c:v></c:pt>`).join('')}</c:strCache></c:strRef></c:cat>`
+    + `<c:val><c:numRef><c:f>Sheet1!$B$2:$B$${n + 1}</c:f><c:numCache><c:formatCode>0%</c:formatCode><c:ptCount val="${n}"/>${c.vals.map((v, i) => `<c:pt idx="${i}"><c:v>${v}</c:v></c:pt>`).join('')}</c:numCache></c:numRef></c:val>`
+    + `</c:ser><c:firstSliceAng val="0"/><c:holeSize val="75"/></c:doughnutChart>${noLn}</c:plotArea>`
+    + `<c:legend><c:legendPos val="b"/><c:layout><c:manualLayout><c:xMode val="edge"/><c:yMode val="edge"/><c:x val="${c.leg[0]}"/><c:y val="${c.leg[1]}"/><c:w val="${c.leg[2]}"/><c:h val="${c.leg[3]}"/></c:manualLayout></c:layout><c:overlay val="0"/>${noLn}${txPr(1050)}</c:legend>`
+    + `<c:plotVisOnly val="1"/><c:dispBlanksAs val="gap"/></c:chart>`;
+}
+async function goldTextGradient(data, stops = {}, charts = {}){
   // ไล่ซ้ายไปขวา ขาวไปทอง เฉพาะช่วงชื่อแผน (สัดส่วนในกล่องข้อความ เก็บไว้ตอน addPlanSlide)
   const zip = await JSZip.loadAsync(data);
   const names = Object.keys(zip.files).filter(n => /^ppt\/slides\/slide\d+\.xml$/.test(n));
   for (const n of names){
+    const c = charts[+n.match(/(\d+)\.xml$/)[1]];
+    if (c){   // กราฟ pie ของรายงานประจำเดือน: เขียนตามโครงของไฟล์ต้นฉบับ
+      const rels = await zip.file(n.replace('slides/', 'slides/_rels/') + '.rels').async('string');
+      const t = (rels.match(/Target="[^"]*\/charts\/(chart\d+\.xml)"/) || [])[1];
+      if (t){ const cp = 'ppt/charts/' + t, cx = await zip.file(cp).async('string');
+        zip.file(cp, cx.replace(/<c:chart>[\s\S]*<\/c:chart>/, () => repChartXML(c))); }
+    }
     const [a, b] = stops[+n.match(/(\d+)\.xml$/)[1]] || [0, 100000];
     const fill = `<a:gradFill rotWithShape="1"><a:gsLst><a:gs pos="${a}"><a:srgbClr val="FFFFFF"/></a:gs><a:gs pos="${b}"><a:srgbClr val="C9B282"/></a:gs></a:gsLst><a:lin ang="0" scaled="0"/></a:gradFill>`;
     const x = await zip.file(n).async('string');
@@ -1991,8 +2080,23 @@ async function addPlanSlide(pptx, slideEl, r, plan, opt = {}, lotusPNG){
     const LINE = gold ? GOLD : GREY, BAR = gold ? GOLD : NAVY, POS = gold ? '22C55E' : '16A34A', NEG = gold ? 'FF2D2D' : 'E3191B';
     const s = pptx.addSlide(opt.section ? {sectionTitle: opt.section} : undefined); s.background = {color: BG};
     const meta = planMeta(plan);
-    const col = colorsFor(r.models, r.raw, opt.theme);
+    const col = repLayout(plan, opt, r.models) ? REP_COL[plan.no][gold ? 'navy' : 'white'] : colorsFor(r.models, r.raw, opt.theme);
 
+    const RL = repLayout(plan, opt, r.models);
+    if (RL){
+      // รายงานประจำเดือน: กราฟและป้ายตามพิกัดไฟล์ต้นฉบับ (XML ของกราฟเขียนทับใน goldTextGradient)
+      const [fx, fy, fw, fh] = RL.frame, ms = r.models, ink = gold ? 'FFFFFF' : '0E1C37';
+      s.addChart(pptx.ChartType.doughnut, [{name: 'Portfolio', labels: ms, values: ms.map(m => +r.raw[m] / 100)}],
+        {x: IN(fx), y: IN(fy), w: IN(fw), h: IN(fh), holeSize: 75, showLegend: true, legendPos: 'b', chartColors: ms.map(m => hex(col[m]))});
+      (pptx._repChart = pptx._repChart || {})[s._slideNum] = {ms, vals: ms.map(m => +r.raw[m] / 100), cols: ms.map(m => hex(col[m])), ink,
+        dl: ms.map(m => RL.dl[m]), leg: RL.leg};
+      const tb = (t, [x, y, w], o) => s.addText(t, {x: IN(x), y: IN(y), w: IN(w), h: IN(o.h), margin: [0, o.rIns || 0, 2.835, 2.835], fit: 'resize', valign: 'top',
+        lineSpacingMultiple: 1.3, paraSpaceBefore: 10, fontFace: HF, fontSize: o.fs, bold: !!o.b, color: ink, align: o.al,
+        shadow: o.sh ? {type: 'outer', blur: 3, offset: 3, angle: 45, color: '000000', opacity: 0.43} : undefined});
+      ms.forEach(m => { const [x, y, w, al] = RL.name[m]; tb(m, [x, y, w], {h: 28.41, fs: 10.5, b: true, al: al === 'ctr' ? 'center' : 'right', rIns: al === 'ctr' ? 0 : 17}); });
+      tb('Portfolio Value', REP_TEXT.pv, {h: 35.34, fs: 14, al: 'center', sh: true});
+      tb(opt.lang === 'en' ? 'THB Mn' : 'ล้านบาท', REP_TEXT.unit, {h: 43.26, fs: 18, al: 'center', sh: true});
+    } else {
     // donut (editable chart) + labels from the on-screen layout
     // viewBox 500x420 ย่อแบบ meet ในกล่อง svg จึงต้องใช้สเกลเดียวกันและชดเชยระยะขอบ ไม่งั้นวงใหญ่เกินจนทับ legend
     const svg = slideEl.querySelector('.s-donut'), sb0 = box(svg), sx = Math.min(sb0.w / 500, sb0.h / 420);
@@ -2014,6 +2118,7 @@ async function addPlanSlide(pptx, slideEl, r, plan, opt = {}, lotusPNG){
       s.addText(tx.textContent, {x, y: b.y - 0.02, w, h: b.h + 0.04, margin: 0, fontFace: fs >= 22 ? HF : BF, fontSize: fs * 0.75, bold: +tx.getAttribute('font-weight') >= 600,
         color: hex(tx.getAttribute('fill')), align: anchor === 'end' ? 'right' : anchor === 'middle' ? 'center' : 'left', valign: 'middle'});
     });
+    }
     // slide heading (lotus + title)
     const sh = slideEl.querySelector('.s-head');
     if (sh){ const bl = box(sh.querySelector('.s-lotus svg')), bt = box(sh.querySelector('.s-h1'));
@@ -2023,8 +2128,8 @@ async function addPlanSlide(pptx, slideEl, r, plan, opt = {}, lotusPNG){
       if (hl && gold){ const hb = box(hl), W = bt.w + 0.6;
         (pptx._goldHL = pptx._goldHL || {})[s._slideNum] = [(hb.x - bt.x) / W, (hb.x + hb.w - bt.x) / W].map(v => Math.round(Math.min(1, Math.max(0, v)) * 100000)); }
       s.addText(parts, {x: bt.x, y: bt.y - 0.05, w: bt.w + 0.6, h: bt.h + 0.1, margin: 0, fontFace: XB, fontSize: 36, bold: false, color: INK, valign: 'middle'}); }
-    // legend
-    slideEl.querySelectorAll('.s-legend span').forEach(sp => {
+    // legend (รายงานประจำเดือนใช้ legend ในกราฟ)
+    if (!RL) slideEl.querySelectorAll('.s-legend span').forEach(sp => {
       const i = sp.querySelector('i'), bi = box(i), bs = box(sp);
       s.addShape(pptx.ShapeType.rect, {x: bi.x, y: bi.y, w: bi.w, h: bi.h, fill: {color: hex(i.style.background)}, line: {type: 'none'}});
       s.addText(sp.textContent.trim(), {x: bi.x + bi.w + 0.04, y: bs.y, w: bs.w, h: bs.h, margin: 0, fontFace: HF, fontSize: 11.25, bold: true, color: INK, valign: 'middle'});

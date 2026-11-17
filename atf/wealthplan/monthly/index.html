@@ -145,10 +145,10 @@ async function download(){
                    navy: await api.svgToPNG(api.BRAND.lotus.replace(/#C10230/g, '#ffffff'), 148, 200)};
     VERSIONS.forEach(v => pptx.addSection({title: v.label}));
     for (const it of ITEMS){
-      await api.addPlanSlide(pptx, it.el, it.r, it.p, {...it.v, section: it.v.label}, lotus[it.v.theme]);
+      await api.addPlanSlide(pptx, it.el, it.r, it.p, {...it.v, report: true, section: it.v.label}, lotus[it.v.theme]);
     }
     const end = ITEMS[0].r.end;
-    const blob = await api.goldTextGradient(await pptx.write({outputType: 'arraybuffer'}), pptx._goldHL);
+    const blob = await api.goldTextGradient(await pptx.write({outputType: 'arraybuffer'}), pptx._goldHL, pptx._repChart);
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
     a.download = `Wealth Solution Plan ข้อมูลถึง ${thDate(end)}.pptx`; document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 10000);
