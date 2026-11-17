@@ -2094,8 +2094,8 @@ async function addPlanSlide(pptx, slideEl, r, plan, opt = {}, lotusPNG){
         lineSpacingMultiple: 1.3, paraSpaceBefore: 10, fontFace: HF, fontSize: o.fs, bold: !!o.b, color: ink, align: o.al,
         shadow: o.sh ? {type: 'outer', blur: 3, offset: 3, angle: 45, color: '000000', opacity: 0.43} : undefined});
       ms.forEach(m => { const [x, y, w, al] = RL.name[m]; tb(m, [x, y, w], {h: 28.41, fs: 10.5, b: true, al: al === 'ctr' ? 'center' : 'right', rIns: al === 'ctr' ? 0 : 17}); });
-      tb('Portfolio Value', REP_TEXT.pv, {h: 35.34, fs: 14, al: 'center', sh: true});
-      tb(opt.lang === 'en' ? 'THB Mn' : 'ล้านบาท', REP_TEXT.unit, {h: 43.26, fs: 18, al: 'center', sh: true});
+      tb('Portfolio Value', REP_TEXT.pv, {h: 35.34, fs: 14, al: 'center'});
+      tb(opt.lang === 'en' ? 'THB Mn' : 'ล้านบาท', REP_TEXT.unit, {h: 43.26, fs: 18, al: 'center'});
       if (opt.amount > 0){
         // จำนวนเงินกลางวง และ (บาท) ใต้ป้าย % ของแต่ละโมเดล (ตำแหน่งป้ายตามที่ PowerPoint วาดจาก manualLayout)
         const {cx, cy, R, r: ri} = repGeom(RL), [, , fw, fh] = RL.frame, tot = ms.reduce((a, m) => a + +r.raw[m], 0);
