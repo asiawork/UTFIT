@@ -471,10 +471,12 @@ body.capturing .print-head.printonly{display:flex;padding:4px 2px 6px;background
 .dp-chart{display:block;background:#fff}
 .dp-chart svg{display:block;font-family:var(--body)}
 .dp-note{font-family:var(--body);font-size:13px;color:#333;line-height:1.45;padding:2px 16px 8px}
-.dp-tbl{width:100%;border-collapse:collapse;font-size:16px}
-.dp-tbl th{background:#e8ebf1;color:var(--navy);font-weight:600;font-size:14px;padding:8px 4px;line-height:1.2}
-.dp-tbl td{text-align:center;padding:0 4px;height:38px;border-bottom:1.5px solid #8b93a3;font-weight:700;font-variant-numeric:tabular-nums}
-.dp-tbl td:first-child{font-weight:600;color:var(--navy);white-space:nowrap;padding:0 8px}
+.dp-tbl{width:100%;border-collapse:collapse;font-size:15px}
+.dp-tbl th{background:#e8ebf1;color:var(--navy);font-weight:600;font-size:13px;padding:8px 8px;line-height:1.2}
+.dp-tbl td{text-align:center;padding:0 8px;height:38px;border-bottom:1px solid #d5d9e1;font-weight:700;font-variant-numeric:tabular-nums}
+.dp-tbl td:first-child{font-weight:600;color:var(--navy);white-space:nowrap;text-align:left;padding:0 8px 0 16px}
+.dp-tbl th:first-child{text-align:left;padding-left:16px}
+.dp-tbl tbody tr:nth-child(even) td{background:#f5f6f9}
 .dp-tbl tr:last-child td{border-bottom:0}
 .dp-stats{position:absolute;display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
 .dp-stat{border-bottom:4px solid var(--navy)}
@@ -2166,7 +2168,7 @@ function detailSlideHTML(plan, r, page, lang = 'th'){
       const d = pos + neg || 1; return {n: rows.length, pPos: pos / d, pNeg: neg / d, avg: sm / rows.length, mn, mx}; };
     const all = HOLD_ALL.map(([k, m]) => { const rows = holdingMonthly(pf, m); return {k, m, rows, st: sumOf(rows)}; }).filter(o => o.st);
     const cur = all.find(o => o.k === '1Y') || all[0];
-    const CW = 720, W = CW, H = 300, pad = {l: 60, r: 18, t: 16, b: 30};
+    const CW = 610, W = CW, H = 300, pad = {l: 60, r: 18, t: 16, b: 30};
     let chart = `<div class="dp-note" style="padding-top:12px">${T.noData}</div>`;
     if (cur){
       const rows = cur.rows, m = rows.length;
@@ -2227,11 +2229,12 @@ async function addDetailSlide(pptx, slideEl, opt = {}, lotusPNG){
     }
     const t = p.querySelector('table');
     if (t){
-      const tb = box(t), none = {type: 'none'}, thin = {type: 'solid', pt: 1, color: '8B93A3'}, trs = [...t.rows];
+      const tb = box(t), none = {type: 'none'}, thin = {type: 'solid', pt: 0.75, color: 'D5D9E1'}, trs = [...t.rows];
       const rows = trs.map((tr, ri) => [...tr.cells].map((c, ci) => ({text: c.textContent.trim(), options: ri === 0
-        ? {fill: {color: 'E8EBF1'}, color: NAVY, fontFace: HF, fontSize: pt(c), align: 'center', valign: 'middle', border: none}
-        : {color: ci === 0 ? NAVY : colOf(c), fontFace: HF, fontSize: pt(c), align: 'center', valign: 'middle', border: [none, none, ri < trs.length - 1 ? thin : none, none]}})));
-      s.addTable(rows, {x: tb.x, y: tb.y, w: tb.w, colW: [...trs[0].cells].map(c => box(c).w), rowH: trs.map(tr => box(tr).h), margin: 0.02, autoPage: false});
+        ? {fill: {color: 'E8EBF1'}, color: NAVY, fontFace: HF, fontSize: pt(c), align: ci === 0 ? 'left' : 'center', valign: 'middle', border: none}
+        : {color: ci === 0 ? NAVY : colOf(c), fontFace: HF, fontSize: pt(c), align: ci === 0 ? 'left' : 'center', valign: 'middle', border: [none, none, ri < trs.length - 1 ? thin : none, none],
+           fill: ri % 2 === 0 ? {color: 'F5F6F9'} : undefined}})));
+      s.addTable(rows, {x: tb.x, y: tb.y, w: tb.w, colW: [...trs[0].cells].map(c => box(c).w), rowH: trs.map(tr => box(tr).h), margin: [0, 0.06, 0, 0.14], autoPage: false});
     }
     for (const nEl of p.querySelectorAll('.dp-note')){ const nb = box(nEl), cs = getComputedStyle(nEl), pl = IN(parseFloat(cs.paddingLeft));
       s.addText(nEl.textContent.trim(), {x: nb.x + pl, y: nb.y, w: nb.w - 2 * pl, h: nb.h, margin: 0, fontFace: BF, fontSize: pt(nEl), color: '333333', valign: 'middle'}); }
