@@ -2086,7 +2086,7 @@ function dpYears(pf, xf){
 function detailSlideHTML(plan, r, page, lang = 'th'){
   const T = DT[lang] || DT.th, D = T.date, meta = planMeta(plan), pf = r.pf, n = pf.dates.length;
   const L = 44, PW = 1192, range = `${D(r.start)} – ${D(r.end)}`;
-  const head = `<div class="s-head dp"><span class="s-lotus">${BRAND.lotus.replace('<svg ', '<svg style="height:62px;width:auto;display:block" ')}</span><span class="s-h1">${T[page]}: Wealth Plan ${plan.no} ${esc(meta.name)}</span></div>`;
+  const head = `<div class="s-head dp"><span class="s-lotus">${BRAND.lotus.replace('<svg ', '<svg style="height:62px;width:auto;display:block" ')}</span><span class="s-h1">${T[page]}: Wealth Plan ${plan.no}</span></div>`;
   const recTxt = d => { const q = recLong(d); return q.v + ' ' + (q.u === 'months' ? T.mon : T.yr); };
   const svg = (W, H, body) => `<div class="dp-chart" style="width:${W}px;height:${H}px"><svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${body}</svg></div>`;
   let body = '';
@@ -2211,7 +2211,7 @@ async function addDetailSlide(pptx, slideEl, opt = {}, lotusPNG){
   const s = pptx.addSlide(opt.section ? {sectionTitle: opt.section} : undefined); s.background = {color: 'FFFFFF'};
   const bl = box(slideEl.querySelector('.s-lotus svg')), h1 = slideEl.querySelector('.s-h1'), bt = box(h1);
   s.addImage({data: lotusPNG, x: bl.x, y: bl.y, w: bl.w, h: bl.h});
-  s.addText(h1.textContent, {x: bt.x, y: bt.y - 0.05, w: bt.w + 0.6, h: bt.h + 0.1, margin: 0, fontFace: XB, fontSize: pt(h1), bold: false, color: NAVY, valign: 'middle'});
+  s.addText(h1.textContent, {x: bt.x, y: bt.y - 0.05, w: 13.333 - 0.35 - bt.x, h: bt.h + 0.1, margin: 0, fontFace: XB, fontSize: pt(h1), bold: false, color: NAVY, valign: 'middle'});
   const bar = (b, h) => s.addShape(pptx.ShapeType.rect, {x: b.x, y: b.y + b.h - IN(h), w: b.w, h: IN(h), fill: {color: NAVY}, line: {type: 'none'}});
   for (const p of slideEl.querySelectorAll('.dp-panel, .dp-stat')){
     const pb = box(p), h4 = p.querySelector('h4'), hb = box(h4), sp = h4.querySelector('span'), em = h4.querySelector('em');
