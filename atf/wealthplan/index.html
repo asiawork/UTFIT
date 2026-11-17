@@ -2069,6 +2069,7 @@ async function goldTextGradient(data, stops = {}, charts = {}){
   }
   return zip.generateAsync({type: 'blob', mimeType: 'application/vnd.openxmlformats-officedocument.presentationml.presentation'});
 }
+/* ใช้น้ำหนักจากชื่อฟอนต์ (BLS Bold, BLS ExtraBold, BLS Text Bold) ไม่กดตัวหนาซ้ำ เพราะตัวหนาจำลองของ PowerPoint ดูไม่สวย */
 async function addPlanSlide(pptx, slideEl, r, plan, opt = {}, lotusPNG){
     const k = slideEl.getBoundingClientRect().width / 1280;
     const IN = px => px / 96;
@@ -2091,7 +2092,7 @@ async function addPlanSlide(pptx, slideEl, r, plan, opt = {}, lotusPNG){
       (pptx._repChart = pptx._repChart || {})[s._slideNum] = {ms, vals: ms.map(m => +r.raw[m] / 100), cols: ms.map(m => hex(col[m])), ink,
         dl: ms.map(m => RL.dl[m]), leg: RL.leg};
       const tb = (t, [x, y, w], o) => s.addText(t, {x: IN(x), y: IN(y), w: IN(w), h: IN(o.h), margin: [0, o.rIns || 0, 2.835, 2.835], fit: 'resize', valign: 'top',
-        lineSpacingMultiple: 1.3, paraSpaceBefore: 10, fontFace: HF, fontSize: o.fs, bold: !!o.b, color: ink, align: o.al,
+        lineSpacingMultiple: 1.3, paraSpaceBefore: 10, fontFace: HF, fontSize: o.fs, bold: false, color: ink, align: o.al,
         shadow: o.sh ? {type: 'outer', blur: 3, offset: 3, angle: 45, color: '000000', opacity: 0.43} : undefined});
       ms.forEach(m => { const [x, y, w, al] = RL.name[m]; tb(m, [x, y, w], {h: 28.41, fs: 10.5, b: true, al: al === 'ctr' ? 'center' : 'right', rIns: al === 'ctr' ? 0 : 17}); });
       tb('Portfolio Value', REP_TEXT.pv, {h: 35.34, fs: 14, al: 'center'});
@@ -2100,7 +2101,7 @@ async function addPlanSlide(pptx, slideEl, r, plan, opt = {}, lotusPNG){
         // จำนวนเงินกลางวง และ (บาท) ใต้ป้าย % ของแต่ละโมเดล (ตำแหน่งป้ายตามที่ PowerPoint วาดจาก manualLayout)
         const {cx, cy, R, r: ri} = repGeom(RL), [, , fw, fh] = RL.frame, tot = ms.reduce((a, m) => a + +r.raw[m], 0);
         s.addText(fmtMoney(opt.amount), {x: IN(REP_TEXT.pv[0]), y: IN(244), w: IN(REP_TEXT.pv[2]), h: IN(52), margin: 0, align: 'center', valign: 'middle',
-          fontFace: HF, fontSize: 32, bold: true, color: ink});
+          fontFace: HF, fontSize: 32, bold: false, color: ink});
         let a0 = -Math.PI / 2;
         ms.forEach((m, i) => {
           const a1 = a0 + +r.raw[m] / tot * 2 * Math.PI, am = (a0 + a1) / 2; a0 = a1;
@@ -2129,7 +2130,7 @@ async function addPlanSlide(pptx, slideEl, r, plan, opt = {}, lotusPNG){
     svg.querySelectorAll('text').forEach(tx => {
       const b = box(tx), anchor = tx.getAttribute('text-anchor'), fs = +tx.getAttribute('font-size');
       const w = Math.max(b.w + 0.3, 1.4), x = anchor === 'end' ? b.x + b.w - w : anchor === 'middle' ? b.x + b.w / 2 - w / 2 : b.x;
-      s.addText(tx.textContent, {x, y: b.y - 0.02, w, h: b.h + 0.04, margin: 0, fontFace: fs >= 22 ? HF : BF, fontSize: fs * 0.75, bold: +tx.getAttribute('font-weight') >= 600,
+      s.addText(tx.textContent, {x, y: b.y - 0.02, w, h: b.h + 0.04, margin: 0, fontFace: fs >= 22 ? HF : +tx.getAttribute('font-weight') >= 600 ? 'BLS Text Bold' : BF, fontSize: fs * 0.75, bold: false,
         color: hex(tx.getAttribute('fill')), align: anchor === 'end' ? 'right' : anchor === 'middle' ? 'center' : 'left', valign: 'middle'});
     });
     }
@@ -2146,7 +2147,7 @@ async function addPlanSlide(pptx, slideEl, r, plan, opt = {}, lotusPNG){
     if (!RL) slideEl.querySelectorAll('.s-legend span').forEach(sp => {
       const i = sp.querySelector('i'), bi = box(i), bs = box(sp);
       s.addShape(pptx.ShapeType.rect, {x: bi.x, y: bi.y, w: bi.w, h: bi.h, fill: {color: hex(i.style.background)}, line: {type: 'none'}});
-      s.addText(sp.textContent.trim(), {x: bi.x + bi.w + 0.04, y: bs.y, w: bs.w, h: bs.h, margin: 0, fontFace: HF, fontSize: 11.25, bold: true, color: INK, valign: 'middle'});
+      s.addText(sp.textContent.trim(), {x: bi.x + bi.w + 0.04, y: bs.y, w: bs.w, h: bs.h, margin: 0, fontFace: HF, fontSize: 11.25, bold: false, color: INK, valign: 'middle'});
     });
     // title block
     const tb = box(slideEl.querySelector('.s-title'));
@@ -2158,7 +2159,7 @@ async function addPlanSlide(pptx, slideEl, r, plan, opt = {}, lotusPNG){
       {x: tb.x, y: tb.y, w: tb.w, h: tb.h, align: 'center', valign: 'middle', color: gold ? NAVY : 'FFFFFF', margin: 0});
     // table
     const tbl = slideEl.querySelector('.tbl'), tbB = box(tbl);
-    const hdr = {fill: {color: gold ? GOLD : NAVY}, color: gold ? NAVY : 'FFFFFF', bold: true, fontFace: HF, align: 'center', valign: 'middle', fontSize: 12, border: {type: 'none'}};
+    const hdr = {fill: {color: gold ? GOLD : NAVY}, color: gold ? NAVY : 'FFFFFF', bold: false, fontFace: HF, align: 'center', valign: 'middle', fontSize: 12, border: {type: 'none'}};
     const thin = {type: 'solid', pt: 1, color: LINE}, none = {type: 'none'}, thick = {type: 'solid', pt: 3, color: BAR};
     const rows = [[{text: 'Strategy', options: {...hdr, rowspan: 2}}, {text: 'Portfolio Model', options: {...hdr, rowspan: 2}},
                    {text: tbl.tHead.rows[0].cells[2].textContent.trim(), options: {...hdr, colspan: 4}}],
@@ -2172,9 +2173,9 @@ async function addPlanSlide(pptx, slideEl, r, plan, opt = {}, lotusPNG){
           border: [none, none, endsLast ? thick : thin, none]};
         if (td.classList.contains('strat')) row.push({text: td.innerText.trim(), options: {...base, fontSize: 11, rowspan: span}});
         else if (td.classList.contains('model')) row.push({text: [{text: '● ', options: {color: hex(td.querySelector('i').style.background), fontSize: 14}},
-                                                                     {text: td.textContent.trim(), options: {bold: true, fontFace: HF}}], options: {...base, align: 'left'}});
+                                                                     {text: td.textContent.trim(), options: {bold: false, fontFace: HF}}], options: {...base, align: 'left'}});
         else { const dv = td.querySelector('.dv'), c = td.classList.contains('pos') ? POS : td.classList.contains('neg') ? NEG : INK;
-          row.push({text: dv ? [{text: td.firstChild.textContent, options: {breakLine: true}}, {text: dv.textContent, options: {fontSize: 8, color: SUB, bold: false, fontFace: BF}}] : td.textContent.trim(), options: {...base, fontFace: HF, bold: true, color: c}}); }
+          row.push({text: dv ? [{text: td.firstChild.textContent, options: {breakLine: true}}, {text: dv.textContent, options: {fontSize: 8, color: SUB, bold: false, fontFace: BF}}] : td.textContent.trim(), options: {...base, fontFace: HF, bold: false, color: c}}); }
       });
       rows.push(row);
     });
@@ -2186,7 +2187,7 @@ async function addPlanSlide(pptx, slideEl, r, plan, opt = {}, lotusPNG){
       const h4 = box(bx.querySelector('h4')), bb = box(bx);
       if (gold) s.addImage({data: gradPNG('h'), x: h4.x, y: h4.y, w: h4.w, h: h4.h});
       else s.addShape(pptx.ShapeType.rect, {x: h4.x, y: h4.y, w: h4.w, h: h4.h, fill: {color: NAVY}, line: {type: 'none'}});
-      s.addText(bx.querySelector('h4').textContent.trim(), {x: h4.x, y: h4.y, w: h4.w, h: h4.h, margin: 0, fontFace: HF, fontSize: 13.5, bold: true, color: gold ? NAVY : 'FFFFFF', align: 'center', valign: 'middle'});
+      s.addText(bx.querySelector('h4').textContent.trim(), {x: h4.x, y: h4.y, w: h4.w, h: h4.h, margin: 0, fontFace: HF, fontSize: 13.5, bold: false, color: gold ? NAVY : 'FFFFFF', align: 'center', valign: 'middle'});
       bx.querySelectorAll('.brow').forEach((rw, i, all) => {
         const b = box(rw), kEl = rw.querySelector('.k'), vEl = rw.querySelector('.v'), kb = box(kEl), vb = box(vEl);
         s.addText(kEl.innerText.trim(), {x: kb.x, y: b.y, w: kb.w, h: b.h, margin: 0, fontFace: BF, fontSize: +getComputedStyle(kEl).fontSize.replace('px', '') * 0.75, color: INK, align: 'center', valign: 'middle'});
@@ -2194,7 +2195,7 @@ async function addPlanSlide(pptx, slideEl, r, plan, opt = {}, lotusPNG){
         const vc = vEl.classList.contains('pos') ? POS : vEl.classList.contains('neg') ? NEG : INK, vfs = +getComputedStyle(vEl).fontSize.replace('px', '') * 0.75;
         s.addText(u ? [{text: main, options: {fontSize: vfs}}, {text: ' ' + u.textContent, options: {fontSize: 12.75, bold: false, fontFace: BF}}]
                  : dv ? [{text: main, options: {fontSize: vfs, breakLine: true}}, {text: dv.textContent, options: {fontSize: 8, bold: false, fontFace: BF, color: SUB}}] : main,
-          {x: vb.x, y: b.y, w: vb.w, h: b.h, margin: 0, fontFace: HF, fontSize: vfs, bold: true, color: vc, align: 'center', valign: 'middle'});
+          {x: vb.x, y: b.y, w: vb.w, h: b.h, margin: 0, fontFace: HF, fontSize: vfs, bold: false, color: vc, align: 'center', valign: 'middle'});
         if (i < all.length - 1) s.addShape(pptx.ShapeType.line, {x: b.x, y: b.y + b.h, w: b.w, h: 0, line: {color: LINE, width: 1}});
       });
       s.addShape(pptx.ShapeType.rect, {x: bb.x, y: bb.y + bb.h - IN(4), w: bb.w, h: IN(4), fill: {color: BAR}, line: {type: 'none'}});
