@@ -2101,7 +2101,7 @@ async function addPlanSlide(pptx, slideEl, r, plan, opt = {}, lotusPNG){
         // จำนวนเงินกลางวง และ (บาท) ใต้ป้าย % ของแต่ละโมเดล (ตำแหน่งป้ายตามที่ PowerPoint วาดจาก manualLayout)
         const {cx, cy, R, r: ri} = repGeom(RL), [, , fw, fh] = RL.frame, tot = ms.reduce((a, m) => a + +r.raw[m], 0);
         s.addText(fmtMoney(opt.amount), {x: IN(REP_TEXT.pv[0]), y: IN(244), w: IN(REP_TEXT.pv[2]), h: IN(52), margin: 0, align: 'center', valign: 'middle',
-          fontFace: HF, fontSize: 32, bold: false, color: ink});
+          fontFace: XB, fontSize: 32, bold: false, color: ink});
         let a0 = -Math.PI / 2;
         ms.forEach((m, i) => {
           const a1 = a0 + +r.raw[m] / tot * 2 * Math.PI, am = (a0 + a1) / 2; a0 = a1;
@@ -2159,11 +2159,15 @@ async function addPlanSlide(pptx, slideEl, r, plan, opt = {}, lotusPNG){
       {x: tb.x, y: tb.y, w: tb.w, h: tb.h, align: 'center', valign: 'middle', color: gold ? NAVY : 'FFFFFF', margin: 0});
     // table
     const tbl = slideEl.querySelector('.tbl'), tbB = box(tbl);
-    const hdr = {fill: {color: gold ? GOLD : NAVY}, color: gold ? NAVY : 'FFFFFF', bold: false, fontFace: HF, align: 'center', valign: 'middle', fontSize: 12, border: {type: 'none'}};
+    // ขนาดตัวอักษรในตาราง: รายงานประจำเดือนใช้ขนาดตามไฟล์ต้นฉบับ (หัว 14/12 ชื่อโมเดล 14 ตัวเลข 16 Recovery 14)
+    const FS = opt.report ? {h1: 14, h1s: 12, h2: 12, strat: plan.no === 1 || plan.no === 5 ? 14 : 12, model: 14, num: 16, rec: 14}
+                          : {h1: 12, h1s: 12, h2: 11, strat: 11, model: 12, num: 12, rec: 12};
+    const hdr = {fill: {color: gold ? GOLD : NAVY}, color: gold ? NAVY : 'FFFFFF', bold: false, fontFace: HF, align: 'center', valign: 'middle', fontSize: FS.h1, border: {type: 'none'}};
+    const perf = tbl.tHead.rows[0].cells[2].textContent.trim(), pm = perf.match(/^(.*?)(\(.*\))$/);
     const thin = {type: 'solid', pt: 1, color: LINE}, none = {type: 'none'}, thick = {type: 'solid', pt: 3, color: BAR};
     const rows = [[{text: 'Strategy', options: {...hdr, rowspan: 2}}, {text: 'Portfolio Model', options: {...hdr, rowspan: 2}},
-                   {text: tbl.tHead.rows[0].cells[2].textContent.trim(), options: {...hdr, colspan: 4}}],
-                  [...tbl.tHead.rows[1].cells].map(c => ({text: c.innerText.trim(), options: {...hdr, fontSize: 11}}))];
+                   {text: pm ? [{text: pm[1], options: {fontSize: FS.h1}}, {text: pm[2], options: {fontSize: FS.h1s}}] : perf, options: {...hdr, colspan: 4}}],
+                  [...tbl.tHead.rows[1].cells].map(c => ({text: c.innerText.trim(), options: {...hdr, fontSize: FS.h2}}))];
     const body = [...tbl.tBodies[0].rows];
     body.forEach((tr, ri) => {
       const last = ri === body.length - 1, row = [];
@@ -2171,11 +2175,12 @@ async function addPlanSlide(pptx, slideEl, r, plan, opt = {}, lotusPNG){
         const span = +td.getAttribute('rowspan') || 1, endsLast = ri + span - 1 === body.length - 1;
         const base = {fontFace: BF, fontSize: 12, align: 'center', valign: 'middle', color: INK,
           border: [none, none, endsLast ? thick : thin, none]};
-        if (td.classList.contains('strat')) row.push({text: td.innerText.trim(), options: {...base, fontSize: 11, rowspan: span}});
+        if (td.classList.contains('strat')) row.push({text: td.innerText.trim(), options: {...base, fontSize: /With Yield/.test(td.textContent) ? Math.min(FS.strat, 11) : FS.strat, rowspan: span}});
         else if (td.classList.contains('model')) row.push({text: [{text: '● ', options: {color: hex(td.querySelector('i').style.background), fontSize: 14}},
-                                                                     {text: td.textContent.trim(), options: {bold: false, fontFace: HF}}], options: {...base, align: 'left'}});
+                                                                     {text: td.textContent.trim(), options: {bold: false, fontFace: HF}}], options: {...base, fontSize: FS.model, align: 'left'}});
         else { const dv = td.querySelector('.dv'), c = td.classList.contains('pos') ? POS : td.classList.contains('neg') ? NEG : INK;
-          row.push({text: dv ? [{text: td.firstChild.textContent, options: {breakLine: true}}, {text: dv.textContent, options: {fontSize: 8, color: SUB, bold: false, fontFace: BF}}] : td.textContent.trim(), options: {...base, fontFace: HF, bold: false, color: c}}); }
+          const isNum = td.classList.contains('pos') || td.classList.contains('neg');
+          row.push({text: dv ? [{text: td.firstChild.textContent, options: {breakLine: true}}, {text: dv.textContent, options: {fontSize: 8, color: SUB, bold: false, fontFace: BF}}] : td.textContent.trim(), options: {...base, fontSize: isNum || dv ? FS.num : FS.rec, fontFace: HF, bold: false, color: c}}); }
       });
       rows.push(row);
     });
