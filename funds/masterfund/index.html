@@ -150,7 +150,7 @@ const SUMMARY_URL = "../../atf/compare/data/summary.json";
 let MASTERS = new Map();   // name -> {name, tags, rows:[fund rows]}
 let FUNDS = [];            // แถวละกอง (รวม class)
 let SUM = {funds: {}};
-let BE_READY = true;
+let BE_READY = true, SD_READY = true;
 const ASSET = [["", "ทุกประเภท"], ["Equity", "หุ้น"], ["Fixed Income", "ตราสารหนี้"], ["Commodity", "ทองคำ/สินค้าโภคภัณฑ์"], ["Multi-Asset", "ผสม"], ["Real Estate", "อสังหาฯ"], ["Alternative", "ทางเลือก"]];
 const MGMT = [["", "ทุกกลยุทธ์"], ["Active", "Active"], ["Passive", "Passive"]];
 const FX = [["", "ทุกแบบ"], ["hedged", "ป้องกันทั้งหมด"], ["dynamic", "ดุลยพินิจ"], ["none", "ไม่ป้องกัน"]];
@@ -198,6 +198,7 @@ async function load() {
   const PEND = new Set(SUM.pending || []);
   // ค่าธรรมเนียมรับซื้อคืนเริ่มเก็บทีหลัง ถ้ายังไม่มีกองไหนมีค่าเลย แปลว่ายังดึงไม่ถึงรอบ
   BE_READY = Object.values(SUM.funds || {}).some(v => v[2] != null) || Object.values(SUM.classes || {}).some(v => v[1] != null);
+  SD_READY = Object.values(SUM.funds || {}).some(v => v[6] != null);
   const ckey = (pid, c) => { c = String(c || "").trim(); return pid + "|" + (["", "main", "none", "nan"].includes(c.toLowerCase()) ? "" : c.toUpperCase().replace(/[^A-Z0-9ก-๙]/g, "")); };
   const AMC = new Map(csvParse(amcT).map(r => [norm(r.name_th), r.abbr]));
   const amcOf = n => AMC.get(norm(n)) || AMC.get(norm(n) + " จำกัด") || norm(n).replace(/^บริษัทหลักทรัพย์จัดการกองทุน(รวม)?\s*/, "").replace(/\s*จำกัด.*$/, "");
@@ -214,7 +215,7 @@ async function load() {
     const names = cls.map(c => c.Search_Name || c.proj_abbr_name);
     const main = names.find(n => SUM.funds[n] && SUM.funds[n][0] != null) || names.find(n => SUM.funds[n]) || names[0];
     const r0 = cls.find(c => (c.Search_Name || c.proj_abbr_name) === main) || cls[0];
-    // [r1y, ขาย, รับซื้อคืน, การจัดการ, รวม, factsheet] จากกองในรายชื่อ ไม่งั้นใช้ค่าธรรมเนียมราย class (เช่นกองภาษี)
+    // [r1y, ขาย, รับซื้อคืน, การจัดการ, รวม, factsheet, sd1y] จากกองในรายชื่อ ไม่งั้นใช้ค่าธรรมเนียมราย class (เช่นกองภาษี)
     let s = SUM.funds[main];
     if (!s) { const c = cls.map(c => (SUM.classes || {})[ckey(c.proj_id, c.fund_class_name)]).find(Boolean); s = c ? [null, ...c] : [null, null, null, null, null, null]; }
     const status = s[0] != null ? "ok" : PEND.has(main) ? "pending" : SUM.funds[main] ? "nodata" : "tax";
@@ -224,7 +225,7 @@ async function load() {
       name: main, abbr: r0.proj_abbr_name, th: r0.proj_name_th, amc: amcOf(r0.comp_name_th),
       master: r0.Master_Fund_Search, mgmt: mg, fx: fxKind(r0.exchange_rate_protection_policy), fxFull: r0.exchange_rate_protection_policy || "",
       ncls: cls.length, ssf: cls.some(c => /SSF/.test(c.fund_class_tax_incentive_type || "")) || /RMF|SSF|ESG/.test(names.join(" ")),
-      r1y: s[0], fe: s[1], be: s[2], mg: s[3], ter: s[4], status, pid: r0.proj_id,
+      r1y: s[0], sd: s[6] ?? null, fe: s[1], be: s[2], mg: s[3], ter: s[4], status, pid: r0.proj_id,
       fs: s[5] || `https://secdocumentstorage.blob.core.windows.net/fundfactsheet/${r0.proj_id}.pdf`, asset: tag.asset || "",
     });
   }
@@ -334,6 +335,8 @@ const NO_R = {pending: ["กำลังดึงข้อมูล", "ระบ
 const cell = {
   r1y: f => f.r1y != null ? `<td class="n ${f.r1y >= 0 ? "pos" : "neg"}">${pct(f.r1y)}</td>`
     : `<td class="n"><span class="st ${f.status}" title="${NO_R[f.status][1]}">${NO_R[f.status][0]}</span></td>`,
+  sd: f => f.sd != null ? `<td class="n fee">${(+f.sd).toFixed(2)}</td>`
+    : f.r1y != null && !SD_READY ? `<td class="n"><span class="st pending" title="ระบบจะคำนวณ SD ในรอบดึง NAV ครั้งถัดไป">กำลังดึงข้อมูล</span></td>` : `<td class="n na">–</td>`,
   fee: (v, c = "") => v == null ? `<td class="n na ${c}">–</td>` : `<td class="n fee ${c}">${(+v).toFixed(2)}</td>`,
 };
 function sortFunds(arr) {
@@ -360,12 +363,12 @@ function renderResults() {
       <div class="sub2">${esc(f.amc)}${f.mgmt ? `<span>${f.mgmt}</span>` : ""}</div></td>
     ${ms.length > 1 ? `<td class="mcol"><button type="button" class="mlink" data-master="${esc(f.master)}" title="${esc(f.master)}">${esc(short(f.master))}</button></td>` : ""}
     <td><span class="pill ${FX_CLS[f.fx] || ""}" title="${esc(f.fxFull)}">${FX_LABEL[f.fx]}</span></td>
-    ${f.status === "tax" && f.fe == null && f.be == null && f.ter == null ? `<td colspan="4" class="taxspan">ระบบยังไม่ได้ดึงข้อมูลส่วนนี้ของกองภาษี</td>` : `${cell.r1y(f)}${cell.fee(f.fe)}${f.be == null && !BE_READY ? `<td class="n"><span class="st pending" title="ระบบจะดึงค่าธรรมเนียมรับซื้อคืนในรอบดึงข้อมูลแบบเต็มครั้งถัดไป">กำลังดึงข้อมูล</span></td>` : cell.fee(f.be)}${cell.fee(f.ter, "last ter")}`}
+    ${f.status === "tax" && f.fe == null && f.be == null && f.ter == null ? `<td colspan="5" class="taxspan">ระบบยังไม่ได้ดึงข้อมูลส่วนนี้ของกองภาษี</td>` : `${cell.r1y(f)}${cell.sd(f)}${cell.fee(f.fe)}${f.be == null && !BE_READY ? `<td class="n"><span class="st pending" title="ระบบจะดึงค่าธรรมเนียมรับซื้อคืนในรอบดึงข้อมูลแบบเต็มครั้งถัดไป">กำลังดึงข้อมูล</span></td>` : cell.fee(f.be)}${cell.fee(f.ter, "last ter")}`}
     <td class="fsc"><a class="fsl" href="${esc(f.fs)}" target="_blank" rel="noopener" title="เปิด Fund factsheet (PDF)" aria-label="Factsheet ${esc(f.name)}"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8l-5-5Z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/></svg></a></td></tr>`).join("");
   $("res").innerHTML = `<div class="rh"><div><h2>${esc(title)}</h2>
       <div class="ms">${ms.slice(0, 8).map(m => `<span>${esc(m.name)}</span>`).join("")}${ms.length > 8 ? `<span>อีก ${ms.length - 8}</span>` : ""}</div></div>
       <div class="ra"><span class="badge">${funds.length} กองไทย</span><a class="btn-p" id="cmp" aria-disabled="true">เทียบกองที่เลือก</a></div></div>
-    ${funds.length ? `<div class="tw"><table><thead><tr class="grp"><th colspan="${ms.length > 1 ? 5 : 4}"></th><th colspan="3" class="gh">ค่าธรรมเนียม (%)</th><th></th></tr><tr><th></th>${th("name", "กองทุน")}${ms.length > 1 ? th("master", "Master") : ""}${th("fx", "ค่าเงิน")}${th("r1y", "ผลตอบแทน 1Y", 1)}${th("fe", "ขาย", 1, "เก็บครั้งเดียวตอนซื้อ คิดเป็น % ของเงินที่ซื้อ (Front-end fee)")}${th("be", "รับซื้อคืน", 1, "เก็บครั้งเดียวตอนขายคืน คิดเป็น % ของเงินที่ขาย (Back-end fee)")}${th("ter", "รวมต่อปี", 1, "ค่าใช้จ่ายรวมที่เก็บจากกองทุนทุกปี (การจัดการ ผู้ดูแลผลประโยชน์ นายทะเบียน และอื่น ๆ) คิดเป็น % ต่อปีของ NAV (Total Expense Ratio)")}<th></th></tr></thead>
+    ${funds.length ? `<div class="tw"><table><thead><tr class="grp"><th colspan="${ms.length > 1 ? 6 : 5}"></th><th colspan="3" class="gh">ค่าธรรมเนียม (%)</th><th></th></tr><tr><th></th>${th("name", "กองทุน")}${ms.length > 1 ? th("master", "Master") : ""}${th("fx", "ค่าเงิน")}${th("r1y", "ผลตอบแทน 1Y", 1)}${th("sd", "SD 1Y", 1, "ความผันผวนของผลตอบแทนย้อนหลัง 1 ปี คิดเป็น % ต่อปี (Standard Deviation) ยิ่งสูง ราคายิ่งขึ้นลงแรง")}${th("fe", "ขาย", 1, "เก็บครั้งเดียวตอนซื้อ คิดเป็น % ของเงินที่ซื้อ (Front-end fee)")}${th("be", "รับซื้อคืน", 1, "เก็บครั้งเดียวตอนขายคืน คิดเป็น % ของเงินที่ขาย (Back-end fee)")}${th("ter", "รวมต่อปี", 1, "ค่าใช้จ่ายรวมที่เก็บจากกองทุนทุกปี (การจัดการ ผู้ดูแลผลประโยชน์ นายทะเบียน และอื่น ๆ) คิดเป็น % ต่อปีของ NAV (Total Expense Ratio)")}<th></th></tr></thead>
       <tbody>${rows}</tbody></table></div>` : `<div class="empty">ไม่มีกองที่ตรงกับตัวกรอง</div>`}
     <div class="rf"><span>${funds.length > S.show ? `<button class="more" id="more">แสดงเพิ่ม</button> ` : ""}แสดง ${Math.min(S.show, funds.length)} จาก ${funds.length} กอง</span>
 </div>`;

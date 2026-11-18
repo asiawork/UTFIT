@@ -351,9 +351,20 @@ def fee_row(x):
             fs[0]]
 
 
+def sd_annual(vals, days):
+    """SD ต่อปี (%) ของผลตอบแทนรายวัน ปรับเป็นรายปีด้วยจำนวนวันที่มี NAV จริงต่อปี (กองที่ประกาศ NAV ไม่ทุกวันก็คิดถูก)"""
+    rets = [b / a - 1 for a, b in zip(vals, vals[1:]) if a and b]
+    span = (days[-1] - days[0]).days
+    if len(rets) < 20 or span <= 0:
+        return None
+    m = sum(rets) / len(rets)
+    var = sum((r - m) ** 2 for r in rets) / (len(rets) - 1)
+    return round((var * len(rets) * 365 / span) ** 0.5 * 100, 2)
+
+
 def summarize(packed, x):
-    """[ผลตอบแทนย้อนหลัง 1 ปี (%), ค่าใช้จ่ายรวมจริงตาม factsheet (%)]"""
-    r1y = None
+    """[ผลตอบแทนย้อนหลัง 1 ปี (%), ค่าใช้จ่ายรวมจริงตาม factsheet (%), SD 1 ปีต่อปี (%)]"""
+    r1y = sd1y = None
     if packed.get("s") and packed.get("v"):
         d = date.fromisoformat(packed["s"]); days = [d]
         for g in packed["dd"]:
@@ -363,27 +374,29 @@ def summarize(packed, x):
             i = max(k for k, dd in enumerate(days) if dd <= target)
             if packed["v"][i]:
                 r1y = round((packed["v"][-1] / packed["v"][i] - 1) * 100, 2)
+                sd1y = sd_annual(packed["v"][i:], days[i:])
     ter = None
     for k, v in ((x or {}).get("fees") or {}).items():
         if "Total" in k and isinstance(v, dict):
             ter = v.get("actual") if v.get("actual") is not None else v.get("rate")
-    return [r1y, ter]
+    return [r1y, ter, sd1y]
 
 
 def write_summary(funds, pending, nav_to):
     """atf/compare/data/summary.json: ผลตอบแทน 1 ปี + ค่าธรรมเนียม + factsheet
-    funds: ชื่อกอง -> [r1y, ขาย, รับซื้อคืน, การจัดการ, รวม, factsheet] (กองในรายชื่อ)
+    funds: ชื่อกอง -> [r1y, ขาย, รับซื้อคืน, การจัดการ, รวม, factsheet, sd1y] (กองในรายชื่อ)
     classes: proj_id|class -> [ขาย, รับซื้อคืน, การจัดการ, รวม, factsheet] (class ที่ไม่อยู่ในรายชื่อ เช่นกองภาษี)
     pending: กองที่ยังดึง NAV ย้อนหลังไม่ครบ"""
     out = {}
     for f in funds:
-        out[f["name"]] = [SUMMARY.get(f["name"])] + fee_row(f.get("x"))
+        r1y, sd1y = SUMMARY.get(f["name"]) or (None, None)
+        out[f["name"]] = [r1y] + fee_row(f.get("x")) + [sd1y]
     classes = json.loads(EXTRAS_ALL_PATH.read_text()) if EXTRAS_ALL_PATH.exists() else {}
     for f in funds:                                   # กองในรายชื่อหาจากชื่อได้แล้ว ไม่ต้องซ้ำ
         i = f["info"]
         classes.pop(ckey(i["proj_id"], i["fund_class_name"]), None)
     (OUT / "summary.json").write_text(json.dumps({
-        "nav_to": nav_to, "cols": ["r1y", "fe", "be", "mg", "ter", "fs"], "funds": out,
+        "nav_to": nav_to, "cols": ["r1y", "fe", "be", "mg", "ter", "fs", "sd1y"], "funds": out,
         "classes": classes, "pending": sorted(pending)}, ensure_ascii=False, separators=(",", ":")))
 
 
@@ -585,7 +598,8 @@ def main():
         if k in AUM:
             x["aum"] = AUM[k]
         f["_s"], f["_e"] = packed["s"], days[-1].isoformat() if days else None
-        SUMMARY[f["name"]] = summarize(packed, x)[0]
+        r = summarize(packed, x)
+        SUMMARY[f["name"]] = (r[0], r[2])
         (FUND_OUT / f"{fn.slug(f['name'])}.json").write_text(json.dumps(
             {"name": f["name"], "group": f["group"], "risk": f.get("risk"), "info": info, "sec": f.get("sec") or {},
              "x": x, "warning": warn, **packed}, ensure_ascii=False, separators=(",", ":")))
