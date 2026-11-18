@@ -49,6 +49,9 @@
   .seg{display:flex;flex-wrap:wrap;background:var(--p-50);border-radius:13px;padding:4px}
   .seg button{font:inherit;font-size:14px;border:0;background:none;color:var(--ink-2);padding:6px 13px;border-radius:10px;cursor:pointer}
   .seg button[aria-pressed=true]{background:var(--card);color:var(--ink);font-weight:600;box-shadow:0 1px 3px rgba(15,26,60,.12)}
+  .seg.sm{display:inline-flex;flex-wrap:nowrap;border-radius:10px;padding:3px}
+  .seg.sm button{font-size:12.5px;padding:3px 10px;border-radius:8px}
+  th.per{padding-bottom:6px}
 
   /* ผลลัพธ์ */
   .res{margin-top:22px;background:var(--card);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);padding:26px 28px}
@@ -150,7 +153,10 @@ const SUMMARY_URL = "../../atf/compare/data/summary.json";
 let MASTERS = new Map();   // name -> {name, tags, rows:[fund rows]}
 let FUNDS = [];            // แถวละกอง (รวม class)
 let SUM = {funds: {}};
-let BE_READY = true, SD_READY = true;
+let BE_READY = true;
+const PER = [["YTD", "YTD"], ["1Y", "1Y"], ["3Y", "3Y"]];
+const PER_COL = {"1Y": [0, 6], YTD: [7, 8], "3Y": [9, 10]};   // ตำแหน่ง [ผลตอบแทน, SD] ในแถว summary.json
+let READY = {};                                             // ช่วงเวลาที่มีข้อมูลแล้ว (ยังไม่ถึงรอบคำนวณ = กำลังดึงข้อมูล)
 const ASSET = [["", "ทุกประเภท"], ["Equity", "หุ้น"], ["Fixed Income", "ตราสารหนี้"], ["Commodity", "ทองคำ/สินค้าโภคภัณฑ์"], ["Multi-Asset", "ผสม"], ["Real Estate", "อสังหาฯ"], ["Alternative", "ทางเลือก"]];
 const MGMT = [["", "ทุกกลยุทธ์"], ["Active", "Active"], ["Passive", "Passive"]];
 const FX = [["", "ทุกแบบ"], ["hedged", "ป้องกันทั้งหมด"], ["dynamic", "ดุลยพินิจ"], ["none", "ไม่ป้องกัน"]];
@@ -198,7 +204,7 @@ async function load() {
   const PEND = new Set(SUM.pending || []);
   // ค่าธรรมเนียมรับซื้อคืนเริ่มเก็บทีหลัง ถ้ายังไม่มีกองไหนมีค่าเลย แปลว่ายังดึงไม่ถึงรอบ
   BE_READY = Object.values(SUM.funds || {}).some(v => v[2] != null) || Object.values(SUM.classes || {}).some(v => v[1] != null);
-  SD_READY = Object.values(SUM.funds || {}).some(v => v[6] != null);
+  for (const [p, [ri, si]] of Object.entries(PER_COL)) READY[p] = {r: Object.values(SUM.funds || {}).some(v => v[ri] != null), sd: Object.values(SUM.funds || {}).some(v => v[si] != null)};
   const ckey = (pid, c) => { c = String(c || "").trim(); return pid + "|" + (["", "main", "none", "nan"].includes(c.toLowerCase()) ? "" : c.toUpperCase().replace(/[^A-Z0-9ก-๙]/g, "")); };
   const AMC = new Map(csvParse(amcT).map(r => [norm(r.name_th), r.abbr]));
   const amcOf = n => AMC.get(norm(n)) || AMC.get(norm(n) + " จำกัด") || norm(n).replace(/^บริษัทหลักทรัพย์จัดการกองทุน(รวม)?\s*/, "").replace(/\s*จำกัด.*$/, "");
@@ -215,7 +221,7 @@ async function load() {
     const names = cls.map(c => c.Search_Name || c.proj_abbr_name);
     const main = names.find(n => SUM.funds[n] && SUM.funds[n][0] != null) || names.find(n => SUM.funds[n]) || names[0];
     const r0 = cls.find(c => (c.Search_Name || c.proj_abbr_name) === main) || cls[0];
-    // [r1y, ขาย, รับซื้อคืน, การจัดการ, รวม, factsheet, sd1y] จากกองในรายชื่อ ไม่งั้นใช้ค่าธรรมเนียมราย class (เช่นกองภาษี)
+    // [r1y, ขาย, รับซื้อคืน, การจัดการ, รวม, factsheet, sd1y, ytd, sdytd, r3y, sd3y] จากกองในรายชื่อ ไม่งั้นใช้ค่าธรรมเนียมราย class (เช่นกองภาษี)
     let s = SUM.funds[main];
     if (!s) { const c = cls.map(c => (SUM.classes || {})[ckey(c.proj_id, c.fund_class_name)]).find(Boolean); s = c ? [null, ...c] : [null, null, null, null, null, null]; }
     const status = s[0] != null ? "ok" : PEND.has(main) ? "pending" : SUM.funds[main] ? "nodata" : "tax";
@@ -225,7 +231,7 @@ async function load() {
       name: main, abbr: r0.proj_abbr_name, th: r0.proj_name_th, amc: amcOf(r0.comp_name_th),
       master: r0.Master_Fund_Search, mgmt: mg, fx: fxKind(r0.exchange_rate_protection_policy), fxFull: r0.exchange_rate_protection_policy || "",
       ncls: cls.length, ssf: cls.some(c => /SSF/.test(c.fund_class_tax_incentive_type || "")) || /RMF|SSF|ESG/.test(names.join(" ")),
-      r1y: s[0], sd: s[6] ?? null, fe: s[1], be: s[2], mg: s[3], ter: s[4], status, pid: r0.proj_id,
+      perf: Object.fromEntries(Object.entries(PER_COL).map(([p, [ri, si]]) => [p, [s[ri] ?? null, s[si] ?? null]])), fe: s[1], be: s[2], mg: s[3], ter: s[4], status, pid: r0.proj_id,
       fs: s[5] || `https://secdocumentstorage.blob.core.windows.net/fundfactsheet/${r0.proj_id}.pdf`, asset: tag.asset || "",
     });
   }
@@ -238,7 +244,7 @@ async function load() {
 }
 
 /* ---------- สถานะ ---------- */
-const S = {toks: [], asset: "", mgmt: "", fx: "", sort: {k: "r1y", asc: false}, picked: new Set(), show: 30, msort: "n"};
+const S = {toks: [], asset: "", mgmt: "", fx: "", sort: {k: "ret", asc: false}, per: "1Y", picked: new Set(), show: 30, msort: "n"};
 const listOf = (tag, k) => String(tag[k] || "").split(";").map(x => x.trim()).filter(Boolean);
 function masterMatches(m, t) {
   const g = m.tags;
@@ -331,12 +337,15 @@ function renderQuick() {
 }
 $("quick").addEventListener("click", e => { const b = e.target.closest("button[data-i]"); if (b) addTok(QUICK[+b.dataset.i]); });
 
-const NO_R = {pending: ["กำลังดึงข้อมูล", "ระบบกำลังทยอยดึง NAV ย้อนหลังของกองนี้"], tax: ["กองภาษี", "ระบบยังไม่ดึงข้อมูลกองภาษี (RMF/SSF/ThaiESG)"], nodata: ["ไม่มีข้อมูล", "ยังมี NAV ไม่ถึง 1 ปี หรือ SEC ไม่มีข้อมูล"]};
+const NO_R = {pending: ["กำลังดึงข้อมูล", "ระบบกำลังทยอยดึง NAV ย้อนหลังของกองนี้"], tax: ["กองภาษี", "ระบบยังไม่ดึงข้อมูลกองภาษี (RMF/SSF/ThaiESG)"], nodata: ["ไม่มีข้อมูล", "ยังมี NAV ไม่ครบช่วงนี้ หรือ SEC ไม่มีข้อมูล"]};
+const PER_TH = {YTD: "ตั้งแต่ต้นปี", "1Y": "ย้อนหลัง 1 ปี", "3Y": "ย้อนหลัง 3 ปี คิดเป็นต่อปี"};
+const WAIT = "<span class=\"st pending\" title=\"ระบบจะคำนวณในรอบดึง NAV ครั้งถัดไป\">กำลังดึงข้อมูล</span>";
 const cell = {
-  r1y: f => f.r1y != null ? `<td class="n ${f.r1y >= 0 ? "pos" : "neg"}">${pct(f.r1y)}</td>`
-    : `<td class="n"><span class="st ${f.status}" title="${NO_R[f.status][1]}">${NO_R[f.status][0]}</span></td>`,
+  ret: f => f.ret != null ? `<td class="n ${f.ret >= 0 ? "pos" : "neg"}">${pct(f.ret)}</td>`
+    : f.status === "ok" && !READY[S.per].r ? `<td class="n">${WAIT}</td>`
+    : (st => `<td class="n"><span class="st ${st}" title="${NO_R[st][1]}">${NO_R[st][0]}</span></td>`)(f.status === "ok" ? "nodata" : f.status),
   sd: f => f.sd != null ? `<td class="n fee">${(+f.sd).toFixed(2)}</td>`
-    : f.r1y != null && !SD_READY ? `<td class="n"><span class="st pending" title="ระบบจะคำนวณ SD ในรอบดึง NAV ครั้งถัดไป">กำลังดึงข้อมูล</span></td>` : `<td class="n na">–</td>`,
+    : f.ret != null && !READY[S.per].sd ? `<td class="n">${WAIT}</td>` : `<td class="n na">–</td>`,
   fee: (v, c = "") => v == null ? `<td class="n na ${c}">–</td>` : `<td class="n fee ${c}">${(+v).toFixed(2)}</td>`,
 };
 function sortFunds(arr) {
@@ -352,6 +361,7 @@ function th(k, t, n, tip) { const on = S.sort.k === k; return `<th data-k="${k}"
 
 function renderResults() {
   const ms = selMasters();
+  for (const f of FUNDS) [f.ret, f.sd] = f.perf[S.per];
   const funds = sortFunds(ms.flatMap(m => m.funds).filter(passFilters));
   const kinds = [...new Set(S.toks.map(t => t.kind))];
   const title = kinds.map(k => { const ts = S.toks.filter(t => t.kind === k);
@@ -363,12 +373,12 @@ function renderResults() {
       <div class="sub2">${esc(f.amc)}${f.mgmt ? `<span>${f.mgmt}</span>` : ""}</div></td>
     ${ms.length > 1 ? `<td class="mcol"><button type="button" class="mlink" data-master="${esc(f.master)}" title="${esc(f.master)}">${esc(short(f.master))}</button></td>` : ""}
     <td><span class="pill ${FX_CLS[f.fx] || ""}" title="${esc(f.fxFull)}">${FX_LABEL[f.fx]}</span></td>
-    ${f.status === "tax" && f.fe == null && f.be == null && f.ter == null ? `<td colspan="5" class="taxspan">ระบบยังไม่ได้ดึงข้อมูลส่วนนี้ของกองภาษี</td>` : `${cell.r1y(f)}${cell.sd(f)}${cell.fee(f.fe)}${f.be == null && !BE_READY ? `<td class="n"><span class="st pending" title="ระบบจะดึงค่าธรรมเนียมรับซื้อคืนในรอบดึงข้อมูลแบบเต็มครั้งถัดไป">กำลังดึงข้อมูล</span></td>` : cell.fee(f.be)}${cell.fee(f.ter, "last ter")}`}
+    ${f.status === "tax" && f.fe == null && f.be == null && f.ter == null ? `<td colspan="5" class="taxspan">ระบบยังไม่ได้ดึงข้อมูลส่วนนี้ของกองภาษี</td>` : `${cell.ret(f)}${cell.sd(f)}${cell.fee(f.fe)}${f.be == null && !BE_READY ? `<td class="n"><span class="st pending" title="ระบบจะดึงค่าธรรมเนียมรับซื้อคืนในรอบดึงข้อมูลแบบเต็มครั้งถัดไป">กำลังดึงข้อมูล</span></td>` : cell.fee(f.be)}${cell.fee(f.ter, "last ter")}`}
     <td class="fsc"><a class="fsl" href="${esc(f.fs)}" target="_blank" rel="noopener" title="เปิด Fund factsheet (PDF)" aria-label="Factsheet ${esc(f.name)}"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8l-5-5Z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/></svg></a></td></tr>`).join("");
   $("res").innerHTML = `<div class="rh"><div><h2>${esc(title)}</h2>
       <div class="ms">${ms.slice(0, 8).map(m => `<span>${esc(m.name)}</span>`).join("")}${ms.length > 8 ? `<span>อีก ${ms.length - 8}</span>` : ""}</div></div>
       <div class="ra"><span class="badge">${funds.length} กองไทย</span><a class="btn-p" id="cmp" aria-disabled="true">เทียบกองที่เลือก</a></div></div>
-    ${funds.length ? `<div class="tw"><table><thead><tr class="grp"><th colspan="${ms.length > 1 ? 6 : 5}"></th><th colspan="3" class="gh">ค่าธรรมเนียม (%)</th><th></th></tr><tr><th></th>${th("name", "กองทุน")}${ms.length > 1 ? th("master", "Master") : ""}${th("fx", "ค่าเงิน")}${th("r1y", "ผลตอบแทน 1Y", 1)}${th("sd", "SD 1Y", 1, "ความผันผวนของผลตอบแทนย้อนหลัง 1 ปี คิดเป็น % ต่อปี (Standard Deviation) ยิ่งสูง ราคายิ่งขึ้นลงแรง")}${th("fe", "ขาย", 1, "เก็บครั้งเดียวตอนซื้อ คิดเป็น % ของเงินที่ซื้อ (Front-end fee)")}${th("be", "รับซื้อคืน", 1, "เก็บครั้งเดียวตอนขายคืน คิดเป็น % ของเงินที่ขาย (Back-end fee)")}${th("ter", "รวมต่อปี", 1, "ค่าใช้จ่ายรวมที่เก็บจากกองทุนทุกปี (การจัดการ ผู้ดูแลผลประโยชน์ นายทะเบียน และอื่น ๆ) คิดเป็น % ต่อปีของ NAV (Total Expense Ratio)")}<th></th></tr></thead>
+    ${funds.length ? `<div class="tw"><table><thead><tr class="grp"><th colspan="${ms.length > 1 ? 4 : 3}"></th><th colspan="2" class="gh per"><div class="seg sm" id="per">${PER.map(([v, l]) => `<button type="button" data-per="${v}" aria-pressed="${S.per === v}">${l}</button>`).join("")}</div></th><th colspan="3" class="gh">ค่าธรรมเนียม (%)</th><th></th></tr><tr><th></th>${th("name", "กองทุน")}${ms.length > 1 ? th("master", "Master") : ""}${th("fx", "ค่าเงิน")}${th("ret", S.per === "3Y" ? "ผลตอบแทน 3Y ต่อปี" : "ผลตอบแทน " + S.per, 1, "ผลตอบแทน" + PER_TH[S.per] + " คำนวณจาก NAV")}${th("sd", "SD " + S.per, 1, "ความผันผวนของผลตอบแทน" + PER_TH[S.per].replace(" คิดเป็นต่อปี", "") + " คิดเป็น % ต่อปี (Standard Deviation) ยิ่งสูง ราคายิ่งขึ้นลงแรง")}${th("fe", "ขาย", 1, "เก็บครั้งเดียวตอนซื้อ คิดเป็น % ของเงินที่ซื้อ (Front-end fee)")}${th("be", "รับซื้อคืน", 1, "เก็บครั้งเดียวตอนขายคืน คิดเป็น % ของเงินที่ขาย (Back-end fee)")}${th("ter", "รวมต่อปี", 1, "ค่าใช้จ่ายรวมที่เก็บจากกองทุนทุกปี (การจัดการ ผู้ดูแลผลประโยชน์ นายทะเบียน และอื่น ๆ) คิดเป็น % ต่อปีของ NAV (Total Expense Ratio)")}<th></th></tr></thead>
       <tbody>${rows}</tbody></table></div>` : `<div class="empty">ไม่มีกองที่ตรงกับตัวกรอง</div>`}
     <div class="rf"><span>${funds.length > S.show ? `<button class="more" id="more">แสดงเพิ่ม</button> ` : ""}แสดง ${Math.min(S.show, funds.length)} จาก ${funds.length} กอง</span>
 </div>`;
@@ -389,13 +399,15 @@ function renderMasterList() {
 function updCmp() {
   const a = $("cmp"); if (!a) return;
   const names = [...S.picked].slice(0, 8);
-  a.href = "../../atf/compare/#f=" + names.map(encodeURIComponent).join("|") + "&q=1Y";
+  a.href = "../../atf/compare/#f=" + names.map(encodeURIComponent).join("|") + "&q=" + S.per;
   a.setAttribute("aria-disabled", names.length ? "false" : "true");
   a.textContent = "เทียบกองที่เลือก" + (names.length ? ` (${names.length})` : "");
 }
 $("res").addEventListener("click", e => {
   const h = e.target.closest("th[data-k]");
-  if (h) { const k = h.dataset.k; S.sort = {k, asc: S.sort.k === k ? !S.sort.asc : !["r1y"].includes(k)}; renderResults(); return; }
+  if (h) { const k = h.dataset.k; S.sort = {k, asc: S.sort.k === k ? !S.sort.asc : !["ret"].includes(k)}; renderResults(); return; }
+  const pb = e.target.closest("button[data-per]");
+  if (pb) { S.per = pb.dataset.per; renderResults(); return; }
   if (e.target.id === "more") { S.show += 50; render(); return; }
   const ml = e.target.closest("button[data-master]");
   if (ml) { S.toks = [{kind: "master", v: ml.dataset.master}]; S.focus = null; S.show = 200; render(); window.scrollTo({top: 0, behavior: "smooth"}); return; }

@@ -326,6 +326,7 @@ def save_fetched():
 
 
 SUMMARY = {}
+PERF_COLS = ["r1y", "sd1y", "ytd", "sdytd", "r3y", "sd3y"]   # ต่อท้ายแถว funds ใน summary.json (r1y อยู่ช่องแรก)
 EXTRAS_ALL_PATH = DATA / "extras_all.json"
 
 
@@ -362,41 +363,60 @@ def sd_annual(vals, days):
     return round((var * len(rets) * 365 / span) ** 0.5 * 100, 2)
 
 
+def period_stats(vals, days, i, annualize=False):
+    """ผลตอบแทน (%) และ SD ต่อปี (%) จากจุดที่ i ถึงวันล่าสุด annualize=True คิดผลตอบแทนเป็นต่อปี (ช่วงเกิน 1 ปี)"""
+    if not vals[i]:
+        return None, None
+    ret = vals[-1] / vals[i]
+    if annualize:
+        span = (days[-1] - days[i]).days
+        ret = ret ** (365 / span) if span > 0 else None
+    return (round((ret - 1) * 100, 2) if ret else None), sd_annual(vals[i:], days[i:])
+
+
 def summarize(packed, x):
-    """[ผลตอบแทนย้อนหลัง 1 ปี (%), ค่าใช้จ่ายรวมจริงตาม factsheet (%), SD 1 ปีต่อปี (%)]"""
-    r1y = sd1y = None
+    """{"r1y", "sd1y", "ytd", "sdytd", "r3y", "sd3y"} (%) + ค่าใช้จ่ายรวมจริงตาม factsheet (%)
+    ytd: เทียบกับ NAV วันสุดท้ายของปีก่อน, r3y: ผลตอบแทนต่อปี, sd: SD ของผลตอบแทนรายวันในช่วงนั้น ปรับเป็นต่อปี"""
+    out = dict.fromkeys(("r1y", "sd1y", "ytd", "sdytd", "r3y", "sd3y"))
     if packed.get("s") and packed.get("v"):
         d = date.fromisoformat(packed["s"]); days = [d]
         for g in packed["dd"]:
             d = d + timedelta(days=g); days.append(d)
-        target = days[-1] - timedelta(days=365)
-        if days[0] <= target:
-            i = max(k for k, dd in enumerate(days) if dd <= target)
-            if packed["v"][i]:
-                r1y = round((packed["v"][-1] / packed["v"][i] - 1) * 100, 2)
-                sd1y = sd_annual(packed["v"][i:], days[i:])
+        vals, end = packed["v"], days[-1]
+
+        def base(target):
+            return max(k for k, dd in enumerate(days) if dd <= target) if days[0] <= target else None
+        i = base(end - timedelta(days=365))
+        if i is not None:
+            out["r1y"], out["sd1y"] = period_stats(vals, days, i)
+        i = base(date(end.year - 1, 12, 31))
+        if i is not None and i < len(vals) - 1:
+            out["ytd"], out["sdytd"] = period_stats(vals, days, i)
+        i = base(end.replace(year=end.year - 3) if not (end.month == 2 and end.day == 29) else end - timedelta(days=3 * 365))
+        if i is not None:
+            out["r3y"], out["sd3y"] = period_stats(vals, days, i, annualize=True)
     ter = None
     for k, v in ((x or {}).get("fees") or {}).items():
         if "Total" in k and isinstance(v, dict):
             ter = v.get("actual") if v.get("actual") is not None else v.get("rate")
-    return [r1y, ter, sd1y]
+    return out, ter
 
 
 def write_summary(funds, pending, nav_to):
     """atf/compare/data/summary.json: ผลตอบแทน 1 ปี + ค่าธรรมเนียม + factsheet
-    funds: ชื่อกอง -> [r1y, ขาย, รับซื้อคืน, การจัดการ, รวม, factsheet, sd1y] (กองในรายชื่อ)
+    funds: ชื่อกอง -> [r1y, ขาย, รับซื้อคืน, การจัดการ, รวม, factsheet, sd1y, ytd, sdytd, r3y, sd3y] (กองในรายชื่อ)
     classes: proj_id|class -> [ขาย, รับซื้อคืน, การจัดการ, รวม, factsheet] (class ที่ไม่อยู่ในรายชื่อ เช่นกองภาษี)
     pending: กองที่ยังดึง NAV ย้อนหลังไม่ครบ"""
     out = {}
     for f in funds:
-        r1y, sd1y = SUMMARY.get(f["name"]) or (None, None)
-        out[f["name"]] = [r1y] + fee_row(f.get("x")) + [sd1y]
+        p = SUMMARY.get(f["name"]) or {}
+        out[f["name"]] = [p.get("r1y")] + fee_row(f.get("x")) + [p.get(k) for k in PERF_COLS[1:]]
     classes = json.loads(EXTRAS_ALL_PATH.read_text()) if EXTRAS_ALL_PATH.exists() else {}
     for f in funds:                                   # กองในรายชื่อหาจากชื่อได้แล้ว ไม่ต้องซ้ำ
         i = f["info"]
         classes.pop(ckey(i["proj_id"], i["fund_class_name"]), None)
     (OUT / "summary.json").write_text(json.dumps({
-        "nav_to": nav_to, "cols": ["r1y", "fe", "be", "mg", "ter", "fs", "sd1y"], "funds": out,
+        "nav_to": nav_to, "cols": ["r1y", "fe", "be", "mg", "ter", "fs", *PERF_COLS[1:]], "funds": out,
         "classes": classes, "pending": sorted(pending)}, ensure_ascii=False, separators=(",", ":")))
 
 
@@ -598,8 +618,7 @@ def main():
         if k in AUM:
             x["aum"] = AUM[k]
         f["_s"], f["_e"] = packed["s"], days[-1].isoformat() if days else None
-        r = summarize(packed, x)
-        SUMMARY[f["name"]] = (r[0], r[2])
+        SUMMARY[f["name"]] = summarize(packed, x)[0]
         (FUND_OUT / f"{fn.slug(f['name'])}.json").write_text(json.dumps(
             {"name": f["name"], "group": f["group"], "risk": f.get("risk"), "info": info, "sec": f.get("sec") or {},
              "x": x, "warning": warn, **packed}, ensure_ascii=False, separators=(",", ":")))
