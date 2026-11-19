@@ -9,6 +9,8 @@
 !pipelines/masterfund/master_aliases.csv
 !funds/masterfund/amc_abbr.csv
 !funds/masterfund/master_tags.csv
+# ไฟล์กลางของทีม: Average Credit Rating กับ ระยะเวลาที่ควรถือลงทุน (ข้อมูลกองทั่วไป ไม่ใช่ข้อมูล Auto Top Funds)
+!atf/compare/data/fund-manual.xlsx
 __pycache__/
 *.pyc
 .DS_Store

@@ -452,7 +452,7 @@
 
       <div class="fxonly" hidden>
       <p class="t1note" id="t1Note" hidden></p>
-      <h3>เทียบกับ FIXEDSP <span class="actions"><span class="pastehint">วางใน PowerPoint แล้วเลือก <b>Keep Source Formatting</b></span><button class="btn primary sm" id="copyT1" title="วางแล้วแก้ข้อความในตารางได้">Copy ตาราง</button></span></h3>
+      <h3>เทียบกับ FIXEDSP <span class="actions"><span class="pastehint">วางใน PowerPoint แล้วเลือก <b>Keep Source Formatting</b></span><button class="btn sm" id="dlManual" title="ไฟล์กลางของทีมสำหรับ Average Credit Rating และระยะเวลาที่ควรถือลงทุน">Excel ข้อมูลกอง</button><button class="btn primary sm" id="copyT1" title="วางแล้วแก้ข้อความในตารางได้">Copy ตาราง</button></span></h3>
       <div class="tbl-wrap card" style="padding:0"><table id="t1" class="dt"></table></div>
       </div>
 
@@ -1364,7 +1364,83 @@ const migrateHold = (v) => typeof v === "string" ? v.replace(/^ตั้งแ�
 for (const o of Object.values(MANUAL)) if (o && o["ระยะเวลาที่ควรถือลงทุน"]) o["ระยะเวลาที่ควรถือลงทุน"] = migrateHold(o["ระยะเวลาที่ควรถือลงทุน"]);
 const saveManual = () => { try { localStorage.setItem(MANUAL_STORE, JSON.stringify(MANUAL)); } catch (e) {} };
 const cellFor = (name, f, label) => name === "FIXEDSP" && !f ? (FIXEDSP_MAP[keyOf(label)] || "")
-  : (PICK[label] && MANUAL[name]?.[label]) || secCell(f, label);
+  : (PICK[label] && (MANUAL[name]?.[label] || FILE_MANUAL[name]?.[label])) || secCell(f, label);
+/* ไฟล์ Excel กลางของทีม (data/fund-manual.xlsx): Average Credit Rating กับ ระยะเวลาที่ควรถือลงทุน ของแต่ละกอง
+   ค่าในไฟล์ใช้แทนค่าที่เคยเลือกไว้ในเครื่องนี้ ช่องที่ไฟล์ว่างไว้ยังเลือกในตารางได้ตามเดิม
+   เติมรายชื่อกองใหม่ลงไฟล์: pipelines/atf-compare/scripts/fund_manual.py */
+let FILE_MANUAL = {};
+const MANUAL_XLSX = () => UTFIT_SRC.atfCompare + "data/fund-manual.xlsx";
+const XLSX_JS = "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
+const HOLD_L = "ระยะเวลาที่ควรถือลงทุน";
+function normPick(label, v) {
+  v = String(v ?? "").replace(/\s+/g, " ").trim(); if (!v || v === "-" || v === "–") return "";
+  if (label === HOLD_L) {
+    v = migrateHold(v);
+    const m = v.match(/^(?:แนะนำ)?(?:ประมาณ)?\s*(\d+\s*(?:วัน|สัปดาห์|เดือน|ปี))\s*(?:ขึ้นไป)?$/);
+    if (m) v = migrateHold(`แนะนำประมาณ ${m[1].replace(/(\d)\s*/, "$1 ")}ขึ้นไป`);
+  } else v = v.toUpperCase().replace("ต่ำกว่า BBB-".toUpperCase(), "ต่ำกว่า BBB-");
+  return v;
+}
+function manualFromRows(rows) {
+  const head = (rows[0] || []).map(keyOf), iN = head.indexOf(keyOf("กองทุน")), out = {};
+  if (iN < 0) return out;
+  const cols = Object.keys(PICK).map(l => [l, head.indexOf(keyOf(l))]).filter(([, i]) => i >= 0);
+  for (const row of rows.slice(1)) {
+    const name = String(row[iN] ?? "").trim(); if (!name) continue;
+    for (const [l, i] of cols) { const v = normPick(l, row[i]); if (v) (out[name] ||= {})[l] = v; }
+  }
+  return out;
+}
+async function loadFileManual() {
+  try {
+    const r = await fetch(MANUAL_XLSX() + "?v=" + Date.now()); if (!r.ok) return;
+    const buf = await r.arrayBuffer();
+    await loadScript(XLSX_JS, () => window.XLSX);
+    const wb = XLSX.read(buf, { type: "array" });
+    FILE_MANUAL = manualFromRows(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, defval: "" }));
+    let changed = false;
+    for (const [n, o] of Object.entries(FILE_MANUAL)) for (const l of Object.keys(o)) if (MANUAL[n]?.[l] != null) { delete MANUAL[n][l]; changed = true; if (!Object.keys(MANUAL[n]).length) delete MANUAL[n]; }
+    if (changed) saveManual();
+    renderTable();
+  } catch (e) { console.warn("fund-manual.xlsx", e); }
+}
+// ดาวน์โหลดไฟล์ Excel กลาง พร้อมใส่ค่าที่เลือกไว้ในเครื่องนี้ลงไปด้วย (คง dropdown ในไฟล์ไว้ จึงแก้ XML ตรง ๆ)
+async function downloadManualXlsx() {
+  const JSZip = await loadJSZip();
+  const zip = await JSZip.loadAsync(await (await fetch(MANUAL_XLSX() + "?v=" + Date.now())).arrayBuffer());
+  const sst = zip.file("xl/sharedStrings.xml") ? [...xmlOf(await zip.file("xl/sharedStrings.xml").async("string")).getElementsByTagName("si")].map(si => si.textContent) : [];
+  const sp = "xl/worksheets/sheet1.xml", doc = xmlOf(await zip.file(sp).async("string")), NS = doc.documentElement.namespaceURI;
+  const sd = doc.getElementsByTagName("sheetData")[0], rows = [...sd.getElementsByTagName("row")];
+  const cellVal = (c) => c ? (c.getAttribute("t") === "s" ? sst[+c.textContent] : c.textContent) : "";
+  const colOf = (c) => c.getAttribute("r").replace(/\d+/g, "");
+  const head = [...rows[0].getElementsByTagName("c")].map(c => [colOf(c), keyOf(cellVal(c))]);
+  const colFor = (l) => head.find(([, k]) => k === keyOf(l))?.[0];
+  const nameCol = colFor("กองทุน"), labels = Object.keys(PICK).map(l => [l, colFor(l)]).filter(([, c]) => c);
+  const colIdx = (c) => [...c].reduce((a, ch) => a * 26 + ch.charCodeAt(0) - 64, 0);
+  const setCell = (row, col, v) => {
+    const r = row.getAttribute("r"), cs = [...row.getElementsByTagName("c")];
+    let c = cs.find(x => colOf(x) === col);
+    const nc = doc.createElementNS(NS, "c"); nc.setAttribute("r", col + r);
+    if (c?.getAttribute("s")) nc.setAttribute("s", c.getAttribute("s"));
+    nc.setAttribute("t", "inlineStr"); const is = doc.createElementNS(NS, "is"), t = doc.createElementNS(NS, "t"); t.textContent = v; is.appendChild(t); nc.appendChild(is);
+    if (c) row.replaceChild(nc, c); else row.insertBefore(nc, cs.find(x => colIdx(colOf(x)) > colIdx(col)) || null);
+  };
+  const seen = new Set(); let added = 0, n = 0;
+  for (const row of rows.slice(1)) {
+    const name = String(cellVal([...row.getElementsByTagName("c")].find(c => colOf(c) === nameCol)) || "").trim(); seen.add(name);
+    for (const [l, col] of labels) if (MANUAL[name]?.[l]) { setCell(row, col, MANUAL[name][l]); n++; }
+  }
+  for (const [name, o] of Object.entries(MANUAL)) {
+    if (seen.has(name) || !labels.some(([l]) => o?.[l])) continue;
+    const r = String(rows.length + 1 + added++), row = doc.createElementNS(NS, "row"); row.setAttribute("r", r); sd.appendChild(row);
+    setCell(row, nameCol, name); for (const [l, col] of labels) if (o[l]) { setCell(row, col, o[l]); n++; }
+  }
+  zip.file(sp, strOf(doc));
+  const blob = await zip.generateAsync({ type: "blob", mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "fund-manual.xlsx"; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  toast(n ? `ดาวน์โหลดแล้ว รวมค่าที่เลือกไว้ในเครื่องนี้ ${n} ช่อง` : "ดาวน์โหลดแล้ว");
+}
 function modelT1() {
   const others = selected.map(byName).filter(f => f && !f.custom && !f.sim && lowRisk(f));   // ตาราง: เฉพาะกองความเสี่ยง 1–4 (โมเดลอื่นยังไม่มีข้อมูลตาราง)
   const cols = [...others.map(f => ({ name: f.name, f })), { name: "FIXEDSP", f: null }];
@@ -1932,6 +2008,7 @@ $("dlBar").onclick = async () => {
 };
 const onPeer = () => { $("peerIn").setAttribute("aria-disabled", !$("showPeer").checked); renderChart(); saveHash(); };
 ["showPeer", "peerYtd"].forEach(id => { $(id).oninput = onPeer; $(id).onchange = onPeer; });
+$("dlManual").onclick = () => downloadManualXlsx().catch(e => { console.error(e); toast("ดาวน์โหลดไฟล์ Excel ไม่ได้"); });
 $("t1").addEventListener("change", (e) => {
   const sel = e.target.closest("select.pick"); if (!sel) return;
   const n = sel.dataset.n, l = sel.dataset.l;
@@ -2381,6 +2458,7 @@ function update() {
   selected = selected.filter(n => byName(n));
   if (!selected.length && CUSTOM.length) selected = [CUSTOM[0].name];
   rebuildDates(); renderList(); update();
+  loadFileManual();
   // โหลดฟอนต์บริษัทก่อนวาดกราฟ (ฟอนต์ใน canvas ต้องโหลดเสร็จก่อนถึงจะใช้ได้)
   if (document.fonts) Promise.all(["700 16px BLSHead", "16px BLSBody", "16px 'IBM Plex Sans Thai'"].map(f => document.fonts.load(f).catch(() => {})))
     .then(() => document.fonts.ready).then(renderChart);
