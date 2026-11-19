@@ -568,7 +568,7 @@ const pendingLoads = new Map();
 async function loadFund(n) {
   if (byName(n)) return byName(n);
   const st = STUBS.get(n); if (!st) return null;
-  if (!pendingLoads.has(n)) pendingLoads.set(n, fetch(UTFIT_SRC.atfCompare + `data/f/${encodeURIComponent(st.file)}.json?v=${INDEX.updated}`)
+  if (!pendingLoads.has(n)) pendingLoads.set(n, fetch(UTFIT_SRC.atfCompare + `data/${st.dir || "f"}/${encodeURIComponent(st.file)}.json?v=${st.dir ? "c" : INDEX.updated}`)
     .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
     .then(f => { if (!byName(f.name)) DATA.funds.push(decodeFund(f)); return byName(f.name); })
     .catch(e => { pendingLoads.delete(n); toast(`โหลดข้อมูล ${n} ไม่ได้`); return null; }));
@@ -2442,6 +2442,14 @@ function update() {
         info: { proj_name_th: row[C.proj_name_th], comp_name_th: row[C.comp_name_th], proj_abbr_name: row[C.abbr] },
         sec: { proj_name_th: row[C.proj_name_th], comp_name_th: row[C.comp_name_th], fund_status: row[C.ipo] ? "IPO" : "" } });
     }
+    // กองที่ปิดไปแล้ว (ดึงครั้งเดียว: pipelines/atf-compare/closed_funds.csv) อยู่ใน data/closed/
+    try {
+      const rc = await fetch(UTFIT_SRC.atfCompare + "data/closed/index.json?v=" + Date.now());
+      if (rc.ok) { const X = await rc.json(), K = Object.fromEntries((X.cols || []).map((c, k) => [c, k]));
+        for (const row of X.funds || []) if (!STUBS.has(row[K.name])) STUBS.set(row[K.name], { name: row[K.name], group: X.groups[row[K.group]], risk: row[K.risk], file: row[K.file], dir: "closed", stub: true,
+          info: { proj_name_th: row[K.proj_name_th], comp_name_th: row[K.comp_name_th], proj_abbr_name: row[K.abbr] },
+          sec: { proj_name_th: row[K.proj_name_th], comp_name_th: row[K.comp_name_th] } }); }
+    } catch (e) {}
     DATA = { funds: [], missing: INDEX.missing || {}, start: INDEX.start, nav_to: INDEX.nav_to, updated: INDEX.updated };
     const from = DATA.start ? (DATA.start.slice(0, 4) === "2021" ? "ม.ค. 65" : thDate(DATA.start)) : null;
     $("asof").innerHTML = esc(`NAV กองทุนรวม ${STUBS.size.toLocaleString()} กอง ${from ? `ตั้งแต่ ${from} – ` : "ถึง "}${thDate(DATA.nav_to || DATA.updated)}`) +

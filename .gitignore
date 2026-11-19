@@ -3,6 +3,7 @@
 *.xlsx
 # CSV ที่ระบบใช้ (อนุญาตเฉพาะที่นี่)
 !pipelines/atf-compare/extra_funds.csv
+!pipelines/atf-compare/closed_funds.csv
 !pipelines/atf-compare/data/nav/*.csv
 !pipelines/weekly/funds.csv
 !pipelines/weekly/data/nav/*.csv
