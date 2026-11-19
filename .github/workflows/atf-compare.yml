@@ -34,7 +34,7 @@ jobs:
         id: gate
         run: |
           if [ "${{ github.event.schedule }}" = "10 1-21/2 * * *" ] && [ -f atf/compare/data/index.json ] \
-             && python3 -c "import json,sys; sys.exit(0 if json.load(open('atf/compare/data/index.json')).get('pending',0)==0 else 1)"; then
+             && python3 -c "import json,re,sys; d=json.load(open('atf/compare/data/index.json')); st=re.search(r'FUNDS_START\", \"([0-9-]+)', open('pipelines/atf-compare/scripts/fetch_funds.py').read()).group(1); sys.exit(0 if d.get('pending',0)==0 and d.get('start')==st else 1)"; then
             echo "skip=1" >> "$GITHUB_OUTPUT"; echo "ดึงย้อนหลังครบแล้ว ข้ามรอบนี้"
           fi
 
