@@ -33,7 +33,7 @@ ROOT = fn.ROOT
 DATA = ROOT / "data"
 OUT = ROOT.parent.parent / "atf" / "compare" / "data"   # หน้าเว็บใน UTFIT
 FUND_OUT = OUT / "f"
-START = date.fromisoformat(os.getenv("FUNDS_START", "2021-12-01"))
+START = date.fromisoformat(os.getenv("FUNDS_START", "2021-11-01"))   # ย้อนหลังได้ 5 ปีเต็ม (เลื่อนให้เก่าลงได้ ระบบดึงเฉพาะช่วงที่ขาด)
 BUDGET = float(os.getenv("TIME_BUDGET_MIN", "300")) * 60      # วินาที
 T0 = time.time()
 LEVEL_GROUP = {
@@ -307,9 +307,23 @@ BACKFILL = json.loads(BACKFILL_PATH.read_text()) if BACKFILL_PATH.exists() else 
 def fetch_nav(info, start, today):
     """ดึง NAV: รอบแรกดึงตั้งแต่ start · รอบต่อไปดึงเฉพาะวันใหม่ (รวมกองที่เปิดหลัง start)"""
     name = info["name"]
-    series = fn.read_cache(fn.NAV_DIR / f"{fn.slug(name)}.csv")
+    path = fn.NAV_DIR / f"{fn.slug(name)}.csv"
+    series = fn.read_cache(path)
     frm = start
-    if series and BACKFILL.get(name, "9999") <= start.isoformat():
+    prev = BACKFILL.get(name)
+    if series and prev and prev > start.isoformat():
+        # เลื่อนวันเริ่มข้อมูล (START) ให้เก่าลง: ดึงเฉพาะช่วงที่ขาด [start, วันเริ่มเดิม) ไม่ดึงทั้งหมดใหม่
+        gap_end, cur = date.fromisoformat(prev) - timedelta(days=1), start
+        while cur <= gap_end:
+            to = min(cur + timedelta(days=fn.CHUNK_DAYS - 1), gap_end)
+            got, _ = fn.parse_rows(fn.call_nav(info["proj_id"], cur, to), info["fund_class_name"])
+            series.update(got)
+            cur = to + timedelta(days=1)
+            time.sleep(0.15)
+        fn.write_cache(path, series)
+        BACKFILL[name] = start.isoformat()
+        frm = max(start, min(series))
+    elif series and BACKFILL.get(name, "9999") <= start.isoformat():
         frm = max(start, min(series))
     _, warn = fn.fetch_series(info, frm, today)
     BACKFILL[name] = start.isoformat()
