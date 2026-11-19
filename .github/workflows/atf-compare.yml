@@ -26,7 +26,7 @@ concurrency:
 jobs:
   update:
     runs-on: ubuntu-latest
-    timeout-minutes: 150
+    timeout-minutes: 330   # รอบเต็ม = สร้างรายชื่อใหม่ + NAV ทุกกอง (~2.5 ชม.) เกิน 150 นาทีแล้วโดนตัดทิ้งทั้งรอบ
     steps:
       - uses: actions/checkout@v4
 
@@ -60,6 +60,7 @@ jobs:
           FUNDS_MODE: ${{ github.event.inputs.mode == 'full' && 'full' || '' }}
           FUNDS_URLS: ${{ github.event.inputs.mode == 'full' && '1' || '' }}
           TIME_BUDGET_MIN: "100"
+          PYTHONUNBUFFERED: "1"   # ให้ log ขึ้นทันที ถ้าโดนตัดกลางทางจะยังเห็นว่าค้างตรงไหน
         run: python pipelines/atf-compare/scripts/fetch_funds.py
 
       - name: Commit
