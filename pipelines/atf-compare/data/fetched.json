@@ -1015,6 +1015,10 @@ null
 "2026-11-19",
 null
 ],
+"DAOL-FPLUS": [
+"2026-11-19",
+null
+],
 "DAOL-GALAXY": [
 "2026-11-19",
 null
@@ -2216,6 +2220,10 @@ null
 null
 ],
 "K-SELECT-A(D)": [
+"2026-11-19",
+null
+],
+"K-SEMI": [
 "2026-11-19",
 null
 ],
@@ -3458,6 +3466,10 @@ null
 "KT-GFO-D": [
 "2026-11-19",
 "API ตอบกลับมาแต่ไม่มี NAV ของ class นี้ (ลองรัน selftest ดู field)"
+],
+"KT-GINFRA": [
+"2026-11-19",
+null
 ],
 "KT-GMO-A": [
 "2026-11-19",
@@ -4711,6 +4723,10 @@ null
 "2026-11-19",
 null
 ],
+"M-SPUS": [
+"2026-11-19",
+null
+],
 "M-SUKUK": [
 "2026-11-19",
 null
@@ -5323,9 +5339,13 @@ null
 "2026-11-19",
 "API ตอบกลับมาแต่ไม่มี NAV ของ class นี้ (ลองรัน selftest ดู field)"
 ],
-"PRINCIPAL GFIXED": [
+"PRINCIPAL GFIXED-A": [
 "2026-11-19",
-null
+"API ตอบกลับมาแต่ไม่มี NAV ของ class นี้ (ลองรัน selftest ดู field)"
+],
+"PRINCIPAL GFIXED-D": [
+"2026-11-19",
+"API ตอบกลับมาแต่ไม่มี NAV ของ class นี้ (ลองรัน selftest ดู field)"
 ],
 "PRINCIPAL GHEALTH-A": [
 "2026-11-19",
@@ -7327,6 +7347,10 @@ null
 "2026-11-19",
 null
 ],
+"TLWORLDINCOME-X": [
+"2026-11-19",
+null
+],
 "TLWORLDXUS-X": [
 "2026-11-19",
 null
@@ -7916,6 +7940,10 @@ null
 null
 ],
 "X-SPACE": [
+"2026-11-19",
+null
+],
+"X-USSMV": [
 "2026-11-19",
 null
 ],
