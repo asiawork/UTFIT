@@ -19,7 +19,7 @@ OUT = ROOT / "atf/compare/data/fund-manual.xlsx"
 RATING = ["AAA", "AA+", "AA", "AA-", "A+", "A", "A-", "BBB+", "BBB", "BBB-", "ต่ำกว่า BBB-"]
 HOLD = ["แนะนำประมาณ 1 สัปดาห์ขึ้นไป", "แนะนำประมาณ 1 เดือนขึ้นไป", "แนะนำประมาณ 3 เดือนขึ้นไป",
         "แนะนำประมาณ 6 เดือนขึ้นไป", "แนะนำประมาณ 1 ปีขึ้นไป"]
-HEAD = ["กองทุน", "ความเสี่ยง", "ชื่อกองทุน", "บลจ.", "Average Credit Rating", "ระยะเวลาที่ควรถือลงทุน"]
+HEAD = ["กองทุน", "Average Credit Rating", "ระยะเวลาที่ควรถือลงทุน"]
 
 
 def main():
@@ -28,24 +28,25 @@ def main():
     funds = {}
     for r in idx["funds"]:
         if str(r[C["risk"]]) in ("1", "2", "3", "4"):
-            funds[r[C["name"]]] = [r[C["name"]], int(r[C["risk"]]), r[C["proj_name_th"]] or "", r[C["comp_name_th"]] or "", "", ""]
+            funds[r[C["name"]]] = [r[C["name"]], "", ""]
 
     # คงค่าที่กรอกไว้ (รวมกองที่ไม่อยู่ในรายชื่อแล้ว)
     if OUT.exists():
         ws = load_workbook(OUT).worksheets[0]
-        for row in ws.iter_rows(min_row=2, values_only=True):
-            if not row or not row[0]:
+        rows = list(ws.iter_rows(values_only=True))
+        head = [str(h or "").strip() for h in rows[0]] if rows else []
+        col = {h: head.index(h) for h in HEAD if h in head}   # อ่านตามชื่อหัวคอลัมน์ (ไฟล์รุ่นเก่ามีคอลัมน์มากกว่านี้)
+        for row in rows[1:]:
+            name = str(row[col["กองทุน"]] or "").strip() if "กองทุน" in col else ""
+            if not name:
                 continue
-            name = str(row[0]).strip()
-            old = funds.get(name) or [name, row[1] or "", row[2] or "", row[3] or "", "", ""]
-            old[4], old[5] = row[4] or "", row[5] or ""
-            funds[name] = old
+            funds[name] = [name] + [row[col[h]] or "" if h in col else "" for h in HEAD[1:]]
 
     wb = Workbook()
     ws = wb.active
     ws.title = "ข้อมูลกอง"
     ws.append(HEAD)
-    for row in sorted(funds.values(), key=lambda x: (x[1] if isinstance(x[1], int) else 9, x[0])):
+    for row in sorted(funds.values(), key=lambda x: x[0].upper()):
         ws.append(row)
 
     navy = PatternFill("solid", fgColor="1B3560")
@@ -53,10 +54,10 @@ def main():
         c.font = Font(bold=True, color="FFFFFF")
         c.fill = navy
         c.alignment = Alignment(horizontal="center", vertical="center")
-    for col, w in zip("ABCDEF", (16, 11, 52, 40, 22, 32)):
+    for col, w in zip("ABC", (18, 24, 32)):
         ws.column_dimensions[col].width = w
-    ws.freeze_panes = "B2"
-    ws.auto_filter.ref = f"A1:F{ws.max_row}"
+    ws.freeze_panes = "A2"
+    ws.auto_filter.ref = f"A1:C{ws.max_row}"
 
     # รายการให้เลือก (dropdown) เก็บในชีตซ่อน
     opt = wb.create_sheet("ตัวเลือก")
@@ -66,7 +67,7 @@ def main():
         opt.cell(i, 2, v)
     opt.sheet_state = "hidden"
     last = max(ws.max_row, 2) + 300
-    for col, ref in (("E", f"'ตัวเลือก'!$A$1:$A${len(RATING)}"), ("F", f"'ตัวเลือก'!$B$1:$B${len(HOLD)}")):
+    for col, ref in (("B", f"'ตัวเลือก'!$A$1:$A${len(RATING)}"), ("C", f"'ตัวเลือก'!$B$1:$B${len(HOLD)}")):
         dv = DataValidation(type="list", formula1=ref, allow_blank=True, showErrorMessage=True,
                             errorTitle="ค่าไม่ตรงตัวเลือก", error="เลือกจากรายการในช่องนี้")
         dv.add(f"{col}2:{col}{last}")
