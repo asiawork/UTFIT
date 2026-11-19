@@ -485,7 +485,7 @@
 
 <script>
 const $ = (id) => document.getElementById(id);
-const PALETTE = ["#2f3747", "#5fb3a6", "#d0273e", "#e0a100", "#8e5bb5", "#2f9e5b", "#7a8794", "#c2185b"];
+const PALETTE = ["#2f3747", "#5fb3a6", "#d0273e", "#e0a100", "#8e5bb5", "#2f9e5b", "#7a8794", "#c2185b", "#e8710a", "#8d5a2b", "#7c8b2e"];   // FIXEDSP + 10 กอง
 const HERO_COLOR = "#3478f6";   // FIXEDSP (สีตามสไลด์)
 const MAX_SEL = PALETTE.length;
 const TH_MON = ["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
@@ -959,7 +959,25 @@ function drawBars(ctx) {
   }
   if (!m) { ctx.restore(); return; }
   const foot = "";
-  const L = 74, R = 24, T = showTitle ? 80 : 34, legendH = 40, B = 40 + legendH + (foot ? 24 : 0), pw = W - L - R, ph = H - T - B;
+  // legend: ย่อตัวอักษรถ้ายาวเกินความกว้างกราฟ ถ้าย่อแล้วยังไม่พอ (เลือกกองเยอะ) แบ่งเป็น 2 แถว
+  // กองที่ยังไม่มีข้อมูลบางปี: บอกวันจัดตั้ง (วันแรกที่มี NAV ของ class นั้น) ต่อท้ายชื่อ
+  const note = (r) => {
+    if (r.peer || !r.vals.some(v => v == null) || byName(r.name)?.custom) return "";   // โมเดลที่อัปโหลด: วันแรกในไฟล์ไม่ใช่วันจัดตั้ง
+    const f0 = byName(r.name)?.d?.[0]; if (!f0 || (DATA.start && f0 <= DATA.start)) return "";
+    if (byName(r.name)?.sim) return ` (เริ่ม ${thDate(f0)})`;
+    return LANG === "en" ? ` (launched ${+f0.slice(8)} ${EN_MON[+f0.slice(5, 7) - 1]} ${f0.slice(0, 4)})` : ` (จัดตั้ง ${thDate(f0)})`;
+  };
+  const lg = (() => {
+    const measure = (lf, sp) => m.rows.map(r => { ctx.font = `600 ${lf}px ${FONT}`; const nw = ctx.measureText(r.name).width; ctx.font = `400 ${lf - 2}px ${FONT}`; const n = note(r);
+      return { r, n, nw, w: 14 + 8 + nw + (n ? ctx.measureText(n).width + 2 : 0) + sp }; });
+    const fits = (line, sp) => line.reduce((a, b) => a + b.w, 0) - sp <= W - 32;
+    for (let lf = 16; lf >= 12; lf--) { const sp = lf >= 14 ? 28 : 18, items = measure(lf, sp); if (fits(items, sp)) return { lf, sp, lines: [items], rowH: 0 }; }
+    for (let lf = 15; lf >= 11; lf--) {
+      const sp = lf >= 14 ? 28 : 18, items = measure(lf, sp), half = Math.ceil(items.length / 2), lines = [items.slice(0, half), items.slice(half)];
+      if (lines.every(l => fits(l, sp)) || lf === 11) return { lf, sp, lines, rowH: lf + 12 };
+    }
+  })();
+  const L = 74, R = 24, T = showTitle ? 80 : 34, legendH = 40 + (lg.lines.length - 1) * lg.rowH, B = 40 + legendH + (foot ? 24 : 0), pw = W - L - R, ph = H - T - B;
   const all = m.rows.flatMap(r => r.vals).filter(v => v != null);
   // ขนาดแท่ง/ตัวเลข ปรับตามจำนวนกองที่เลือก: กองน้อย = แท่งผอม เว้นระยะระหว่างปีกว้าง · กองเยอะ = กลุ่มแท่งกว้างขึ้น
   // ตัวเลขบนแท่งใช้ขนาดใหญ่สุดที่ไม่ล้นช่องแท่ง ถ้าเล็กกว่า 11px ยังไม่พอ ให้หมุนตัวเลขตั้งขึ้น
@@ -1006,30 +1024,17 @@ function drawBars(ctx) {
     ctx.font = `700 16px ${FONT_B}`; ctx.fillStyle = INK; ctx.textAlign = "center"; ctx.textBaseline = "top";
     ctx.fillText(yr === m.years.at(-1) && m.ytd ? `${yearLabel(yr)} (YTD)` : yearLabel(yr), cx, T + ph + 12);
   });
-  // legend ด้านล่าง (สี่เหลี่ยมสี + ชื่อ)
-  // ย่อตัวอักษร legend ถ้าเลือกกองเยอะจนยาวเกินความกว้างกราฟ
-  // กองที่ยังไม่มีข้อมูลบางปี: บอกวันจัดตั้ง (วันแรกที่มี NAV ของ class นั้น) ต่อท้ายชื่อ
-  const note = (r) => {
-    if (r.peer || !r.vals.some(v => v == null) || byName(r.name)?.custom) return "";   // โมเดลที่อัปโหลด: วันแรกในไฟล์ไม่ใช่วันจัดตั้ง
-    const f0 = byName(r.name)?.d?.[0]; if (!f0 || (DATA.start && f0 <= DATA.start)) return "";
-    if (byName(r.name)?.sim) return ` (เริ่ม ${thDate(f0)})`;
-    return LANG === "en" ? ` (launched ${+f0.slice(8)} ${EN_MON[+f0.slice(5, 7) - 1]} ${f0.slice(0, 4)})` : ` (จัดตั้ง ${thDate(f0)})`;
-  };
-  let lf = 16, items, sp = 28;
-  for (; lf >= 11; lf--) {
-    sp = lf >= 14 ? 28 : 18;
-    items = m.rows.map(r => { ctx.font = `600 ${lf}px ${FONT}`; const nw = ctx.measureText(r.name).width; ctx.font = `400 ${lf - 2}px ${FONT}`; const n = note(r);
-      return { r, n, nw, w: 14 + 8 + nw + (n ? ctx.measureText(n).width + 2 : 0) + sp }; });
-    if (items.reduce((a, b) => a + b.w, 0) - sp <= W - 32) break;
-  }
+  // legend ด้านล่าง (สี่เหลี่ยมสี + ชื่อ) แถวละบรรทัด ตามที่คำนวณไว้ใน lg
   ctx.textBaseline = "middle"; ctx.textAlign = "left";
-  let x = W / 2 - (items.reduce((a, b) => a + b.w, 0) - sp) / 2; const ly = H - 22 - (foot ? 24 : 0);
-  for (const it of items) {
-    ctx.fillStyle = it.r.color; ctx.fillRect(x, ly - 7, 14, 14);
-    ctx.font = `600 ${lf}px ${FONT}`; ctx.fillStyle = INK; ctx.fillText(it.r.name, x + 22, ly + 0.5);
-    if (it.n) { ctx.font = `400 ${lf - 2}px ${FONT}`; ctx.fillStyle = MUTE; ctx.fillText(it.n, x + 22 + it.nw + 2, ly + 0.5); }
-    x += it.w;
-  }
+  lg.lines.forEach((line, li) => {
+    let x = W / 2 - (line.reduce((a, b) => a + b.w, 0) - lg.sp) / 2; const ly = H - 22 - (foot ? 24 : 0) - (lg.lines.length - 1 - li) * lg.rowH;
+    for (const it of line) {
+      ctx.fillStyle = it.r.color; ctx.fillRect(x, ly - 7, 14, 14);
+      ctx.font = `600 ${lg.lf}px ${FONT}`; ctx.fillStyle = INK; ctx.fillText(it.r.name, x + 22, ly + 0.5);
+      if (it.n) { ctx.font = `400 ${lg.lf - 2}px ${FONT}`; ctx.fillStyle = MUTE; ctx.fillText(it.n, x + 22 + it.nw + 2, ly + 0.5); }
+      x += it.w;
+    }
+  });
   if (foot) { ctx.font = `13px ${FONT}`; ctx.fillStyle = "#8a929e"; ctx.textAlign = "right"; ctx.fillText(foot, W - 24, H - 14); }
   ctx.restore();
 }
