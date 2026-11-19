@@ -1680,6 +1680,31 @@ function splitT1(m) {
   }
   return out;
 }
+// เกิน 2 กอง (หรือชื่อยาวจนหัวข้อล้นบรรทัด): ปกไม่ใส่ชื่อกอง สไลด์กราฟใช้หัวข้อ "เปรียบเทียบผลตอบแทน FIXEDSP" แล้วใส่ชื่อกองเป็นบรรทัดเล็กใต้หัวข้อ
+function manyNames(names) {
+  if (names.split(" / ").length > 2) return true;
+  const ctx = MEASURE_CTX || (MEASURE_CTX = document.createElement("canvas").getContext("2d"));
+  ctx.font = `700 54px ${FONT_B}`;
+  return ctx.measureText(names).width > 8670200 / EMU_PT - 20;    // กล่องชื่อบนปก 54 pt
+}
+function coverNoNames(doc, oldNames) {
+  for (const p of [...doc.getElementsByTagNameNS(NS_A, "p")]) if (textOf(p).trim() === oldNames) p.remove();
+}
+function chartTitleWithSub(doc, oldNames, names) {
+  const ts = tsOf(doc), i = ts.findIndex(t => t.textContent.trim() === oldNames);
+  if (i < 0) return swapNames(doc, oldNames, names);
+  ts[i].textContent = "";
+  for (let k = i - 1; k >= 0 && !/FIXEDSP/.test(ts[k].textContent); k--) ts[k].textContent = "";     // " กับ "
+  // บรรทัดชื่อกองวางทับขอบบนของรูปกราฟ (ส่วนนั้นของรูปเป็นที่ว่าง)
+  const x = 1025414, y = 800000, cx = 10950686, cy = 300000, txt = "กับ " + names;
+  let sz = 18; while (sz > 10 && textLines(txt, cx / EMU_PT - 20, sz, false) > 1) sz -= 0.5;
+  const ids = [...doc.getElementsByTagNameNS(NS_P, "cNvPr")].map(e => +e.getAttribute("id") || 0);
+  const sp = xmlOf(`<p:sp xmlns:p="${NS_P}" xmlns:a="${NS_A}"><p:nvSpPr><p:cNvPr id="${Math.max(0, ...ids) + 1}" name="Compared funds"/><p:cNvSpPr txBox="1"/><p:nvPr/></p:nvSpPr>` +
+    `<p:spPr><a:xfrm><a:off x="${x}" y="${y}"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom><a:noFill/></p:spPr>` +
+    `<p:txBody><a:bodyPr wrap="none" lIns="91440" tIns="0" rIns="91440" bIns="0" anchor="ctr"><a:noAutofit/></a:bodyPr><a:lstStyle/><a:p><a:r><a:rPr lang="th-TH" sz="${Math.round(sz * 100)}" dirty="0">` +
+    `<a:solidFill><a:srgbClr val="4B5563"/></a:solidFill><a:latin typeface="BLS Text"/><a:cs typeface="BLS Text"/></a:rPr><a:t>${esc(txt)}</a:t></a:r></a:p></p:txBody></p:sp>`).documentElement;
+  doc.getElementsByTagNameNS(NS_P, "spTree")[0].appendChild(doc.importNode(sp, true));
+}
 // หัวสไลด์ตาราง "รายละเอียดกองทุน <ชื่อกอง> กับ FIXEDSP": ชื่อยาวเกินบรรทัดใช้ "รายละเอียดกองทุนเทียบกับ FIXEDSP" แทน
 function tableTitle(doc, oldNames, pm, suffix) {
   const names = pm.cols.filter(c => !isFxCol(c)).map(c => c.name).join(" / ");
@@ -1737,7 +1762,8 @@ async function buildPptx(file) {
   const m = modelT1(), names = m.cols.filter(c => !isFxCol(c)).map(c => c.name).join(" / ");
   const pages = splitT1(m), oldNames = fillTable(xmlOf(tblXml), pages[0]);
   if (oldNames == null) throw new Error("ไม่พบตารางในสไลด์ที่ 4 ของแม่แบบ");
-  [0, 1].forEach(i => swapNames(docs[i], oldNames, names));
+  if (manyNames(names)) { coverNoNames(docs[0], oldNames); chartTitleWithSub(docs[1], oldNames, names); }
+  else [0, 1].forEach(i => swapNames(docs[i], oldNames, names));
   swapAsOf(docs[2]);
   // ตาราง: หน้าละไม่เกิน 4 กอง หน้าถัดไปเป็นสำเนาสไลด์ 4 ต่อท้ายกันไป
   for (let j = 0; j < pages.length; j++) {
