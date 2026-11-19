@@ -1597,6 +1597,99 @@ function setCellText(tc, text) {
   if (end) { const rpr = p.ownerDocument.createElementNS(NS_A, "a:rPr"); for (const at of end.attributes) rpr.setAttribute(at.name, at.value);
     for (const ch of end.childNodes) rpr.appendChild(ch.cloneNode(true)); r.insertBefore(rpr, t); p.insertBefore(r, end); } else p.appendChild(r);
 }
+// จัดคอลัมน์และขนาดตัวอักษรให้พอดีช่อง: กอง 1 กองใช้ขนาดตามแม่แบบ
+// กองเยอะ: คอลัมน์หัวข้อแคบลงตามข้อความ FIXEDSP กว้างกว่ากองอื่น และ FIXEDSP ตัวใหญ่กว่ากองอื่นเสมอ
+const EMU_PT = 12700;
+let MEASURE_CTX = null;
+function textLines(text, maxW, sizePt, bold) {
+  const ctx = MEASURE_CTX || (MEASURE_CTX = document.createElement("canvas").getContext("2d"));
+  ctx.font = `${bold ? 700 : 400} ${sizePt}px ${bold ? FONT_B : FONT}`;
+  let n = 0;
+  for (const para of String(text || "").split("\n")) {
+    if (ctx.measureText(para).width <= maxW) { n++; continue; }
+    const parts = Intl.Segmenter ? [...new Intl.Segmenter("th", { granularity: "word" }).segment(para)].map(x => x.segment) : para.split(/(?<=[\/ ])/);
+    let line = "";
+    for (const q of parts) { if (line && ctx.measureText(line + q).width > maxW) { n++; line = q.trimStart(); } else line += q; }
+    if (line) n++;
+  }
+  return n;
+}
+const cellTextOf = (tc) => [...tc.getElementsByTagNameNS(NS_A, "p")].map(textOf).join("\n");
+function setCellSize(tc, sz) {
+  for (const el of [...tc.getElementsByTagNameNS(NS_A, "rPr"), ...tc.getElementsByTagNameNS(NS_A, "endParaRPr")]) el.setAttribute("sz", String(Math.round(sz * 100)));
+}
+function fitTable(doc, tbl, k) {
+  const grid = tbl.getElementsByTagNameNS(NS_A, "tblGrid")[0], gcs = [...grid.getElementsByTagNameNS(NS_A, "gridCol")];
+  const trs = [...tbl.getElementsByTagNameNS(NS_A, "tr")], tcsOf = (tr) => [...tr.children].filter(e => e.localName === "tc");
+  const total = gcs.reduce((a, g) => a + +g.getAttribute("w"), 0), tplL = +gcs[0].getAttribute("w"), tplF = +gcs.at(-1).getAttribute("w");
+  const PAD = 14;                                           // ขอบซ้ายขวาในช่อง (pt) + เผื่อ
+  let wL = tplL, wF = tplF, wO = Math.floor((total - wL - wF) / Math.max(k, 1));
+  if (k >= 2) {
+    // หัวข้อ: กว้างพอให้ข้อความ 16 pt อยู่บรรทัดเดียว (ไม่เกินขนาดแม่แบบ)
+    const lab = trs.map(tr => cellTextOf(tcsOf(tr)[0]));
+    const ctx = MEASURE_CTX || (MEASURE_CTX = document.createElement("canvas").getContext("2d")); ctx.font = `700 16px ${FONT_B}`;
+    const need = Math.max(...lab.flatMap(t => t.split("\n")).map(t => ctx.measureText(t).width)) + PAD;
+    wL = Math.min(tplL, Math.max(total * 0.22, need * EMU_PT));
+    const rest = total - wL; wO = Math.floor(rest / (k + 1.5)); wF = rest - wO * k;
+  }
+  gcs.slice(1, -1).forEach(g => g.remove());
+  gcs[0].setAttribute("w", String(Math.round(wL))); gcs.at(-1).setAttribute("w", String(Math.round(wF)));
+  for (let i = 0; i < k; i++) { const g = doc.createElementNS(NS_A, "a:gridCol"); g.setAttribute("w", String(wO)); grid.insertBefore(g, gcs.at(-1)); }
+  if (k < 2) return;
+  // ขนาดตัวอักษร: ใหญ่สุดที่ทุกช่องในคอลัมน์ไม่ล้นความสูงแถวในแม่แบบ
+  const rows = trs.map(tr => ({ h: +tr.getAttribute("h") / EMU_PT, tcs: tcsOf(tr) })).filter(r => r.tcs.length === k + 2);
+  const fits = (cells, wEmu, sz, bold) => cells.every(([tc, h]) => textLines(cellTextOf(tc), wEmu / EMU_PT - PAD, sz, bold) * sz * 1.2 + 6 <= h);
+  const colCells = (i) => rows.map(r => [r.tcs[i], r.h]);
+  const best = (cells, w, hi, bold) => { for (let sz = hi; sz > 8; sz -= 0.5) if (fits(cells, w, sz, bold)) return sz; return 8; };
+  const fxCells = colCells(k + 1), oCells = rows.flatMap(r => r.tcs.slice(1, -1).map(tc => [tc, r.h]));
+  const fxSz = best(fxCells, wF, SLIDE_T.fxSize, true);
+  const oSz = Math.min(best(oCells, wO, SLIDE_T.bodySize, false), fxSz - 2);
+  fxCells.forEach(([tc]) => setCellSize(tc, fxSz)); oCells.forEach(([tc]) => setCellSize(tc, oSz));
+}
+// ทำสำเนาสไลด์ (ไม่เอาโน้ตไปด้วย) ต่อท้ายสไลด์ต้นฉบับ คืนพาธสไลด์ใหม่
+async function dupSlide(zip, path, srcXml, after) {
+  const nums = Object.keys(zip.files).map(f => +(f.match(/^ppt\/slides\/slide(\d+)\.xml$/) || [])[1] || 0);
+  const n = Math.max(...nums) + 1, np = `ppt/slides/slide${n}.xml`;
+  zip.file(np, srcXml);
+  const rel = xmlOf(await zip.file(path.replace(/slides\/(slide\d+\.xml)$/, "slides/_rels/$1.rels")).async("string"));
+  for (const r of [...rel.getElementsByTagNameNS(NS_PR, "Relationship")]) if (/notesSlide/.test(r.getAttribute("Type"))) r.remove();
+  zip.file(`ppt/slides/_rels/slide${n}.xml.rels`, strOf(rel));
+  const ct = xmlOf(await zip.file("[Content_Types].xml").async("string"));
+  const ov = ct.createElementNS(ct.documentElement.namespaceURI, "Override");
+  ov.setAttribute("PartName", "/" + np); ov.setAttribute("ContentType", "application/vnd.openxmlformats-officedocument.presentationml.slide+xml");
+  ct.documentElement.appendChild(ov); zip.file("[Content_Types].xml", strOf(ct));
+  const prel = xmlOf(await zip.file("ppt/_rels/presentation.xml.rels").async("string"));
+  const ids = [...prel.getElementsByTagNameNS(NS_PR, "Relationship")].map(r => +r.getAttribute("Id").replace(/\D/g, "") || 0);
+  const rid = "rId" + (Math.max(...ids) + 1), pr = prel.createElementNS(NS_PR, "Relationship");
+  pr.setAttribute("Id", rid); pr.setAttribute("Type", "http://schemas.openxmlformats.org/officeDocument/2006/relationships/slide"); pr.setAttribute("Target", `slides/slide${n}.xml`);
+  prel.documentElement.appendChild(pr); zip.file("ppt/_rels/presentation.xml.rels", strOf(prel));
+  const pres = xmlOf(await zip.file("ppt/presentation.xml").async("string"));
+  const sl = [...pres.getElementsByTagNameNS(NS_P, "sldId")], sid = pres.createElementNS(NS_P, "p:sldId");
+  sid.setAttribute("id", String(Math.max(...sl.map(e => +e.getAttribute("id"))) + 1)); sid.setAttributeNS(NS_R, "r:id", rid);
+  sl[after].after(sid); zip.file("ppt/presentation.xml", strOf(pres));
+  return np;
+}
+// แบ่งกองเป็นหน้า หน้าละไม่เกิน 4 กอง (เฉลี่ยให้เท่า ๆ กัน) ทุกหน้ามี FIXEDSP
+const T1_PER_PAGE = 4;
+function splitT1(m) {
+  const others = m.cols.filter(c => !isFxCol(c)), fx = m.cols.find(isFxCol);
+  const pages = Math.max(1, Math.ceil(others.length / T1_PER_PAGE)), out = [];
+  for (let p = 0, at = 0; p < pages; p++) {
+    const take = Math.ceil((others.length - at) / (pages - p)), cols = [...others.slice(at, at + take), ...(fx ? [fx] : [])]; at += take;
+    out.push({ cols, rows: m.rows.map(([l, vs]) => [l, cols.map(c => vs[m.cols.indexOf(c)])]) });
+  }
+  return out;
+}
+// หัวสไลด์ตาราง "รายละเอียดกองทุน <ชื่อกอง> กับ FIXEDSP": ชื่อยาวเกินบรรทัดใช้ "รายละเอียดกองทุนเทียบกับ FIXEDSP" แทน
+function tableTitle(doc, oldNames, pm, suffix) {
+  const names = pm.cols.filter(c => !isFxCol(c)).map(c => c.name).join(" / ");
+  const ts = tsOf(doc), i = ts.findIndex(t => t.textContent.trim() === oldNames);
+  if (i < 0) { swapNames(doc, oldNames, names); return; }
+  const fx = ts.findIndex((t, k) => k > i && t.textContent.includes("FIXEDSP"));
+  if (names.length <= 28) ts[i].textContent = ts[i].textContent.replace(oldNames, names);
+  else { ts[i].textContent = ""; if (ts[i + 1] && ts[i + 1].textContent.trim() === "กับ") ts[i + 1].textContent = "เทียบกับ "; }
+  if (fx > 0 && suffix) ts[fx].textContent = ts[fx].textContent.replace("FIXEDSP", "FIXEDSP" + suffix);
+}
 // ตาราง: คอลัมน์ = หัวข้อ + กองที่เลือก (ใช้รูปแบบคอลัมน์กองเดิม) + FIXEDSP (รูปแบบคอลัมน์สุดท้ายเดิม)
 function fillTable(doc, m) {
   const tbl = doc.getElementsByTagNameNS(NS_A, "tbl")[0]; if (!tbl) return null;
@@ -1613,12 +1706,7 @@ function fillTable(doc, m) {
     others.forEach((c, i) => { const tc = tplO.cloneNode(true); if (vals) setCellText(tc, vals[m.cols.indexOf(c)] || ""); tr.insertBefore(tc, tplF); });
     if (vals && fxc) setCellText(tplF, vals[m.cols.indexOf(fxc)] || "");
   });
-  // ความกว้างคอลัมน์: หัวข้อและ FIXEDSP เท่าเดิม กองอื่นแบ่งที่เหลือเท่า ๆ กัน
-  const grid = tbl.getElementsByTagNameNS(NS_A, "tblGrid")[0], gcs = [...grid.getElementsByTagNameNS(NS_A, "gridCol")];
-  const total = gcs.reduce((a, g) => a + +g.getAttribute("w"), 0), wL = +gcs[0].getAttribute("w"), wF = +gcs.at(-1).getAttribute("w");
-  const wO = Math.floor((total - wL - wF) / Math.max(others.length, 1));
-  gcs.slice(1, -1).forEach(g => g.remove());
-  others.forEach(() => { const g = doc.createElementNS(NS_A, "a:gridCol"); g.setAttribute("w", String(wO)); grid.insertBefore(g, gcs.at(-1)); });
+  fitTable(doc, tbl, others.length);
   return oldNames.join(" / ");
 }
 // สไลด์ "รายละเอียดพอร์ต FIXEDSP" ในแม่แบบ: ใช้ค่าธรรมเนียมจาก FIXEDSP_INFO (ไม่ต้องแก้ไฟล์แม่แบบ)
@@ -1644,17 +1732,25 @@ async function buildPptx(file) {
   const zip = await JSZip.loadAsync(await file.arrayBuffer());
   const paths = await slidePaths(zip);
   if (paths.length < 4) throw new Error("แม่แบบต้องมีอย่างน้อย 4 สไลด์ (ปก, กราฟเส้น, กราฟแท่ง, ตาราง)");
+  const tblXml = await zip.file(paths[3]).async("string");
   const docs = await Promise.all(paths.slice(0, 4).map(async p => xmlOf(await zip.file(p).async("string"))));
   const m = modelT1(), names = m.cols.filter(c => !isFxCol(c)).map(c => c.name).join(" / ");
-  const oldNames = fillTable(docs[3], m);
+  const pages = splitT1(m), oldNames = fillTable(xmlOf(tblXml), pages[0]);
   if (oldNames == null) throw new Error("ไม่พบตารางในสไลด์ที่ 4 ของแม่แบบ");
-  [0, 1, 3].forEach(i => swapNames(docs[i], oldNames, names));
-  [2, 3].forEach(i => swapAsOf(docs[i]));
+  [0, 1].forEach(i => swapNames(docs[i], oldNames, names));
+  swapAsOf(docs[2]);
+  // ตาราง: หน้าละไม่เกิน 4 กอง หน้าถัดไปเป็นสำเนาสไลด์ 4 ต่อท้ายกันไป
+  for (let j = 0; j < pages.length; j++) {
+    const d = j ? xmlOf(tblXml) : docs[3];
+    tableTitle(d, oldNames, pages[j], pages.length > 1 ? ` (${j + 1}/${pages.length})` : "");
+    fillTable(d, pages[j]); swapAsOf(d);
+    if (j) { const np = await dupSlide(zip, paths[3], tblXml, 3 + j - 1); zip.file(np, strOf(d)); paths.splice(3 + j, 0, np); }
+  }
   const stamp = Date.now().toString(36);
   await swapPicture(zip, paths[1], docs[1], exportCanvas(3, await fillHeight(zip, docs[1])), "compare_line_" + stamp);
   await swapPicture(zip, paths[2], docs[2], exportBars(3), "compare_bar_" + stamp);
   docs.forEach((d, i) => zip.file(paths[i], strOf(d)));
-  await syncFxDetailSlides(zip, paths.slice(4));
+  await syncFxDetailSlides(zip, paths.slice(3 + pages.length));
   return { zip, name: `Review Portfolio กองทุนตราสารหนี้ ${names.replace(/ \/ /g, ", ")}` };
 }
 async function saveZip(zip, name) {
