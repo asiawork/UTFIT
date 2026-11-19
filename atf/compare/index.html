@@ -165,6 +165,7 @@
   h3 { margin: 22px 0 10px; font-size: 17px; color: var(--navy); display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
   h3 small { font-size: 12.5px; font-weight: 400; color: var(--muted); }
   .tbl-wrap { overflow-x: auto; }
+  .layout > * { min-width: 0; }
   table { width: 100%; border-collapse: collapse; background: #fff; font-variant-numeric: tabular-nums; }
   th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--line); font-size: 13.5px; vertical-align: top; }
   thead th { background: var(--navy); color: #fff; font-weight: 600; font-size: 13px; white-space: nowrap; }
@@ -311,6 +312,11 @@
   #t1 thead th:not(:first-child) { border-bottom: 1px solid #1f2a44; }
   #t1 .fx { background: #dce8fb !important; font-size: 16px !important; font-weight: 700 !important; font-family: var(--font-head); }
   .card:has(> #t1) { border-radius: 0; overflow: hidden; }
+  #t1.wide th:first-child { width: 300px; position: sticky; left: 0; z-index: 2; }
+  #t1.wide tr > :nth-child(2) { border-left: 0; }
+  #t1.wide .fx:last-child { position: sticky; right: 0; z-index: 1; }
+  #t1.wide .fx:last-child::before { content: ""; position: absolute; top: 0; left: -1px; bottom: 0; width: 1px; background: #1f2a44; }
+  #t1.wide th:first-child::after { content: ""; position: absolute; top: 0; right: -1px; bottom: 0; width: 1px; background: #1f2a44; }
   .pastehint { font-size: 12.5px; color: var(--muted); font-weight: 400; margin-right: 4px; }
   @media (max-width: 700px) { .pastehint { display: none; } }
   #t1 select.pick { font: inherit; color: #1b3560; background: transparent; border: 1px dashed #b8c2d3; border-radius: 6px;
@@ -1377,6 +1383,10 @@ const highRiskPicked = () => selected.map(byName).filter(f => f && !f.custom && 
 function renderTable() {
   renderInfos();
   $("t1").innerHTML = tableHTML(modelT1());
+  // กองเยอะ: ให้คอลัมน์กว้างอย่างน้อย 140px แล้วเลื่อนซ้ายขวาได้ คอลัมน์หัวข้อค้างไว้
+  const nCol = Math.max(0, ($("t1").rows[0]?.cells.length || 1) - 1);
+  $("t1").classList.toggle("wide", nCol > 4);
+  $("t1").style.minWidth = nCol > 4 ? (300 + nCol * 140) + "px" : "";
   const hi = highRiskPicked();
   $("t1Note").hidden = !hi.length;
   $("t1Note").innerHTML = hi.length ? `ตารางและไฟล์ <b>Ver. เปรียบเทียบกับรายกอง</b> เทียบได้เฉพาะกองความเสี่ยง 1–4 · ไม่รวม: ${hi.map(f => `${esc(f.name)} (${f.risk ? "ความเสี่ยง " + esc(f.risk) : "ไม่ระบุความเสี่ยง"})`).join(", ")}` : "";
