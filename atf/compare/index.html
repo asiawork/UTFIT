@@ -1669,11 +1669,11 @@ async function dupSlide(zip, path, srcXml, after) {
   sl[after].after(sid); zip.file("ppt/presentation.xml", strOf(pres));
   return np;
 }
-// แบ่งกองเป็นหน้า หน้าละไม่เกิน 4 กอง (เฉลี่ยให้เท่า ๆ กัน) ทุกหน้ามี FIXEDSP
+// แบ่งกองเป็นหน้า หน้าละ 4 กอง ไม่เกิน 2 หน้า (เฉลี่ยให้เท่า ๆ กัน) ทุกหน้ามี FIXEDSP
 const T1_PER_PAGE = 4;
 function splitT1(m) {
   const others = m.cols.filter(c => !isFxCol(c)), fx = m.cols.find(isFxCol);
-  const pages = Math.max(1, Math.ceil(others.length / T1_PER_PAGE)), out = [];
+  const pages = Math.min(2, Math.max(1, Math.ceil(others.length / T1_PER_PAGE))), out = [];   // ไม่เกิน 2 หน้า (9–10 กองได้หน้าละ 5)
   for (let p = 0, at = 0; p < pages; p++) {
     const take = Math.ceil((others.length - at) / (pages - p)), cols = [...others.slice(at, at + take), ...(fx ? [fx] : [])]; at += take;
     out.push({ cols, rows: m.rows.map(([l, vs]) => [l, cols.map(c => vs[m.cols.indexOf(c)])]) });
