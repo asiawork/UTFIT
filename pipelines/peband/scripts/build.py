@@ -160,21 +160,22 @@ def spx_eps_sp():
 
 
 def spx_eps_multpl_q():
-    """multpl: กำไรต่อหุ้นย้อนหลัง 12 เดือน (As Reported) รายไตรมาส"""
-    r = requests.get("https://www.multpl.com/s-p-500-earnings/table/by-quarter", headers=UA, timeout=60)
+    """multpl: กำไรต่อหุ้นย้อนหลัง 12 เดือน (As Reported) รายเดือน"""
+    r = requests.get("https://www.multpl.com/s-p-500-earnings/table/by-month", headers=UA, timeout=60)
     r.raise_for_status()
+    log("multpl final url:", r.url)
+    m = re.search(r"<table.*?</table>", r.text, re.S)
+    log("multpl raw rows:", re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", m.group(0)))[:700] if m else "no table")
     t = pd.read_html(io.StringIO(r.text))[0]
-    log("multpl earnings raw head:\n" + t.head(8).to_string())
+    log("multpl earnings raw head:\n" + t.head(15).to_string())
     t.columns = ["date", "v"]
     t["est"] = t["v"].astype(str).str.contains("estimate", case=False)
     t["date"] = pd.to_datetime(t["date"], errors="coerce")
     t["rep"] = pd.to_numeric(t["v"].astype(str).str.replace(",", "").str.extract(r"([\d.]+)")[0], errors="coerce")
     t = t.dropna(subset=["date", "rep"])
     t = t[~t.est].sort_values("date")
-    # วันที่ในตารางเป็นวันสิ้นไตรมาส
-    t["date"] = t["date"] + pd.offsets.QuarterEnd(0)
     t["op"] = None
-    return t[["date", "op", "rep"]], None, "multpl.com (S&P 500 Earnings รายไตรมาส จาก S&P)"
+    return t[["date", "op", "rep"]], None, "multpl.com (S&P 500 Earnings ย้อนหลัง 12 เดือน รายเดือน)"
 
 
 def spx_eps_multpl(price):
@@ -214,8 +215,8 @@ def build_spx():
         log(f"S&P EPS failed: {e!r} -> multpl quarterly")
         try:
             ttm, fwd, esrc = spx_eps_multpl_q()
-            log("multpl quarterly TTM tail:\n" + ttm.tail(8).to_string())
-            lag = LAG_DAYS
+            log("multpl TTM tail:\n" + ttm.tail(14).to_string())
+            lag = 0
         except Exception as e2:
             log(f"multpl quarterly failed: {e2!r} -> multpl monthly P/E")
             ttm, fwd, esrc = spx_eps_multpl(price)
