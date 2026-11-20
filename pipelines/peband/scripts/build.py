@@ -212,11 +212,12 @@ def build_spx():
         ttm, fwd, esrc = spx_eps_sp()
         lag = LAG_DAYS
     except Exception as e:
-        log(f"S&P EPS failed: {e!r} -> multpl quarterly")
+        log(f"S&P EPS failed: {e!r} -> multpl monthly earnings")
         try:
             ttm, fwd, esrc = spx_eps_multpl_q()
             log("multpl TTM tail:\n" + ttm.tail(14).to_string())
-            lag = 0
+            # ตัวเลขลงวันที่สิ้นเดือนของงวด แต่ประกาศจริงช้ากว่านั้น ~3 เดือน (เทียบกับ Bloomberg ก.ค. 2026 แล้วใกล้สุด)
+            lag = int(os.environ.get("MULTPL_LAG_DAYS", "90"))
         except Exception as e2:
             log(f"multpl quarterly failed: {e2!r} -> multpl monthly P/E")
             ttm, fwd, esrc = spx_eps_multpl(price)
