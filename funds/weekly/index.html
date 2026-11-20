@@ -279,6 +279,7 @@ const NAME_FONT = hasLocalFont("BLS Bold")
 const LV_COLOR = { res: "#c62828", sup: "#0f8a4b", add: "#1b3560" };
 const LV_FONT = hasLocalFont("BLS Text")
   ? '600 27px "BLS Text", "IBM Plex Sans Thai", sans-serif' : '600 27px "IBM Plex Sans Thai", "DejaVu Sans", sans-serif';
+const LV_SHOWN = {};
 const lvKey = (name) => "wg-levels:" + name;
 const fmtNav = (v) => v.toFixed(4);
 
@@ -294,11 +295,12 @@ function loadLevels(f) {
   } else {
     LV.lines = autoLines(f); LV.edited = false;
   }
-  LV.show = false;   // ค่าเริ่มต้น = ไม่แสดงเส้น (เส้นที่ปรับไว้ยังเก็บอยู่ ติ๊ก "แสดงบนกราฟ" เพื่อเปิด)
+  LV.show = !!LV_SHOWN[f.name];   // ค่าเริ่มต้น = ไม่แสดงเส้น จำที่ติ๊กไว้ของแต่ละกองระหว่างเปิดหน้านี้ (PowerPoint ใช้ค่านี้)
   LV.hover = LV.drag = null;
 }
 function saveLevels() {
   LV.edited = true;
+  LV_SHOWN[current.name] = LV.show;
   const lines = LV.lines.map(({ nav, auto, touches, basis }) => ({ nav, auto, touches, basis }));
   try { localStorage.setItem(lvKey(current.name), JSON.stringify({ lines })); } catch (e) {}
 }
@@ -526,7 +528,7 @@ async function downloadImage() {
 }
 
 /* PowerPoint: 1 สไลด์ต่อ 1 กอง เรียงตามลำดับบนหน้าเว็บ กราฟเป็นรูปเดียวกับปุ่มดาวน์โหลด PNG
-   กองที่เปิดอยู่ใช้เส้นแนวรับแนวต้านตามที่เห็นตอนนี้ กองอื่นไม่ใส่เส้น (เหมือนตอนเปิดกองนั้นครั้งแรก) */
+   เส้นแนวรับแนวต้านและชื่อกองบนกราฟใส่ตามที่เลือกไว้บนหน้าเว็บ กองที่ไม่ได้ติ๊ก "แสดงบนกราฟ" จะไม่มีเส้น */
 const loadScript = (src, test) => test() ? Promise.resolve() : new Promise((ok, no) => {
   const sc = document.createElement("script"); sc.src = src; sc.onload = () => ok(); sc.onerror = () => no(new Error(src)); document.head.appendChild(sc);
 });
