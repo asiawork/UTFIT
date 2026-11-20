@@ -174,8 +174,10 @@ def spx_eps_multpl_q():
     t["rep"] = pd.to_numeric(t["v"].astype(str).str.replace(",", "").str.extract(r"([\d.]+)")[0], errors="coerce")
     t = t.dropna(subset=["date", "rep"])
     t = t[~t.est].sort_values("date")
+    # ตารางนี้เกลี่ยค่าระหว่างไตรมาสเป็นรายเดือน ใช้แค่ค่าสิ้นไตรมาส เส้น band จะเปลี่ยนทีละไตรมาสเหมือน Bloomberg
+    t = t[t.date.dt.month.isin([3, 6, 9, 12])]
     t["op"] = None
-    return t[["date", "op", "rep"]], None, "multpl.com (S&P 500 Earnings ย้อนหลัง 12 เดือน รายเดือน)"
+    return t[["date", "op", "rep"]], None, "multpl.com (S&P 500 Earnings ย้อนหลัง 12 เดือน ค่าสิ้นไตรมาส)"
 
 
 def spx_eps_multpl(price):
