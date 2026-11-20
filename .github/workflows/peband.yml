@@ -1,0 +1,44 @@
+name: P/E Band
+
+# หน้า market/peband/ : ราคาดัชนีรายวัน + EPS ย้อนหลัง
+on:
+  schedule:
+    # จันทร์-ศุกร์ 06:30 เวลาไทย (หลังตลาดสหรัฐฯ ปิด)
+    - cron: "30 23 * * 0-4"
+  push:
+    paths: ["pipelines/peband/**", ".github/workflows/peband.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: peband
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install
+        run: pip install requests pandas openpyxl lxml yfinance
+
+      - name: Build data
+        run: python pipelines/peband/scripts/build.py
+
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add market/peband/data
+          if ! git diff --staged --quiet; then
+            git commit -m "P/E Band data $(TZ=Asia/Bangkok date '+%Y-%m-%d')"
+            git pull --rebase -X theirs origin main
+            git push
+          fi

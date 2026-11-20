@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>P/E Band | UTFIT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../shared/utfit.css">
+<script src="../../shared/nav.js" data-section="market" data-title="P/E Band"></script>
+<style>
+  .wrap,.utfit-nav .in{max-width:1180px}
+  .pb-h{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:48px 0 0}
+  .pb-h h1{font-size:44px;line-height:1.1;letter-spacing:-.03em}
+  .pb-h .asof{font-size:13.5px;color:var(--mute)}
+  .bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:22px}
+  .bar .sp{flex:1}
+  .seg{display:inline-flex;flex-wrap:wrap;background:var(--p-50);border-radius:13px;padding:4px}
+  .seg button{font:inherit;font-size:14px;border:0;background:none;color:var(--ink-2);padding:6px 13px;border-radius:10px;cursor:pointer}
+  .seg button[aria-pressed=true]{background:var(--card);color:var(--ink);font-weight:600;box-shadow:0 1px 3px rgba(15,26,60,.12)}
+  .card{margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);padding:22px 24px}
+  .ttl{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+  .ttl h2{font-size:24px}
+  .ttl .tk{color:var(--mute);font-size:14px}
+  .kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:16px}
+  .kpi{background:var(--p-50);border-radius:16px;padding:12px 16px}
+  .kpi .l{font-size:13px;color:var(--mute)}
+  .kpi .v{font:700 26px/1.2 var(--head);margin-top:2px}
+  .kpi .s{font-size:13px;color:var(--ink-2)}
+  .up{color:#c2410c} .dn{color:#0b7a4b}
+  @media (max-width:760px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  .tw{overflow-x:auto;margin-top:16px}
+  table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+  th{font-size:12.5px;font-weight:500;color:var(--mute);padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap;text-align:right}
+  th.g{text-align:center;color:var(--ink);font-weight:600;border-bottom:1px solid var(--line)}
+  th:first-child,td:first-child{text-align:left}
+  td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+  td.b{font-weight:700}
+  td.hl,th.hl{background:var(--p-50)}
+  .sw{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:7px;vertical-align:0}
+  .chart{position:relative;margin-top:16px}
+  .chart svg{display:block;width:100%;height:auto;overflow:visible;font-family:var(--body)}
+  .legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:8px;font-size:13.5px;color:var(--ink-2)}
+  .legend b{color:var(--ink);font-weight:600}
+  .tip{position:absolute;pointer-events:none;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 26px rgba(15,26,60,.16);padding:9px 12px;font-size:13px;line-height:1.55;white-space:nowrap;display:none;z-index:5}
+  .tip .d{font-weight:700;margin-bottom:2px}
+  .tip i{font-style:normal}
+  .tip span{display:flex;justify-content:space-between;gap:16px}
+  .note{margin-top:14px;font-size:13px;color:var(--mute);line-height:1.7}
+  .empty{padding:60px 0;text-align:center;color:var(--mute)}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <div class="pb-h">
+    <h1>P/E Band</h1>
+    <div class="asof" id="asof"></div>
+  </div>
+
+  <div class="bar">
+    <div class="seg" id="idxSeg"></div>
+    <span class="sp"></span>
+    <div class="seg" id="epsSeg" title="ชนิดกำไรต่อหุ้น"></div>
+    <div class="seg" id="perSeg"></div>
+  </div>
+
+  <section class="card" id="main"><div class="empty">กำลังโหลดข้อมูล</div></section>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const PERIODS = [["1Y", 1], ["2Y", 2], ["3Y", 3], ["5Y", 5], ["10Y", 10]];
+const EPS_NAME = { op: "Operating", rep: "As Reported" };
+// สีเส้น: +2SD ... -2SD (ไล่จากแพงไปถูก)
+const BANDS = [
+  { k: 2, c: "#2f56ff", n: "+2 SD" },
+  { k: 1, c: "#e2603a", n: "+1 SD" },
+  { k: 0, c: "#8b5cf6", n: "ค่าเฉลี่ย" },
+  { k: -1, c: "#d4a106", n: "−1 SD" },
+  { k: -2, c: "#14a3b8", n: "−2 SD" },
+];
+const PX_COLOR = "#0f1a3c";
+const st = { idx: null, years: 10, eps: "op", data: {}, list: [] };
+
+const f1 = v => v == null || !isFinite(v) ? "—" : v.toFixed(1);
+const f2 = v => v == null || !isFinite(v) ? "—" : v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const f0 = v => v == null || !isFinite(v) ? "—" : Math.round(v).toLocaleString("en-US");
+const TH_M = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+const thDate = s => { const [y, m, d] = s.split("-").map(Number); return `${d} ${TH_M[m - 1]} ${y}`; };
+
+function seg(el, opts, cur, on) {
+  el.innerHTML = opts.map(([v, t]) => `<button type="button" data-v="${v}" aria-pressed="${String(v) === String(cur)}">${t}</button>`).join("");
+  el.onclick = e => { const b = e.target.closest("button"); if (b) on(b.dataset.v); };
+}
+
+/** คำนวณทุกอย่างของช่วงที่เลือก */
+function calc(d, years, epsKey) {
+  const eps = d.eps[epsKey];
+  const n = d.date.length, last = n - 1;
+  const end = new Date(d.date[last]);
+  const from = new Date(end); from.setFullYear(end.getFullYear() - years);
+  const fromS = from.toISOString().slice(0, 10);
+  let i0 = d.date.findIndex(x => x >= fromS); if (i0 < 0) i0 = 0;
+  const idx = [], pe = [];
+  for (let i = i0; i < n; i++) {
+    const e = eps[i];
+    if (e > 0 && d.price[i] != null) { idx.push(i); pe.push(d.price[i] / e); }
+  }
+  const avg = pe.reduce((a, b) => a + b, 0) / pe.length;
+  const sd = Math.sqrt(pe.reduce((a, b) => a + (b - avg) ** 2, 0) / pe.length);
+  const curPE = d.price[last] / eps[last];
+  const sorted = [...pe].sort((a, b) => a - b);
+  const pct = sorted.filter(v => v <= curPE).length / sorted.length * 100;
+  const fwd = d.fwd && d.fwd[epsKey] ? d.fwd[epsKey] : null;
+  return { idx, pe, avg, sd, curPE, z: (curPE - avg) / sd, pct, eps, last, fwd, startDate: d.date[idx[0]] };
+}
+
+function render() {
+  const d = st.data[st.idx]; if (!d) return;
+  if (!d.eps[st.eps]) st.eps = Object.keys(d.eps)[0];
+  seg($("epsSeg"), Object.keys(d.eps).map(k => [k, EPS_NAME[k]]), st.eps, v => { st.eps = v; render(); });
+  seg($("perSeg"), PERIODS.map(([t, y]) => [y, t]), st.years, v => { st.years = +v; render(); });
+  const c = calc(d, st.years, st.eps), L = c.last, px = d.price[L], e = c.eps[L];
+  const lv = k => c.avg + k * c.sd;
+  $("asof").textContent = `ข้อมูล ณ ${thDate(d.date[L])}`;
+  const zTxt = c.z >= 0 ? `แพงกว่าค่าเฉลี่ย ${f1(c.z)} SD` : `ถูกกว่าค่าเฉลี่ย ${f1(-c.z)} SD`;
+  const per = `${st.years}Y`;
+  const fwdHead = c.fwd ? `ราคาที่ P/E แต่ละระดับ × EPS 12 เดือนข้างหน้า (${f2(c.fwd)})` : "";
+  $("main").innerHTML = `
+    <div class="ttl"><h2>${d.name}</h2><span class="tk">${d.ticker} ${d.ccy}</span></div>
+    <div class="kpis">
+      <div class="kpi"><div class="l">ราคาล่าสุด</div><div class="v">${f2(px)}</div><div class="s">EPS ย้อนหลัง 12 เดือน ${f2(e)}</div></div>
+      <div class="kpi"><div class="l">P/E ปัจจุบัน (LTM)</div><div class="v">${f1(c.curPE)}x</div><div class="s ${c.z >= 0 ? "up" : "dn"}">${zTxt}</div></div>
+      <div class="kpi"><div class="l">ค่าเฉลี่ย ${per} ± 1 SD</div><div class="v">${f1(c.avg)}x</div><div class="s">${f1(lv(-1))}x ถึง ${f1(lv(1))}x (SD ${f1(c.sd)})</div></div>
+      <div class="kpi"><div class="l">เปอร์เซ็นไทล์ ${per}</div><div class="v">${Math.round(c.pct)}</div><div class="s">P/E สูงกว่า ${Math.round(c.pct)}% ของวันในช่วงนี้</div></div>
+    </div>
+    <div class="tw"><table>
+      <thead>
+        <tr><th></th><th class="g" colspan="6">Valuation Metric Bands</th><th class="g" colspan="5">ราคาที่ P/E แต่ละระดับ (EPS ย้อนหลัง 12 เดือน)</th></tr>
+        <tr><th>Metric</th><th>Current</th><th>${per} Avg</th><th>Band (SD)</th><th>Avg+1SD</th><th>Avg−1SD</th><th>EPS LTM</th>
+            <th>Avg−2SD</th><th>Avg−1SD</th><th class="hl">${per} Avg</th><th>Avg+1SD</th><th>Avg+2SD</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="b">LTM P/E</td><td class="b">${f1(c.curPE)}x</td><td>${f1(c.avg)}x</td><td>${f1(c.sd)}</td><td>${f1(lv(1))}x</td><td>${f1(lv(-1))}x</td><td>${f2(e)}</td>
+            <td>${f0(e * lv(-2))}</td><td>${f0(e * lv(-1))}</td><td class="hl b">${f0(e * lv(0))}</td><td>${f0(e * lv(1))}</td><td>${f0(e * lv(2))}</td></tr>
+        ${c.fwd ? `<tr><td colspan="7" style="color:var(--mute);font-size:13px">ใช้ EPS 12 เดือนข้างหน้า ${f2(c.fwd)} (ประมาณการ)</td>
+            <td>${f0(c.fwd * lv(-2))}</td><td>${f0(c.fwd * lv(-1))}</td><td class="hl b">${f0(c.fwd * lv(0))}</td><td>${f0(c.fwd * lv(1))}</td><td>${f0(c.fwd * lv(2))}</td></tr>` : ""}
+      </tbody>
+    </table></div>
+    <div class="chart" id="chart"></div>
+    <div class="legend" id="legend"></div>
+    <div class="note">
+      เส้น band แต่ละเส้น = P/E ระดับนั้น × EPS ย้อนหลัง 12 เดือนของวันนั้น ค่าเฉลี่ยและ SD คิดจาก P/E รายวันในช่วง ${per} (${thDate(c.startDate)} ถึง ${thDate(d.date[L])})<br>
+      ราคาจาก ${d.source.price} EPS แบบ ${EPS_NAME[st.eps]} จาก ${d.source.eps}${d.source.lagDays ? ` เริ่มใช้ EPS ของแต่ละไตรมาสหลังสิ้นไตรมาส ${d.source.lagDays} วัน` : ""}
+      ตัวเลขอาจต่างจาก Bloomberg เล็กน้อย เพราะนิยามกำไรและจังหวะอัปเดต EPS ไม่เหมือนกัน
+    </div>`;
+  drawChart(d, c);
+}
+
+function drawChart(d, c) {
+  const W = 1100, H = 440, m = { l: 8, r: 64, t: 12, b: 30 };
+  const iw = W - m.l - m.r, ih = H - m.t - m.b;
+  const ids = c.idx, n = ids.length;
+  const lv = k => c.avg + k * c.sd;
+  const series = BANDS.map(b => ids.map(i => c.eps[i] * lv(b.k)));
+  const pxs = ids.map(i => d.price[i]);
+  let lo = Infinity, hi = -Infinity;
+  for (const s of [...series, pxs]) for (const v of s) { if (v < lo) lo = v; if (v > hi) hi = v; }
+  const pad = (hi - lo) * 0.05; lo = Math.max(0, lo - pad); hi += pad;
+  const t0 = +new Date(d.date[ids[0]]), t1 = +new Date(d.date[ids[n - 1]]);
+  const X = i => m.l + (+new Date(d.date[ids[i]]) - t0) / (t1 - t0 || 1) * iw;
+  const Y = v => m.t + (1 - (v - lo) / (hi - lo)) * ih;
+  // เส้นแบบขั้นบันได (EPS เปลี่ยนเป็นช่วง)
+  const stepPath = s => { let p = `M${X(0).toFixed(1)},${Y(s[0]).toFixed(1)}`; for (let i = 1; i < n; i++) { const x = X(i).toFixed(1); if (s[i] !== s[i - 1]) p += `H${x}V${Y(s[i]).toFixed(1)}`; } return p + `H${X(n - 1).toFixed(1)}`; };
+  const linePath = s => s.map((v, i) => `${i ? "L" : "M"}${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join("");
+  // แกน Y
+  const rawStep = (hi - lo) / 6, mag = 10 ** Math.floor(Math.log10(rawStep));
+  const step = [1, 2, 2.5, 5, 10].map(k => k * mag).find(s => s >= rawStep);
+  let grid = "";
+  for (let v = Math.ceil(lo / step) * step; v <= hi; v += step)
+    grid += `<line x1="${m.l}" x2="${W - m.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="#e7e9f2"/><text x="${W - m.r + 8}" y="${Y(v) + 4}" font-size="12" fill="#868ca6">${f0(v)}</text>`;
+  // แกน X: ปี หรือ เดือนเมื่อช่วงสั้น
+  const yrs = st.years;
+  let xt = "", prev = "";
+  ids.forEach((id, i) => {
+    const s = d.date[id], key = yrs >= 3 ? s.slice(0, 4) : s.slice(0, 7);
+    if (key !== prev && i > 0) {
+      const [y, mo] = s.split("-").map(Number);
+      const show = yrs >= 3 || (yrs === 2 ? mo % 3 === 1 : true);
+      if (show) {
+        const x = X(i);
+        xt += `<line x1="${x}" x2="${x}" y1="${m.t}" y2="${H - m.b}" stroke="#f0f2f8"/><text x="${x + 4}" y="${H - 10}" font-size="12" fill="#868ca6">${yrs >= 3 ? y : `${TH_M[mo - 1]} ${String(y).slice(2)}`}</text>`;
+      }
+    }
+    prev = key;
+  });
+  const lines = BANDS.map((b, j) => `<path d="${stepPath(series[j])}" fill="none" stroke="${b.c}" stroke-width="1.6" stroke-linejoin="round"/>`).join("");
+  $("chart").innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="กราฟ P/E Band ${d.name}">
+    ${grid}${xt}${lines}
+    <path d="${linePath(pxs)}" fill="none" stroke="${PX_COLOR}" stroke-width="1.7" stroke-linejoin="round"/>
+    <g id="hov" style="display:none"><line id="hx" y1="${m.t}" y2="${H - m.b}" stroke="#868ca6" stroke-dasharray="3 3"/><circle id="hc" r="4" fill="${PX_COLOR}"/></g>
+    <rect id="hit" x="${m.l}" y="${m.t}" width="${iw}" height="${ih}" fill="transparent"/>
+  </svg><div class="tip" id="tip"></div>`;
+  const L = n - 1;
+  $("legend").innerHTML = `<span><i class="sw" style="background:${PX_COLOR}"></i>ราคา <b>${f2(pxs[L])}</b> ที่ P/E ${f1(c.curPE)}x</span>` +
+    BANDS.map((b, j) => `<span><i class="sw" style="background:${b.c}"></i>${b.n} <b>${f2(series[j][L])}</b> ที่ P/E ${f1(lv(b.k))}x</span>`).join("");
+  // hover
+  const svg = $("chart").querySelector("svg"), tip = $("tip");
+  const xs = ids.map((_, i) => X(i));
+  const move = ev => {
+    const r = svg.getBoundingClientRect(), sx = (ev.clientX - r.left) / r.width * W;
+    let a = 0, b = n - 1; while (b - a > 1) { const mid = (a + b) >> 1; xs[mid] < sx ? a = mid : b = mid; }
+    const i = Math.abs(xs[a] - sx) < Math.abs(xs[b] - sx) ? a : b, id = ids[i];
+    $("hov").style.display = ""; $("hx").setAttribute("x1", xs[i]); $("hx").setAttribute("x2", xs[i]);
+    $("hc").setAttribute("cx", xs[i]); $("hc").setAttribute("cy", Y(pxs[i]));
+    tip.innerHTML = `<div class="d">${thDate(d.date[id])}</div><span><i>ราคา</i><b>${f2(pxs[i])}</b></span><span><i>P/E</i><b>${f1(c.pe[i])}x</b></span>` +
+      BANDS.map((bb, j) => `<span><i><i class="sw" style="background:${bb.c}"></i>${bb.n}</i>${f0(series[j][i])}</span>`).join("");
+    tip.style.display = "block";
+    const px = xs[i] / W * r.width, tw = tip.offsetWidth;
+    tip.style.left = (px + 14 + tw > r.width ? px - tw - 14 : px + 14) + "px";
+    tip.style.top = "10px";
+  };
+  const hit = $("hit");
+  hit.addEventListener("pointermove", move);
+  hit.addEventListener("pointerleave", () => { $("hov").style.display = "none"; tip.style.display = "none"; });
+}
+
+async function load(id) {
+  st.idx = id;
+  seg($("idxSeg"), st.list.map(x => [x.id, x.name]), id, v => load(v));
+  if (!st.data[id]) {
+    const r = await fetch(`data/${id}.json?v=${Date.now() / 36e5 | 0}`);
+    st.data[id] = await r.json();
+  }
+  render();
+}
+
+(async () => {
+  try {
+    const r = await fetch(`data/index.json?v=${Date.now() / 36e5 | 0}`);
+    st.list = (await r.json()).items;
+    await load(st.list[0].id);
+  } catch (e) {
+    $("main").innerHTML = `<div class="empty">ยังไม่มีข้อมูล รอระบบดึงข้อมูลรอบแรก</div>`;
+    console.error(e);
+  }
+})();
+</script>
+</body>
+</html>

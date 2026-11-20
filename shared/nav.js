@@ -12,7 +12,7 @@
   if (me.dataset.tool) { document.documentElement.dataset.tool = me.dataset.tool; theme = "light"; }
   applyTheme(theme);
   const root = me.src.replace(/shared\/nav\.js.*$/, "");
-  const SECT = { atf: ["Auto Top Funds", "atf/"], funds: ["รายกองทุน", "funds/"] };
+  const SECT = { atf: ["Auto Top Funds", "atf/"], funds: ["รายกองทุน", "funds/"], market: ["ตลาด", "market/"] };
   const secKey = me.dataset.section, sec = SECT[secKey], title = me.dataset.title;
   const st = document.createElement("style");
   st.textContent = `

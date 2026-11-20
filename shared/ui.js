@@ -41,6 +41,13 @@ window.UI = (() => {
       <rect x="18" y="13" width="16" height="4" rx="2" fill="#fff" opacity=".9"/>
       <rect x="18" y="43" width="28" height="3.5" rx="1.75" fill="#fff" opacity=".55"/>
       <rect x="18" y="50" width="18" height="3.5" rx="1.75" fill="#fff" opacity=".55"/></svg>`,
+    // ตลาด: กราฟราคากับเส้น band
+    market: (id) => `<svg viewBox="0 0 64 64" class="art" aria-hidden="true">
+      <defs><linearGradient id="${id}a" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--g1)"/><stop offset=".6" style="stop-color:var(--g2)"/><stop offset="1" style="stop-color:var(--g3)"/></linearGradient></defs>
+      <rect x="5" y="8" width="54" height="48" rx="10" fill="url(#${id}a)"/>
+      <path d="M12 22h12v-4h14v-3h14" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" opacity=".55"/>
+      <path d="M12 44h12v-3h14v-3h14" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" opacity=".55"/>
+      <path d="M12 36l7-5 6 3 8-9 7 4 12-8" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
   };
   const art = (n) => ART[n] ? ART[n]("ua" + (++gid)) : "";
   const TH = ["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
@@ -49,7 +56,7 @@ window.UI = (() => {
   const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const getJSON = url => fetch(url, { cache: "no-cache" }).then(r => r.ok ? r.json() : null).catch(() => null);
   return {
-    icon, art, thDate, pct, esc,
+    icon, art, thDate, pct, esc, getJSON,
     /** {count, navTo, pending} ของ NAV กองทุนรวม (หน้าเปรียบเทียบ) */
     async navIndex(root) { const d = await getJSON(root + "atf/compare/data/index.json"); return d && { count: d.funds.length, navTo: d.nav_to || d.updated, pending: d.pending || 0 }; },
     /** {updated, funds:[{name, since, asOf, rec}]} ของกราฟ Weekly */

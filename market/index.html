@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ตลาด | UTFIT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/utfit.css">
+<script src="../shared/nav.js" data-section="market"></script>
+<script src="../shared/ui.js"></script>
+</head>
+<body>
+<main class="wrap">
+  <header class="page-h"><span data-art="market"></span><h1>ตลาด</h1></header>
+  <div class="tools">
+    <a class="tool" href="peband/">
+      <span class="shot"><img src="../shared/previews/peband.jpg" alt="" loading="lazy"></span>
+      <span class="name"><span class="ic" data-i="chart"></span><b>P/E Band</b><span class="go" data-g="arrow"></span></span>
+    </a>
+  </div>
+  <footer class="foot">ข้อมูลตลาดจากแหล่งสาธารณะ อัปเดตอัตโนมัติทุกวันทำการ</footer>
+</main>
+<script>document.querySelectorAll("[data-i]").forEach(e => e.innerHTML = UI.icon(e.dataset.i, "ico", !e.closest(".drop")));
+document.querySelectorAll("[data-g]").forEach(e => e.innerHTML = UI.icon(e.dataset.g));
+document.querySelectorAll("[data-art]").forEach(e => e.outerHTML = UI.art(e.dataset.art));</script>
+</body>
+</html>
