@@ -159,6 +159,24 @@ def spx_eps_sp():
     return ttm, fwd, "S&P Dow Jones Indices (sp-500-eps-est.xlsx)"
 
 
+def spx_eps_multpl_q():
+    """multpl: กำไรต่อหุ้นย้อนหลัง 12 เดือน (As Reported) รายไตรมาส"""
+    r = requests.get("https://www.multpl.com/s-p-500-earnings/table/by-quarter", headers=UA, timeout=60)
+    r.raise_for_status()
+    t = pd.read_html(io.StringIO(r.text))[0]
+    log("multpl earnings raw head:\n" + t.head(8).to_string())
+    t.columns = ["date", "v"]
+    t["est"] = t["v"].astype(str).str.contains("estimate", case=False)
+    t["date"] = pd.to_datetime(t["date"], errors="coerce")
+    t["rep"] = pd.to_numeric(t["v"].astype(str).str.replace(",", "").str.extract(r"([\d.]+)")[0], errors="coerce")
+    t = t.dropna(subset=["date", "rep"])
+    t = t[~t.est].sort_values("date")
+    # วันที่ในตารางเป็นวันสิ้นไตรมาส
+    t["date"] = t["date"] + pd.offsets.QuarterEnd(0)
+    t["op"] = None
+    return t[["date", "op", "rep"]], None, "multpl.com (S&P 500 Earnings รายไตรมาส จาก S&P)"
+
+
 def spx_eps_multpl(price):
     r = requests.get("https://www.multpl.com/s-p-500-pe-ratio/table/by-month", headers=UA, timeout=60)
     r.raise_for_status()
@@ -193,9 +211,15 @@ def build_spx():
         ttm, fwd, esrc = spx_eps_sp()
         lag = LAG_DAYS
     except Exception as e:
-        log(f"S&P EPS failed: {e!r} -> multpl")
-        ttm, fwd, esrc = spx_eps_multpl(price)
-        lag = 0
+        log(f"S&P EPS failed: {e!r} -> multpl quarterly")
+        try:
+            ttm, fwd, esrc = spx_eps_multpl_q()
+            log("multpl quarterly TTM tail:\n" + ttm.tail(8).to_string())
+            lag = LAG_DAYS
+        except Exception as e2:
+            log(f"multpl quarterly failed: {e2!r} -> multpl monthly P/E")
+            ttm, fwd, esrc = spx_eps_multpl(price)
+            lag = 0
     eps = daily_eps(price, ttm, lag)
     keep = eps.rep.notna() | eps.op.notna()
     price, eps = price[keep], eps[keep]
