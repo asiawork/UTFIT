@@ -527,7 +527,7 @@ async function downloadImage() {
   } catch (e) { toast("ดาวน์โหลดไม่สำเร็จ"); }
 }
 
-/* PowerPoint: 1 สไลด์ต่อ 1 กอง เรียงตามลำดับบนหน้าเว็บ กราฟเป็นรูปเดียวกับปุ่มดาวน์โหลด PNG
+/* PowerPoint: 1 สไลด์ต่อ 1 กอง เรียงตามลำดับบนหน้าเว็บ มีแค่ชื่อกองกับกราฟ กราฟเป็นรูปเดียวกับปุ่มดาวน์โหลด PNG ขนาดเท่ากัน
    เส้นแนวรับแนวต้านและชื่อกองบนกราฟใส่ตามที่เลือกไว้บนหน้าเว็บ กองที่ไม่ได้ติ๊ก "แสดงบนกราฟ" จะไม่มีเส้น */
 const loadScript = (src, test) => test() ? Promise.resolve() : new Promise((ok, no) => {
   const sc = document.createElement("script"); sc.src = src; sc.onload = () => ok(); sc.onerror = () => no(new Error(src)); document.head.appendChild(sc);
@@ -543,7 +543,8 @@ async function fundChartDataURL(f, keepState) {
   const canLevels = !!(f.axes && f.base_nav);
   if (!keepState && canLevels) loadLevels(f);
   drawOverlay(ctx, c.width, c.height, false, canLevels);
-  return { data: c.toDataURL("image/png"), ratio: c.height / c.width };
+  // ขนาดเท่ารูป PNG ที่ดาวน์โหลดจากหน้าเว็บ (กราฟสร้างที่ 300 dpi)
+  return { data: c.toDataURL("image/png"), w: c.width / 300, h: c.height / 300 };
 }
 async function downloadPptx() {
   const btn = $("pptx"), label = btn.textContent;
@@ -553,30 +554,15 @@ async function downloadPptx() {
     await loadScript("https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js", () => window.PptxGenJS);
     try { await Promise.all([document.fonts.load(LV_FONT), document.fonts.load(NAME_FONT)]); } catch (e) {}
     const pptx = new PptxGenJS(); pptx.layout = "LAYOUT_WIDE";   // 13.333 x 7.5 นิ้ว
-    const NV = "0F1A3C", MUT = "5B6578", POS = "0F8A4B", NEG = "C62828";
+    const NV = "0F1A3C";
     for (const f of DATA.funds) {
+      if (!f.image) continue;
       const s = pptx.addSlide();
-      s.addText(f.name, { x: 0.5, y: 0.3, w: 12.3, h: 0.6, fontFace: "BLS ExtraBold", fontSize: 28, color: NV, margin: 0 });
-      const sub = `แนะนำเมื่อ ${thDate(f.recommend_date)}` + (f.base_nav != null ? `   NAV วันเริ่มต้น ${f.base_nav.toFixed(4)}` +
-        (baseDate(f) !== f.recommend_date ? ` (ณ ${thDate(baseDate(f))})` : "") : "") +
-        (f.peers.length ? `   เทียบกับ ${f.peers.join(" / ")}` : "");
-      s.addText(sub, { x: 0.5, y: 0.92, w: 12.3, h: 0.35, fontFace: "BLS Text", fontSize: 14, color: MUT, margin: 0 });
-      let chartBottom = 1.4;
-      if (f.image) {
-        current = f;
-        const { data, ratio } = await fundChartDataURL(f, f === keep);
-        let w = 12.3, h = w * ratio;
-        if (h > 4.8) { h = 4.8; w = h / ratio; }
-        s.addImage({ data, x: 0.5 + (12.3 - w) / 2, y: 1.45, w, h });
-        chartBottom = 1.45 + h;
-      }
-      const r = f.returns || {};
-      const head = COLS.map(([, label]) => ({ text: label, options: { fontFace: "BLS Text", fontSize: 12, color: MUT, align: "center" } }));
-      const vals = COLS.map(([k]) => ({ text: fmt(r[k]), options: { fontFace: "BLS Bold", fontSize: 18, align: "center",
-        color: r[k] == null ? MUT : r[k] >= 0 ? POS : NEG } }));
-      s.addTable([head, vals], { x: 0.5, y: Math.max(chartBottom + 0.15, 6.35), w: 12.3, colW: Array(COLS.length).fill(12.3 / COLS.length),
-        rowH: [0.3, 0.45], border: { type: "none" }, fill: { color: "F4F6FA" }, valign: "middle", margin: 0 });
-      if (r.as_of) s.addText(`NAV ณ ${thDate(r.as_of)}`, { x: 0.5, y: 7.12, w: 12.3, h: 0.25, fontFace: "BLS Text", fontSize: 10, color: MUT, align: "right", margin: 0 });
+      current = f;
+      const { data, w, h } = await fundChartDataURL(f, f === keep);
+      const x = (13.333 - w) / 2, y = (7.5 - h) / 2;
+      s.addText(f.name, { x, y: y - 0.45, w, h: 0.4, fontFace: "BLS Bold", fontSize: 18, color: NV, margin: 0, valign: "bottom" });
+      s.addImage({ data, x, y, w, h });
     }
     await pptx.writeFile({ fileName: `Top-Funds-Weekly-${DATA.updated}.pptx` });
   } catch (e) {
