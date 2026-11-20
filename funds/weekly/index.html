@@ -158,6 +158,7 @@
         <label class="tgl"><input type="checkbox" id="nameShow"> แสดงชื่อกองบนกราฟ</label>
         <button class="btn primary" id="copy">Copy รูป</button>
         <button class="btn ghost" id="download">ดาวน์โหลด PNG</button>
+        <button class="btn ghost" id="pptx">ดาวน์โหลด PowerPoint ทุกกอง</button>
       </div>
     </div>
     <div class="chart" id="chartBox"><img id="img" alt=""><canvas id="ov" aria-label="คลิกเพื่อเพิ่มเส้นแนวรับแนวต้าน"></canvas></div>
@@ -524,6 +525,66 @@ async function downloadImage() {
   } catch (e) { toast("ดาวน์โหลดไม่สำเร็จ"); }
 }
 
+/* PowerPoint: 1 สไลด์ต่อ 1 กอง เรียงตามลำดับบนหน้าเว็บ กราฟเป็นรูปเดียวกับปุ่มดาวน์โหลด PNG
+   กองที่เปิดอยู่ใช้เส้นแนวรับแนวต้านตามที่เห็นตอนนี้ กองอื่นไม่ใส่เส้น (เหมือนตอนเปิดกองนั้นครั้งแรก) */
+const loadScript = (src, test) => test() ? Promise.resolve() : new Promise((ok, no) => {
+  const sc = document.createElement("script"); sc.src = src; sc.onload = () => ok(); sc.onerror = () => no(new Error(src)); document.head.appendChild(sc);
+});
+const loadImg = (src) => new Promise((ok, no) => { const im = new Image(); im.onload = () => ok(im); im.onerror = no; im.src = src; });
+async function fundChartDataURL(f, keepState) {
+  const im = keepState ? $("img") : await loadImg(UTFIT_SRC.weekly + f.image + "?v=" + (f.image_ver || DATA.updated));
+  if (!im.complete || !im.naturalWidth) await new Promise((ok, no) => { im.onload = ok; im.onerror = no; });
+  const c = document.createElement("canvas");
+  c.width = im.naturalWidth; c.height = im.naturalHeight;
+  const ctx = c.getContext("2d");
+  ctx.drawImage(im, 0, 0);
+  const canLevels = !!(f.axes && f.base_nav);
+  if (!keepState && canLevels) loadLevels(f);
+  drawOverlay(ctx, c.width, c.height, false, canLevels);
+  return { data: c.toDataURL("image/png"), ratio: c.height / c.width };
+}
+async function downloadPptx() {
+  const btn = $("pptx"), label = btn.textContent;
+  btn.disabled = true; btn.textContent = "กำลังสร้าง…";
+  const keep = current, keepLV = { ...LV, lines: LV.lines.map(l => ({ ...l })) };
+  try {
+    await loadScript("https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js", () => window.PptxGenJS);
+    try { await Promise.all([document.fonts.load(LV_FONT), document.fonts.load(NAME_FONT)]); } catch (e) {}
+    const pptx = new PptxGenJS(); pptx.layout = "LAYOUT_WIDE";   // 13.333 x 7.5 นิ้ว
+    const NV = "0F1A3C", MUT = "5B6578", POS = "0F8A4B", NEG = "C62828";
+    for (const f of DATA.funds) {
+      const s = pptx.addSlide();
+      s.addText(f.name, { x: 0.5, y: 0.3, w: 12.3, h: 0.6, fontFace: "BLS ExtraBold", fontSize: 28, color: NV, margin: 0 });
+      const sub = `แนะนำเมื่อ ${thDate(f.recommend_date)}` + (f.base_nav != null ? `   NAV วันเริ่มต้น ${f.base_nav.toFixed(4)}` +
+        (baseDate(f) !== f.recommend_date ? ` (ณ ${thDate(baseDate(f))})` : "") : "") +
+        (f.peers.length ? `   เทียบกับ ${f.peers.join(" / ")}` : "");
+      s.addText(sub, { x: 0.5, y: 0.92, w: 12.3, h: 0.35, fontFace: "BLS Text", fontSize: 14, color: MUT, margin: 0 });
+      let chartBottom = 1.4;
+      if (f.image) {
+        current = f;
+        const { data, ratio } = await fundChartDataURL(f, f === keep);
+        let w = 12.3, h = w * ratio;
+        if (h > 4.8) { h = 4.8; w = h / ratio; }
+        s.addImage({ data, x: 0.5 + (12.3 - w) / 2, y: 1.45, w, h });
+        chartBottom = 1.45 + h;
+      }
+      const r = f.returns || {};
+      const head = COLS.map(([, label]) => ({ text: label, options: { fontFace: "BLS Text", fontSize: 12, color: MUT, align: "center" } }));
+      const vals = COLS.map(([k]) => ({ text: fmt(r[k]), options: { fontFace: "BLS Bold", fontSize: 18, align: "center",
+        color: r[k] == null ? MUT : r[k] >= 0 ? POS : NEG } }));
+      s.addTable([head, vals], { x: 0.5, y: Math.max(chartBottom + 0.15, 6.35), w: 12.3, colW: Array(COLS.length).fill(12.3 / COLS.length),
+        rowH: [0.3, 0.45], border: { type: "none" }, fill: { color: "F4F6FA" }, valign: "middle", margin: 0 });
+      if (r.as_of) s.addText(`NAV ณ ${thDate(r.as_of)}`, { x: 0.5, y: 7.12, w: 12.3, h: 0.25, fontFace: "BLS Text", fontSize: 10, color: MUT, align: "right", margin: 0 });
+    }
+    await pptx.writeFile({ fileName: `Top-Funds-Weekly-${DATA.updated}.pptx` });
+  } catch (e) {
+    console.error(e); toast("สร้าง PowerPoint ไม่สำเร็จ");
+  } finally {
+    current = keep; Object.assign(LV, keepLV); renderLevels();
+    btn.disabled = false; btn.textContent = label;
+  }
+}
+
 function renderTable() {
   const head = "<tr><th>กองทุน</th><th>วันแนะนำ</th>" + COLS.map(c => `<th>${c[1]}</th>`).join("") + "<th>NAV วันเริ่มต้น</th><th>NAV ล่าสุด</th></tr>";
   const rows = DATA.funds.map(f => {
@@ -575,6 +636,7 @@ async function init() {
 
 $("copy").addEventListener("click", copyImage);
 $("download").addEventListener("click", downloadImage);
+$("pptx").addEventListener("click", downloadPptx);
 setupLevels();
 $("copyTable").addEventListener("click", copyTable);
 init();
