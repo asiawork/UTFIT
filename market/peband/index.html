@@ -119,6 +119,7 @@ function render() {
   const d = st.data[st.idx]; if (!d) return;
   if (!d.eps[st.eps]) st.eps = Object.keys(d.eps)[0];
   seg($("epsSeg"), Object.keys(d.eps).map(k => [k, EPS_NAME[k]]), st.eps, v => { st.eps = v; render(); });
+  $("epsSeg").hidden = Object.keys(d.eps).length < 2;
   seg($("perSeg"), PERIODS.map(([t, y]) => [y, t]), st.years, v => { st.years = +v; render(); });
   const c = calc(d, st.years, st.eps), L = c.last, px = d.price[L], e = c.eps[L];
   const lv = k => c.avg + k * c.sd;
@@ -151,7 +152,7 @@ function render() {
     <div class="legend" id="legend"></div>
     <div class="note">
       เส้น band แต่ละเส้น = P/E ระดับนั้น × EPS ย้อนหลัง 12 เดือนของวันนั้น ค่าเฉลี่ยและ SD คิดจาก P/E รายวันในช่วง ${per} (${thDate(c.startDate)} ถึง ${thDate(d.date[L])})<br>
-      ราคาจาก ${d.source.price} EPS แบบ ${EPS_NAME[st.eps]} จาก ${d.source.eps}${d.source.lagDays ? ` เริ่มใช้ EPS ของแต่ละไตรมาสหลังสิ้นไตรมาส ${d.source.lagDays} วัน` : ""}
+      ราคาจาก ${d.source.price} EPS แบบ ${EPS_NAME[st.eps]} จาก ${d.source.eps}${d.source.lagDays ? ` เริ่มใช้ EPS ของแต่ละงวดหลังสิ้นงวด ${d.source.lagDays} วัน (ช่วงที่บริษัทประกาศงบ)` : ""}
       ตัวเลขอาจต่างจาก Bloomberg เล็กน้อย เพราะนิยามกำไรและจังหวะอัปเดต EPS ไม่เหมือนกัน
     </div>`;
   drawChart(d, c);
