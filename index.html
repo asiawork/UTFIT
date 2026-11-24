@@ -73,15 +73,6 @@
         <li><a href="funds/masterfund/">ค้นหาด้วย Master Fund<span data-i="arrow"></span></a></li>
       </ul>
     </div>
-    <div class="cat">
-      <a class="cat-h" href="market/">
-        <div class="top"><span data-art="market"></span><span class="go" data-i="arrow"></span></div>
-        <div><h2>ตลาด</h2><div class="tag" id="marketTag"></div></div>
-      </a>
-      <ul>
-        <li><a href="market/peband/">P/E Band<span data-i="arrow"></span></a></li>
-      </ul>
-    </div>
   </div>
 
   <footer class="foot">UTFIT</footer>
@@ -103,8 +94,6 @@ document.querySelectorAll("[data-art]").forEach(e => e.outerHTML = UI.art(e.data
   const [nav, wk, file] = await Promise.all([UI.navIndex(""), UI.weekly(""), UI.atfFile()]);
 
   $("atfTag").innerHTML = file ? `<i class="dot ok"></i>ไฟล์ Model Performance พร้อมใช้` : `<i class="dot warn"></i>ยังไม่มีไฟล์ Model Performance ในเครื่องนี้`;
-  const pb = await UI.getJSON("market/peband/data/index.json");
-  if (pb) $("marketTag").innerHTML = `<i class="dot ok"></i>P/E Band อัปเดต ${UI.thDate(pb.updated)}`;
   if (wk) $("fundsTag").innerHTML = `<i class="dot ok"></i>กราฟ Weekly อัปเดต ${UI.thDate(wk.updated)}`;
 })();
 </script>
