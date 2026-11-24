@@ -16,7 +16,7 @@ on:
         options: [update, selftest]
         default: update
       end_date:
-        description: "ข้อมูลถึงวันที่ (YYYY-MM-DD เช่น 2026-11-23) เว้นว่าง = NAV ล่าสุดที่มี"
+        description: "ข้อมูลถึงวันที่ (YYYY-MM-DD) เว้นว่าง = วันจันทร์ล่าสุด / latest = NAV ล่าสุดที่มี"
         type: string
         required: false
         default: ""

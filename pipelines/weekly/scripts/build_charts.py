@@ -10,7 +10,7 @@ import hashlib
 import json
 import os
 import re
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 import matplotlib
@@ -58,9 +58,19 @@ def read_funds():
     return out
 
 
-# วันสุดท้ายของข้อมูล (ไม่บังคับ) ตั้งผ่านช่อง end_date ตอนกด Run workflow ว่าง = ใช้ NAV ล่าสุดที่มี
-_end = os.environ.get("END_DATE", "").strip()
-END_DATE = date.fromisoformat(_end) if _end else None
+# วันสุดท้ายของข้อมูล: ค่าเริ่มต้น = วันจันทร์ล่าสุด (เวลาไทย) เพราะรายงานใช้ตัวเลขวันจันทร์
+# รันวันไหนก็ได้ตัวเลขชุดเดียวกัน ตั้งเองได้ที่ช่อง end_date ตอนกด Run workflow (YYYY-MM-DD หรือ latest = NAV ล่าสุดที่มี)
+def _end_date():
+    v = os.environ.get("END_DATE", "").strip().lower()
+    if v == "latest":
+        return None
+    if v:
+        return date.fromisoformat(v)
+    th = (datetime.now(timezone.utc) + timedelta(hours=7)).date()
+    return th - timedelta(days=th.weekday())
+
+
+END_DATE = _end_date()
 
 
 def load_nav(name):
