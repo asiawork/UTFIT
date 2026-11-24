@@ -108,6 +108,9 @@ button,input,select{font-family:inherit;font-size:inherit;color:inherit}
 .rb-tbl tfoot td{text-align:right;padding:7px 10px;border-top:2px solid var(--navy);font-weight:600}
 .rb-tbl tfoot td:first-child{text-align:left}
 .rb-dot{cursor:pointer}
+.rbp-pick{display:grid;gap:10px;margin-bottom:4px}
+.rbp-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.rbp-row>span{width:52px;font-weight:600;color:var(--navy);font-size:14px}
 @media print{.rb-sec{display:none !important}}
 body.capturing #rbFig{padding:14px 18px 16px}
 .rb-figbar{display:flex;justify-content:flex-end;margin:8px 0 -4px}
@@ -1690,10 +1693,14 @@ function drawRebound(r){
   const plan = PLANS.find(p => p.id === state.plan);
   const show = !!(plan && plan.no && r.port && r.pf);
   box.hidden = head.hidden = !show; if (!show) return;
-  const pf = r.pf, n = pf.dates.length, med = r.port.cycDDMedian;
+  reboundInto(box, {pf: r.pf, med: r.port.cycDDMedian, start: r.start, end: r.end, okey: state.plan});
+}
+// the whole rebound block for one series (a plan or a single model); R = {pf, med, start, end, okey, title}
+function reboundInto(box, R){
+  const pf = R.pf, n = pf.dates.length, med = R.med, r = R;
   if (med == null){ box.innerHTML = `<div class="eq-head"><h3>ผลตอบแทนหลังจุดต่ำสุดของ Drawdown</h3></div><div class="hint">ช่วงนี้ไม่มี cycle ให้คำนวณ Median Drawdown</div>`; return; }
   const ev = reboundEvents(pf, med), key = e => pf.dates[e.t];
-  const off = (EQ.rbOff = EQ.rbOff || {})[state.plan] = (EQ.rbOff[state.plan] || new Set());   // troughs left out, per plan
+  const off = (EQ.rbOff = EQ.rbOff || {})[R.okey] = (EQ.rbOff[R.okey] || new Set());   // troughs left out, per plan / model
   const inc = e => !off.has(key(e)), use = ev.filter(inc);
   let pk = -Infinity; const dd = pf.nav.map(x => { if (x > pk) pk = x; return x / pk - 1; });
   const cum = pf.nav.map(x => x / pf.nav[0] - 1);
@@ -1796,24 +1803,53 @@ function drawRebound(r){
       <tr><td colspan="5">โอกาสเป็นบวก</td><td>${pos(0)}</td><td>${pos(1)}</td><td></td></tr></tfoot></table></div>` : '';
 
   box.innerHTML = `<div class="eq-head"><h3>ผลตอบแทนหลังจุดต่ำสุดของ Drawdown</h3><div class="eq-ctl"><span>${thDate(r.start)} – ${thDate(r.end)}</span></div></div>
-    <div class="hint" style="margin:0 0 6px">ช่วงที่พอร์ตลงจากจุดสูงสุดลึกกว่า Median Drawdown ของแผน (<b>${pct(med)}</b>) แล้วดูผลตอบแทนเมื่อผ่านไป 3 และ 6 เดือนนับจากจุดต่ำสุดของช่วงนั้น ค่าเฉลี่ยคิดจากรอบที่เลือกไว้</div>
+    <div class="hint" style="margin:0 0 6px">ช่วงที่ลงจากจุดสูงสุดลึกกว่า Median Drawdown (<b>${pct(med)}</b>) แล้วดูผลตอบแทนเมื่อผ่านไป 3 และ 6 เดือนนับจากจุดต่ำสุดของช่วงนั้น ค่าเฉลี่ยคิดจากรอบที่เลือกไว้</div>
     ${ev.length ? kpi : `<div class="hint">ไม่มีช่วงที่ลงลึกกว่า Median ในช่วงเวลานี้</div>`}
     <div class="rb-figbar"><button class="secimg" id="rbCopy" title="คัดลอกรูปกราฟไปวางใน PowerPoint / LINE / อีเมล">⧉ คัดลอกรูปกราฟ</button></div>
     <div id="rbFig" class="rb-fig rb-big">
-    <div class="eq-sub">ผลตอบแทนสะสม</div>
+    <div class="eq-sub">ผลตอบแทนสะสม${R.title ? ' ' + esc(R.title) : ''}</div>
     <div class="eq-legend"><span><i class="box" style="background:rgba(227,25,27,.18)"></i>ช่วงลงจากจุดสูงสุดถึงจุดต่ำสุด</span><span><i class="box" style="background:rgba(22,163,74,.22)"></i>6 เดือนหลังจุดต่ำสุด (เฉพาะกราฟบน)</span><span><i class="thin" style="border-color:#8b93a3;border-top-style:dashed"></i>จุดต่ำสุด ไป 3M ไป 6M</span></div>${svg1}
     <div class="eq-sub rb-ddh"><span>Drawdown</span><span class="rb-med"><i></i>Median ${pct(med)}</span></div>${svg2}
     </div>
     ${tbl}`;
 
-  const toggle = d => { off.has(d) ? off.delete(d) : off.add(d); drawRebound(r); };
+  const toggle = d => { off.has(d) ? off.delete(d) : off.add(d); reboundInto(box, R); };
   box.querySelectorAll('[data-rb]').forEach(el => {
     el.addEventListener('click', ev2 => { if (ev2.target.tagName === 'INPUT') ev2.preventDefault(); toggle(el.dataset.rb); });
   });
   box.querySelector('#rbCopy').onclick = () => copyImg('rbFig', box.querySelector('#rbCopy'));
-  box.querySelectorAll('[data-rball]').forEach(b => b.onclick = () => { if (b.dataset.rball === '1') off.clear(); else ev.forEach(e => off.add(key(e))); drawRebound(r); });
+  box.querySelectorAll('[data-rball]').forEach(b => b.onclick = () => { if (b.dataset.rball === '1') off.clear(); else ev.forEach(e => off.add(key(e))); reboundInto(box, R); });
 }
 
+/* ================= Rebound page: every plan 1-5 and every model (atf/wealthplan/rebound/ loads this page in an iframe) ================= */
+const RBP = {sel: 'p1'};
+function reboundPage(root){
+  const plans = PLANS.filter(p => p.no), models = MODEL_ORDER.filter(m => FULL.models[m]);
+  if (!state.period) setPeriod('all');
+  const draw = () => {
+    const isPlan = plans.some(p => p.id === RBP.sel);
+    let R = null, title = '';
+    if (isPlan){
+      const p = plans.find(q => q.id === RBP.sel);
+      state.plan = p.id; state.weights[p.id] = {...p.w};
+      const r = compute(); title = `แผน ${p.no} ${p.name}`;
+      if (r.pf && r.port) R = {pf: r.pf, med: r.port.cycDDMedian, start: r.start, end: r.end, okey: 'rbp-' + p.id, title};
+    } else {
+      const m = RBP.sel, pf = WP.portfolio(FULL, {[m]: 1}, state.start, state.end); title = m;
+      if (pf.dates.length >= 30) R = {pf, med: WP.stats(pf, MODEL_INFO[m].filter / 100).cycDDMedian, start: pf.dates[0], end: pf.dates[pf.dates.length - 1], okey: 'rbm-' + m, title};
+    }
+    const btn = (id, label, sub) => `<button role="radio" aria-checked="${id === RBP.sel}" data-sel="${id}">${label}${sub ? `<small>${esc(sub)}</small>` : ''}</button>`;
+    root.innerHTML = `<div class="rbp-pick">
+        <div class="rbp-row"><span>แผน</span><div class="period-opts" role="radiogroup" aria-label="แผน">${plans.map(p => btn(p.id, 'แผน ' + p.no, p.name)).join('')}</div></div>
+        <div class="rbp-row"><span>โมเดล</span><div class="period-opts" role="radiogroup" aria-label="โมเดล">${models.map(m => btn(m, m)).join('')}</div></div>
+        <div id="rbpPeriod"></div></div>
+      <section class="eq rb-sec" id="rb">${R ? '' : '<div class="hint">ข้อมูลในช่วงนี้ไม่พอ</div>'}</section>`;
+    root.querySelectorAll('[data-sel]').forEach(b => b.onclick = () => { RBP.sel = b.dataset.sel; draw(); });
+    const pb = root.querySelector('#rbpPeriod'); pb.innerHTML = periodHTML(false, true); bindPeriod(pb, draw);
+    if (R) reboundInto(root.querySelector('#rb'), R);
+  };
+  draw();
+}
 /* ================= equity curve + drawdown ================= */
 const EQ = {models:false};
 function niceStep(range, n){ const raw = range / n, p = Math.pow(10, Math.floor(Math.log10(raw))), f = raw / p; return (f < 1.5 ? 1 : f < 3 ? 2 : f < 7 ? 5 : 10) * p; }
@@ -2691,7 +2727,7 @@ window.addEventListener('afterprint', fit);
 if (window.ResizeObserver) new ResizeObserver(fit).observe(document.body);
 
 /* ใช้โดยหน้ารายงานประจำเดือน (monthly/) */
-window.WPAPI = {PLANS, state, compute, slideHTML, stretchTable, addPlanSlide, detailSlideHTML, fitDetailHead, addDetailSlide, DETAIL_PAGES, goldTextGradient, svgToPNG, BRAND, setPeriod, SLIDE_PERIOD,
+window.WPAPI = {PLANS, state, compute, reboundPage, slideHTML, stretchTable, addPlanSlide, detailSlideHTML, fitDetailHead, addDetailSlide, DETAIL_PAGES, goldTextGradient, svgToPNG, BRAND, setPeriod, SLIDE_PERIOD,
   ready: () => !!(DATA && DATA.csv && FULL), lastDate: () => lastDate(), dates: () => DATA.csv.dates.slice(), csvName: () => DATA && DATA.csvName};
 
 /* boot */
