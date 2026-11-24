@@ -54,7 +54,11 @@ def read_funds():
         except ValueError:
             rec = None
         peers = [p.strip() for p in re.split(r"[;|]", r.get("compare_with") or "") if p.strip()]
-        out.append({"name": name, "rec": rec, "peers": peers})
+        try:   # วันเลิกแนะนำ (ไม่บังคับ) กราฟและผลตอบแทนหยุดที่วันนี้
+            end = date.fromisoformat((r.get("end_date") or "").strip())
+        except ValueError:
+            end = None
+        out.append({"name": name, "rec": rec, "peers": peers, "end": end})
     return out
 
 
@@ -303,11 +307,14 @@ def main():
         series = {}
         for n in [f["name"], *f["peers"]]:
             s = load_nav(n)
-            if s is not None:
+            if s is not None and f["end"]:
+                s = s[s.index <= pd.Timestamp(f["end"])]
+            if s is not None and len(s):
                 series[n] = s
         entry = {
             "name": f["name"],
             "recommend_date": f["rec"].isoformat() if f["rec"] else None,
+            "end_date": f["end"].isoformat() if f["end"] else None,
             "peers": [p for p in f["peers"] if p in series],
             "missing": {n: report.get("missing", {}).get(n, "ยังไม่มีข้อมูล NAV")
                         for n in [f["name"], *f["peers"]] if n not in series},
