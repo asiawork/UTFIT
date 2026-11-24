@@ -96,6 +96,18 @@ button,input,select{font-family:inherit;font-size:inherit;color:inherit}
 .hp-tbl tr.na td{color:var(--muted);text-align:left}
 .pbar{display:inline-block;width:90px;height:7px;border-radius:999px;background:#fde2e2;overflow:hidden}
 .pbar i{display:block;height:100%;background:#16a34a}
+.rb-kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:10px 0 4px}
+.rb-kpi>div{border:1px solid var(--line);border-radius:8px;padding:9px 12px}
+.rb-kpi span{display:block;font-size:12px;color:var(--muted)}
+.rb-kpi b{display:block;font-size:20px;font-variant-numeric:tabular-nums;margin-top:2px}
+.rb-kpi small{display:block;font-size:12px;color:var(--muted);margin-top:1px}
+.rb-tbl tbody tr{cursor:pointer}
+.rb-tbl tbody tr:hover{background:#f6f8fb}
+.rb-tbl tbody tr.on{background:#eef3fb}
+.rb-tbl tbody tr.on td:first-child{font-weight:600;color:var(--accent)}
+.rb-tbl tfoot td{text-align:right;padding:7px 10px;border-top:2px solid var(--navy);font-weight:600}
+.rb-tbl tfoot td:first-child{text-align:left}
+.rb-dot{cursor:pointer}
 .hp-say{font-size:13.5px;line-height:1.6;margin-top:4px}
 .tab:disabled{opacity:.35;cursor:not-allowed}
 .eq{background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px 18px 12px;margin-top:14px}
@@ -1284,6 +1296,8 @@ function renderResult(err){
       <section class="eq" id="cal" aria-label="ผลตอบแทนรายปี"></section>
       <div class="sechead secgap noprint"><span>Returns by Holding Period</span></div>
       <section class="eq" id="hold" aria-label="ผลตอบแทนตามระยะเวลาถือครอง"></section>
+      <div class="sechead secgap noprint" id="rbHead"><span>Rebound after Drawdown</span></div>
+      <section class="eq noprint" id="rb" aria-label="ผลตอบแทนหลังจุดต่ำสุดของ Drawdown"></section>
     </div>`;
   app.querySelector('#backBtn').onclick = () => { state.view = 'input'; render(); window.scrollTo(0, 0); };
   const pb = app.querySelector('#periodBox');
@@ -1338,6 +1352,7 @@ function update(){
   drawEquity(r);
   drawCalendar(r);
   drawHolding(r);
+  drawRebound(r);
   const sumEl = document.getElementById('sum');
   if (sumEl){ sumEl.className = 'sum ' + (Math.abs(r.sum-100) < 1e-6 ? 'good' : 'bad'); sumEl.lastElementChild.textContent = fmtNum(r.sum) + '%'; }
   const thrEl = document.getElementById('thr');
@@ -1633,6 +1648,119 @@ function drawHolding(r){
     ${chart}${tbl}
     <div class="hint" style="margin-top:6px">คิดจากมูลค่าพอร์ต ณ สิ้นเดือน ทุกเดือนที่เป็นไปได้ในช่วง ${thDate(r.start)} – ${thDate(r.end)} จึงไม่รวมความผันผวนระหว่างเดือน${r.div ? ' · ไม่รวมเงินปันผล DAA' : ''}</div>`;
   box.querySelectorAll('[data-hold]').forEach(b => b.onclick = () => { EQ.hold = b.dataset.hold; drawHolding(r); });
+}
+
+/* ================= rebound after drawdown (plans 1-5 only, screen only, not in reports) ================= */
+// episode = peak -> (trough) -> back to that peak; kept when its trough is deeper than the plan's Median Drawdown.
+// return after h months = NAV(last date <= EDATE(trough, h)) / NAV(trough) - 1
+const RB_H = [3, 6];
+function reboundEvents(pf, med){
+  const v = pf.nav, d = pf.dates, n = v.length, out = [], last = d[n - 1];
+  let pk = 0;
+  for (let i = 1; i < n; i++){
+    if (v[i] >= v[pk]){ pk = i; continue; }
+    let k = i, t = i; while (k < n && v[k] < v[pk]){ if (v[k] < v[t]) t = k; k++; }
+    const dd = v[t] / v[pk] - 1;
+    if (dd < med){
+      const after = RB_H.map(h => { const tg = WP.edate(d[t], h); if (tg > last) return null;
+        let j = t; while (j + 1 < n && d[j + 1] <= tg) j++; return {h, j, r: v[j] / v[t] - 1}; });
+      out.push({pk, t, k: k < n ? k : null, dd, after});
+    }
+    pk = k < n ? k : pk; i = k;
+  }
+  return out;
+}
+function drawRebound(r){
+  const box = document.getElementById('rb'), head = document.getElementById('rbHead'); if (!box) return;
+  const plan = PLANS.find(p => p.id === state.plan);
+  const on = !!(plan && plan.no && r.port && r.pf);
+  box.hidden = head.hidden = !on; if (!on) return;
+  const pf = r.pf, n = pf.dates.length, med = r.port.cycDDMedian;
+  if (med == null){ box.innerHTML = `<div class="eq-head"><h3>ผลตอบแทนหลังจุดต่ำสุดของ Drawdown</h3></div><div class="hint">ช่วงนี้ไม่มี cycle ให้คำนวณ Median Drawdown</div>`; return; }
+  const ev = reboundEvents(pf, med);
+  let pk = -Infinity; const dd = pf.nav.map(x => { if (x > pk) pk = x; return x / pk - 1; });
+  const cum = pf.nav.map(x => x / pf.nav[0] - 1);
+  if (EQ.rb == null || !ev.some(e => pf.dates[e.t] === EQ.rb)){ const deep = ev.reduce((a, e) => !a || e.dd < a.dd ? e : a, null); EQ.rb = deep ? pf.dates[deep.t] : null; }
+  const sel = ev.find(e => pf.dates[e.t] === EQ.rb), si = ev.indexOf(sel);
+
+  const W = 1100, padL = 56, padR = 18, padT = 14, padB = 26, H1 = 280, H2 = 200;
+  const x = i => padL + (W - padL - padR) * i / (n - 1);
+  let lo = Math.min(0, ...cum), hi = Math.max(0, ...cum); const st = niceStep(hi - lo || 0.01, 5); lo = Math.floor(lo / st) * st; hi = Math.ceil(hi / st) * st;
+  const y1 = v => padT + (H1 - padT - padB) * (hi - v) / (hi - lo);
+  const ddMin = Math.min(...dd, med), st2 = niceStep(-ddMin || 0.001, 4), ddLo = Math.floor(ddMin / st2) * st2 || -st2;
+  const y2 = v => padT + (H2 - padT - padB) * (0 - v) / (0 - ddLo);
+  const dp = s => s * 100 < 1 ? (s * 100 < 0.1 ? 2 : 1) : 0;
+  const tk = (a, b, s) => { const o = []; for (let v = a; v <= b + 1e-12; v += s) o.push(+v.toFixed(10)); return o; };
+  const years = []; let ly = null; pf.dates.forEach((d, i) => { const yy = d.slice(0, 4); if (yy !== ly){ if (ly && d.slice(5, 7) === '01') years.push({i, yy}); ly = yy; } });
+  const grid = (H, yf, ticks, s) => ticks.map(v => `<line x1="${padL}" x2="${W-padR}" y1="${yf(v)}" y2="${yf(v)}" stroke="${Math.abs(v) < 1e-12 ? '#8b93a3' : '#e6e9ef'}"/><text x="${padL-8}" y="${yf(v)+4}" text-anchor="end" font-size="11.5" fill="#6a7488">${(v > 0 ? '+' : '') + (v*100).toFixed(dp(s))}%</text>`).join('')
+    + years.map(o => `<line x1="${x(o.i)}" x2="${x(o.i)}" y1="${padT}" y2="${H-padB}" stroke="#eef0f4"/><text x="${x(o.i)}" y="${H-8}" text-anchor="middle" font-size="11.5" fill="#6a7488">${o.yy}</text>`).join('');
+  const path = (v, yf) => v.map((val, i) => (i ? 'L' : 'M') + x(i).toFixed(1) + ',' + yf(val).toFixed(1)).join('');
+  const lbl = (X, Y, t, c, anchor = 'middle') => `<text x="${X}" y="${Y}" text-anchor="${anchor}" font-size="12.5" font-weight="600" fill="${c}" stroke="#fff" stroke-width="4" paint-order="stroke">${t}</text>`;
+  const rc = v => v == null ? '#8b93a3' : v >= 0 ? 'var(--pos)' : 'var(--neg)';
+
+  // selected episode overlays
+  let o1 = '', o2 = '';
+  if (sel){
+    const end6 = sel.after[1] ? sel.after[1].j : n - 1;
+    o1 += `<rect x="${x(sel.pk)}" y="${padT}" width="${Math.max(2, x(sel.t)-x(sel.pk))}" height="${H1-padT-padB}" fill="rgba(227,25,27,.08)"/>
+      <rect x="${x(sel.t)}" y="${padT}" width="${Math.max(2, x(end6)-x(sel.t))}" height="${H1-padT-padB}" fill="rgba(22,163,74,.09)"/>`;
+    o2 += `<rect x="${x(sel.pk)}" y="${padT}" width="${Math.max(2, x(sel.t)-x(sel.pk))}" height="${H2-padT-padB}" fill="rgba(227,25,27,.08)"/>
+      <rect x="${x(sel.t)}" y="${padT}" width="${Math.max(2, x(end6)-x(sel.t))}" height="${H2-padT-padB}" fill="rgba(22,163,74,.09)"/>`;
+  }
+  let m1 = '';
+  if (sel){
+    const ty = y1(cum[sel.t]);
+    m1 += `<circle cx="${x(sel.pk)}" cy="${y1(cum[sel.pk])}" r="4.5" fill="var(--navy)"/>
+      <line x1="${x(sel.t)}" x2="${x(sel.t)}" y1="${padT}" y2="${H1-padB}" stroke="var(--neg)" stroke-dasharray="3 3"/>
+      <circle cx="${x(sel.t)}" cy="${ty}" r="5" fill="var(--neg)"/>${lbl(x(sel.t), ty + 20, 'ต่ำสุด ' + pct(sel.dd), 'var(--neg)')}`;
+    sel.after.forEach((a, q) => { if (!a) return; const ay = y1(cum[a.j]);
+      m1 += `<line x1="${x(a.j)}" x2="${x(a.j)}" y1="${padT}" y2="${H1-padB}" stroke="#8b93a3" stroke-dasharray="3 3"/>
+        <line x1="${x(sel.t)}" x2="${x(a.j)}" y1="${ty}" y2="${ay}" stroke="${rc(a.r)}" stroke-width="1.5" stroke-dasharray="5 3"/>
+        <circle cx="${x(a.j)}" cy="${ay}" r="5" fill="${rc(a.r)}"/>${lbl(x(a.j) + (q ? 8 : -8), ay - 12 - q * 2, a.h + 'M ' + pct(a.r), rc(a.r), q ? 'start' : 'end')}`; });
+  }
+  const dots2 = ev.map((e, q) => `<g class="rb-dot" data-rb="${pf.dates[e.t]}"><circle cx="${x(e.t)}" cy="${y2(e.dd)}" r="${e === sel ? 6.5 : 4.5}" fill="${e === sel ? 'var(--accent)' : '#fff'}" stroke="var(--accent)" stroke-width="2"/>
+      <circle cx="${x(e.t)}" cy="${y2(e.dd)}" r="11" fill="transparent"/><title>${thDate(pf.dates[e.t])}: ${pct(e.dd)}</title></g>`).join('');
+  const medY = y2(med);
+  const svg1 = `<svg viewBox="0 0 ${W} ${H1}" role="img" aria-label="ผลตอบแทนสะสม">${o1}${grid(H1, y1, tk(lo, hi, st), st)}
+    <path d="${path(cum, y1)}" fill="none" stroke="var(--navy)" stroke-width="2.4" stroke-linejoin="round"/>${m1}</svg>`;
+  const svg2 = `<svg viewBox="0 0 ${W} ${H2}" role="img" aria-label="Drawdown" id="rbDD">${o2}${grid(H2, y2, tk(ddLo, 0, st2), st2)}
+    <path d="${path(dd, y2)}L${x(n-1)},${y2(0)}L${x(0)},${y2(0)}Z" fill="rgba(227,25,27,.16)"/>
+    <path d="${path(dd, y2)}" fill="none" stroke="var(--neg)" stroke-width="1.3"/>
+    <line x1="${padL}" x2="${W-padR}" y1="${medY}" y2="${medY}" stroke="var(--navy)" stroke-width="1.6" stroke-dasharray="7 4"/>
+    <rect x="${W-padR-150}" y="${medY-21}" width="150" height="18" rx="3" fill="var(--navy)"/>
+    <text x="${W-padR-75}" y="${medY-8}" text-anchor="middle" font-size="12" font-weight="600" fill="#fff">Median ${pct(med)}</text>
+    ${dots2}</svg>`;
+
+  const avg = a => a.length ? a.reduce((s, v) => s + v, 0) / a.length : null;
+  const col = q => ev.map(e => e.after[q]).filter(Boolean).map(a => a.r);
+  const kpi = sel ? `<div class="rb-kpi">
+      <div><span>จุดสูงสุดก่อนลง</span><b>${thDate(pf.dates[sel.pk])}</b></div>
+      <div><span>จุดต่ำสุด</span><b class="neg">${pct(sel.dd)}</b><small>${thDate(pf.dates[sel.t])}</small></div>
+      ${sel.after.map((a, q) => `<div><span>${RB_H[q]} เดือนหลังจุดต่ำสุด</span>${a ? `<b class="${cls(a.r)}">${pct(a.r)}</b><small>${thDate(pf.dates[a.j])}</small>` : `<b style="color:var(--muted)">—</b><small>ข้อมูลยังไม่ครบ ${RB_H[q]} เดือน</small>`}</div>`).join('')}
+      <div><span>กลับถึงจุดสูงสุดเดิม</span>${sel.k != null ? `<b>${recShort(WP.daysBetween(pf.dates[sel.t], pf.dates[sel.k]))}</b><small>${thDate(pf.dates[sel.k])} นับจากจุดต่ำสุด</small>` : `<b style="color:var(--muted)">ยังไม่กลับ</b>`}</div>
+    </div>` : '';
+  const cell = a => a ? `<td class="${cls(a.r)}">${pct(a.r)}</td>` : `<td style="color:var(--muted)">—</td>`;
+  const pos = q => { const c = col(q); return c.length ? Math.round(c.filter(v => v > 0).length / c.length * 100) + '%' : '—'; };
+  const tbl = ev.length ? `<div class="eq-sub" style="margin-top:16px">ทุกช่วงที่ลงลึกกว่า Median (${ev.length} ช่วง)</div>
+    <div class="hp-tbl rb-tbl"><table><thead><tr><th>#</th><th>จุดสูงสุดก่อนลง</th><th>จุดต่ำสุด</th><th>Drawdown</th><th>3 เดือนหลังจุดต่ำสุด</th><th>6 เดือนหลังจุดต่ำสุด</th><th>กลับถึงจุดสูงสุดเดิม</th></tr></thead><tbody>
+    ${ev.map((e, q) => `<tr class="${e === sel ? 'on' : ''}" data-rb="${pf.dates[e.t]}"><td>${q + 1}</td><td>${thDate(pf.dates[e.pk])}</td><td>${thDate(pf.dates[e.t])}</td>
+      <td class="neg">${pct(e.dd)}</td>${cell(e.after[0])}${cell(e.after[1])}<td>${e.k != null ? recShort(WP.daysBetween(pf.dates[e.t], pf.dates[e.k])) : 'ยังไม่กลับ'}</td></tr>`).join('')}
+    </tbody><tfoot><tr><td colspan="3">เฉลี่ย</td><td class="neg">${pct(avg(ev.map(e => e.dd)))}</td><td class="${cls(avg(col(0)))}">${pct(avg(col(0)))}</td><td class="${cls(avg(col(1)))}">${pct(avg(col(1)))}</td><td></td></tr>
+      <tr><td colspan="4">โอกาสเป็นบวก</td><td>${pos(0)}</td><td>${pos(1)}</td><td></td></tr></tfoot></table></div>` : '';
+
+  box.innerHTML = `<div class="eq-head"><h3>ผลตอบแทนหลังจุดต่ำสุดของ Drawdown</h3><div class="eq-ctl"><span>${thDate(r.start)} – ${thDate(r.end)}</span></div></div>
+    <div class="hint" style="margin:0 0 6px">ช่วงที่พอร์ตลงจากจุดสูงสุดลึกกว่า Median Drawdown ของแผน (<b>${pct(med)}</b>) แล้วดูผลตอบแทนเมื่อผ่านไป 3 และ 6 เดือนนับจากจุดต่ำสุดของช่วงนั้น</div>
+    ${ev.length ? '' : `<div class="hint">ไม่มีช่วงที่ลงลึกกว่า Median ในช่วงเวลานี้</div>`}
+    ${kpi}
+    <div class="eq-sub">ผลตอบแทนสะสม</div>${svg1}
+    <div class="eq-sub">Drawdown</div>${svg2}
+    ${tbl}`;
+  const pick = d => { EQ.rb = d; drawRebound(r); };
+  box.querySelectorAll('[data-rb]').forEach(el => el.onclick = () => pick(el.dataset.rb));
+  const s2 = box.querySelector('#rbDD');
+  s2.addEventListener('click', e => { if (e.target.closest('.rb-dot') || !ev.length) return;
+    const b = s2.getBoundingClientRect(), px = (e.clientX - b.left) / (b.width / W), i = (px - padL) / (W - padL - padR) * (n - 1);
+    const hit = ev.find(q => i >= q.pk && i <= (q.k ?? n - 1)); if (hit) pick(pf.dates[hit.t]); });
 }
 
 /* ================= equity curve + drawdown ================= */
