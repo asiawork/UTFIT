@@ -58,11 +58,18 @@ def read_funds():
     return out
 
 
+# วันสุดท้ายของข้อมูล (ไม่บังคับ) ตั้งผ่านช่อง end_date ตอนกด Run workflow ว่าง = ใช้ NAV ล่าสุดที่มี
+_end = os.environ.get("END_DATE", "").strip()
+END_DATE = date.fromisoformat(_end) if _end else None
+
+
 def load_nav(name):
     p = NAV_DIR / f"{slug(name)}.csv"
     if not p.exists():
         return None
     s = pd.read_csv(p, parse_dates=["date"]).set_index("date")["nav"].sort_index()
+    if END_DATE:   # ตัดข้อมูลให้จบที่วันที่เลือกตอนกด Run workflow
+        s = s[s.index <= pd.Timestamp(END_DATE)]
     return s if len(s) else None
 
 
@@ -275,13 +282,13 @@ def main():
     funds = read_funds()
     report_p = ROOT / "data" / "fetch_report.json"
     report = json.loads(report_p.read_text()) if report_p.exists() else {"funds": {}, "missing": {}}
-    today = date.today()
+    today = END_DATE or date.today()
 
     CHARTS.mkdir(parents=True, exist_ok=True)
     for old in CHARTS.glob("*.png"):
         old.unlink()
 
-    out = {"updated": today.isoformat(), "funds": []}
+    out = {"updated": date.today().isoformat(), "funds": []}
     for f in funds:
         series = {}
         for n in [f["name"], *f["peers"]]:

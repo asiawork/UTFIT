@@ -15,6 +15,11 @@ on:
         type: choice
         options: [update, selftest]
         default: update
+      end_date:
+        description: "ข้อมูลถึงวันที่ (YYYY-MM-DD เช่น 2026-11-23) เว้นว่าง = NAV ล่าสุดที่มี"
+        type: string
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -50,6 +55,8 @@ jobs:
 
       - name: Build charts
         if: ${{ github.event.inputs.mode != 'selftest' }}
+        env:
+          END_DATE: ${{ github.event.inputs.end_date }}
         run: python pipelines/weekly/scripts/build_charts.py
 
       - name: Commit
