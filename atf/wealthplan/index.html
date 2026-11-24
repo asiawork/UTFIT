@@ -112,6 +112,9 @@ button,input,select{font-family:inherit;font-size:inherit;color:inherit}
 body.capturing #rbFig{padding:14px 18px 16px}
 .rb-figbar{display:flex;justify-content:flex-end;margin:8px 0 -4px}
 .rb-fig{background:#fff;padding:4px 2px}
+.rb-ddh{display:flex;align-items:center;gap:18px}
+.rb-med{display:inline-flex;align-items:center;gap:8px;color:var(--navy);font-weight:700}
+.rb-med i{display:inline-block;width:26px;border-top:2px dashed var(--navy)}
 .rb-big .eq-sub{font-size:16px;margin-top:12px}
 .rb-big .eq-legend{font-size:14.5px;gap:6px 20px}
 .rb-tbl tbody tr.off td{color:#b0b7c3}
@@ -1747,8 +1750,7 @@ function drawRebound(r){
     <path d="${path(dd, y2)}L${x(n-1)},${y2(0)}L${x(0)},${y2(0)}Z" fill="rgba(227,25,27,.16)"/>
     <path d="${path(dd, y2)}" fill="none" stroke="var(--neg)" stroke-width="1.3"/>
     <line x1="${padL}" x2="${W-padR}" y1="${medY}" y2="${medY}" stroke="var(--navy)" stroke-width="1.6" stroke-dasharray="7 4"/>
-    <rect x="${W-padR-200}" y="${medY-28}" width="200" height="25" rx="4" fill="var(--navy)"/>
-    <text x="${W-padR-100}" y="${medY-9.5}" text-anchor="middle" font-size="17" font-weight="700" fill="#fff">Median ${pct(med)}</text>
+    
     ${dots2}</svg>`;
 
   // averages of the chosen episodes
@@ -1779,7 +1781,7 @@ function drawRebound(r){
     <div id="rbFig" class="rb-fig rb-big">
     <div class="eq-sub">ผลตอบแทนสะสม</div>
     <div class="eq-legend"><span><i class="box" style="background:rgba(227,25,27,.18)"></i>ช่วงลงจากจุดสูงสุดถึงจุดต่ำสุด</span><span><i class="box" style="background:rgba(22,163,74,.22)"></i>6 เดือนหลังจุดต่ำสุด (เฉพาะกราฟบน)</span><span><i class="thin" style="border-color:#8b93a3;border-top-style:dashed"></i>จุดต่ำสุด ไป 3M ไป 6M</span></div>${svg1}
-    <div class="eq-sub">Drawdown</div>${svg2}
+    <div class="eq-sub rb-ddh"><span>Drawdown</span><span class="rb-med"><i></i>Median ${pct(med)}</span></div>${svg2}
     </div>
     ${tbl}`;
 
