@@ -73,6 +73,10 @@ def _end_date():
 END_DATE = _end_date()
 
 
+NEW_FUND_DAYS = 30        # แนะนำมาไม่ถึงกี่วัน ถึงนับว่าเป็นกองใหม่
+NEW_FUND_LOOKBACK = 92    # กองใหม่แสดงย้อนหลังกี่วัน (ประมาณ 3 เดือน)
+
+
 def load_nav(name):
     p = NAV_DIR / f"{slug(name)}.csv"
     if not p.exists():
@@ -186,7 +190,9 @@ def find_levels(s: pd.Series):
     return out
 
 
-def draw(fund, series: dict, start: pd.Timestamp, path: Path):
+def draw(fund, series: dict, start: pd.Timestamp, path: Path, view_from=None):
+    """start = วันที่เป็น 0% (วันแนะนำ) view_from = วันแรกที่แสดงบนกราฟ (กองที่เพิ่งแนะนำย้อนดูก่อนวันแนะนำได้)"""
+    view_from = min(view_from, start) if view_from is not None else start
     plt.rcParams.update({"font.family": "DejaVu Sans", "font.size": 7})
     fig, ax = plt.subplots(figsize=(FIG_W, FIG_H), dpi=DPI)
     fig.patch.set_facecolor("white")
@@ -198,10 +204,11 @@ def draw(fund, series: dict, start: pd.Timestamp, path: Path):
     tags, lo, hi, x_end = [], 0.0, 0.0, start
     for name, color, lw, z in lines:
         s = series[name]
-        s = s[s.index >= start]
-        if len(s) < 2:
+        base = nav_on_or_before(s, start) or (float(s[s.index >= start].iloc[0]) if (s.index >= start).any() else None)
+        s = s[s.index >= view_from]
+        if len(s) < 2 or not base:
             continue
-        y = (s / s.iloc[0] - 1) * 100
+        y = (s / base - 1) * 100
         ax.plot(y.index, y.values, color=color, lw=lw, zorder=z, solid_joinstyle="round")
         tags.append((float(y.iloc[-1]), color, z))
         lo, hi = min(lo, y.min()), max(hi, y.max())
@@ -224,7 +231,7 @@ def draw(fund, series: dict, start: pd.Timestamp, path: Path):
         lambda v, _: f"{v:.0f}%" if abs(v - round(v)) < 1e-9 else f"{v:g}%"))
 
     # แกน x ปรับตามช่วงเวลา
-    span = (x_end - start).days
+    span = (x_end - view_from).days
     if span <= 75:
         ax.xaxis.set_major_locator(mdates.WeekdayLocator(byweekday=mdates.MO, interval=2))
         ax.xaxis.set_major_formatter(mdates.DateFormatter("%d %b"))
@@ -238,7 +245,7 @@ def draw(fund, series: dict, start: pd.Timestamp, path: Path):
         ax.xaxis.set_major_locator(mdates.MonthLocator(bymonth=(1, 4, 7, 10)))
         ax.xaxis.set_major_formatter(mdates.DateFormatter("%b %Y"))
     ax.tick_params(colors=MUTED, length=0, labelsize=6.5, pad=3)
-    ax.set_xlim(start, x_end)
+    ax.set_xlim(view_from, x_end)
 
     rng = (hi - lo) or 1
     ax.set_ylim(lo - rng * 0.06, hi + rng * 0.18)
@@ -257,8 +264,10 @@ def draw(fund, series: dict, start: pd.Timestamp, path: Path):
     ax.plot([start], [0], marker="o", ms=3.2, color=NAVY, mec="white", mew=0.8,
             zorder=6, clip_on=False)
     lbl = f"{start.day} {start:%b %Y}"
-    start_txt = ax.annotate(lbl, xy=(0, 0), xycoords="axes fraction", xytext=(0, -3),
-                            textcoords="offset points", ha="left", va="top",
+    if view_from < start:   # ย้อนดูก่อนวันแนะนำ: ขีดเส้นตั้งที่วันแนะนำ ป้ายวันที่อยู่ใต้เส้นนั้น
+        ax.axvline(start, color=NAVY, lw=0.8, ls=(0, (4, 3)), zorder=3)
+    start_txt = ax.annotate(lbl, xy=(start, 0), xycoords=("data", "axes fraction"), xytext=(0, -3),
+                            textcoords="offset points", ha="left" if view_from >= start else "center", va="top",
                             fontsize=6.5, fontweight="bold", color=NAVY, annotation_clip=False)
 
     # ซ่อนเฉพาะตัวเลขแกนที่ทับ tag / ป้ายวันแนะนำจริงๆ
@@ -323,11 +332,16 @@ def main():
                 start = start_date(s0, f["rec"])
             else:
                 start = max(pd.Timestamp(today - timedelta(days=LOOKBACK_DAYS)), s0.index[0])
+            # เพิ่งแนะนำ (ยังไม่ครบ 1 เดือน) แสดงย้อนหลัง 3 เดือน ให้เห็นทิศทางก่อนวันแนะนำ
+            view_from = start
+            if f["rec"] and (s0.index[-1] - pd.Timestamp(f["rec"])).days < NEW_FUND_DAYS:
+                view_from = max(start - pd.Timedelta(days=NEW_FUND_LOOKBACK), s0.index[0])
             img = f"charts/{slug(f['name'])}.png"
-            entry["axes"] = draw(f, series, start, OUT / img)
-            shown = s0[s0.index >= start]
-            entry["base_nav"] = round(float(shown.iloc[0]), 4)    # NAV ที่ 0% บนกราฟ
-            entry["base_date"] = shown.index[0].date().isoformat()  # วันของ NAV เริ่มต้น (อาจเป็นวันทำการก่อนวันแนะนำ)
+            entry["axes"] = draw(f, series, start, OUT / img, view_from)
+            shown = s0[s0.index >= view_from]
+            base_s = s0[s0.index <= start]
+            entry["base_nav"] = round(float(base_s.iloc[-1]), 4)    # NAV ที่ 0% บนกราฟ
+            entry["base_date"] = base_s.index[-1].date().isoformat()  # วันของ NAV เริ่มต้น (อาจเป็นวันทำการก่อนวันแนะนำ)
             entry["last_nav"] = round(float(shown.iloc[-1]), 4)
             entry["levels"] = find_levels(shown)
             entry["image"] = img

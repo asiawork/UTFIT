@@ -340,6 +340,8 @@ def main():
         # ดึงตั้งแต่ก่อนวันแนะนำเล็กน้อย (เผื่อวันแนะนำเป็นวันหยุด)
         if f["name"] in rec_dates:
             start = rec_dates[f["name"]] - timedelta(days=14)
+            if (today - rec_dates[f["name"]]).days < 45:   # กองใหม่ หน้าเว็บแสดงย้อนหลัง 3 เดือน
+                start = rec_dates[f["name"]] - timedelta(days=110)
         else:
             start = today - timedelta(days=LOOKBACK_DAYS)
         for n in [f["name"], *f["peers"]]:
