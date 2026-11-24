@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Rebound after Drawdown</title>
+<link rel="stylesheet" href="../../../shared/utfit.css">
+<style>
+  .mh{padding:44px 0 18px}
+  .mh h1{font-size:40px;line-height:1.15;letter-spacing:-.02em}
+  .mh .sub{margin-top:8px;color:#6b7290;font-size:15px;max-width:760px;line-height:1.6}
+  .empty{border:1.5px dashed #d5daea;border-radius:18px;padding:40px;text-align:center;color:#6b7290;margin:20px 0 60px}
+  .empty a{color:#2f56ff;font-weight:600}
+  #view{width:100%;border:0;display:block;margin-bottom:60px;min-height:400px}
+</style>
+</head>
+<body>
+<script src="../../../shared/nav.js" data-section="atf" data-title="Rebound after Drawdown"></script>
+<main class="wrap">
+  <div class="mh">
+    <h1>Rebound after Drawdown</h1>
+    <div class="sub" id="sub">กำลังโหลดข้อมูล…</div>
+  </div>
+  <div class="empty" id="empty" hidden>ยังไม่มีไฟล์ Model Performance ในเบราว์เซอร์นี้ อัปโหลดได้ที่หน้า <a href="../../">Auto Top Funds</a></div>
+  <iframe id="view" title="Rebound after Drawdown" allow="clipboard-write"></iframe>
+</main>
+<script>
+/* ใช้โค้ดคำนวณและวาดกราฟของหน้า Wealth Solution Plan (โหลดไว้ใน iframe) ตัวเลขจึงตรงกับหน้านั้นเสมอ
+   ส่วนที่วาดอยู่ใน reboundPage() / reboundInto() ของ atf/wealthplan/index.html */
+const $ = id => document.getElementById(id);
+const frame = $('view');
+let W, D;
+
+function waitReady(){
+  return new Promise(res => {
+    const t0 = Date.now();
+    (function tick(){
+      W = frame.contentWindow; D = frame.contentDocument;
+      const api = W && W.WPAPI;
+      if (api && (api.ready() || Date.now() - t0 > 6000)) return res(api);
+      setTimeout(tick, 150);
+    })();
+  });
+}
+function fit(){ if (D && D.documentElement) frame.style.height = D.getElementById('rroot').offsetHeight + 8 + 'px'; }
+
+frame.addEventListener('load', async () => {
+  const api = await waitReady();
+  if (!api || !api.ready()){ $('sub').textContent = ''; $('empty').hidden = false; frame.hidden = true; return; }
+  $('sub').textContent = `ช่วงที่ลงจากจุดสูงสุดลึกกว่า Median Drawdown แล้วผลตอบแทนเมื่อผ่านไป 3 และ 6 เดือนนับจากจุดต่ำสุด ข้อมูลจาก ${api.csvName() || 'ไฟล์ Model Performance'}`;
+  const css = D.createElement('style');
+  css.textContent = `html,body{background:transparent!important;margin:0!important;padding:0!important;overflow:hidden}
+    body > *:not(#rroot){display:none!important}
+    #rroot{display:block;padding:2px}
+    #rroot .eq{margin-top:14px}`;
+  D.head.appendChild(css);
+  const root = D.createElement('div'); root.id = 'rroot'; D.body.appendChild(root);
+  api.reboundPage(root);
+  new W.ResizeObserver(fit).observe(root);
+  fit();
+});
+// โหลดหน้า Wealth Solution Plan ใหม่ทุกครั้ง ไม่ใช้ของที่เบราว์เซอร์เก็บไว้
+frame.src = '../?v=' + Date.now();
+</script>
+</body>
+</html>
