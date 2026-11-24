@@ -1701,7 +1701,8 @@ function drawRebound(r){
   const W = 1100, padL = 66, padR = 18, padT = 14, padB = 30, H1 = 320, H2 = 170, H3 = 260;
   const x = i => padL + (W - padL - padR) * i / (n - 1);
   let lo = Math.min(0, ...cum), hi = Math.max(0, ...cum); const st = niceStep(hi - lo || 0.01, 5); lo = Math.floor(lo / st) * st; hi = Math.ceil(hi / st) * st;
-  const y1 = v => padT + (H1 - padT - padB) * (hi - v) / (hi - lo);
+  const yTop = hi + (hi - lo) * 0.12, yBot = lo - (hi - lo) * 0.07;
+  const y1 = v => padT + (H1 - padT - padB) * (yTop - v) / (yTop - yBot);
   const ddMin = Math.min(...dd, med), st2 = niceStep(-ddMin || 0.001, 4), ddLo = Math.floor(ddMin / st2) * st2 || -st2;
   const y2 = v => padT + (H2 - padT - padB - 8) * (0 - v) / (0 - ddLo);
   const dp = s => s * 100 < 1 ? (s * 100 < 0.1 ? 2 : 1) : 0;
@@ -1731,13 +1732,33 @@ function drawRebound(r){
   { const stp = Math.max(1, Math.floor(n / 400)); for (let i = 0; i < n; i += stp){ const X = x(i), Y = y1(cum[i]); P1.push({x0: X - 1.5, x1: X + 1.5, y0: Y - 2.5, y1: Y + 2.5}); } }   // keep labels off the line
   const items = [];
   use.forEach(e => items.push({e, pri: 0, i: e.t, dir: 1, txt: '', val: pct(e.dd), c: 'var(--neg)'}));
-  use.forEach(e => e.after.forEach((a, k) => { if (a) items.push({e, pri: 2 - k, i: a.j, dir: -1, txt: RB_H[k] + 'M', val: pct(a.r), c: rc(a.r)}); }));
   items.sort((p, q) => p.pri - q.pri || p.i - q.i);
-  const lbl1 = items.map(o => { const cx = x(o.i), cy = y1(cum[o.i]), w = (o.txt.length + o.val.length + 1) * 10.4 + 8;
-    let k = 0, b; do { const yy = o.dir > 0 ? cy + 25 + k * 21 : cy - 12 - k * 21; b = {x0: cx - w / 2, x1: cx + w / 2, y0: yy - 16, y1: yy + 4, yy}; k++; } while (hit(b) && k < 14);
+  // try spots near the point first (preferred side, then right/left of it, then further out on either side);
+  // a spot must stay inside the plot and must not touch the line, a dot or another label
+  const inPlot = b => b.x0 >= padL + 2 && b.x1 <= W - padR - 2 && b.y0 >= padT && b.y1 <= H1 - padB - 2;
+  const lbl1 = items.map(o => { const px = x(o.i), py = y1(cum[o.i]), w = (o.txt.length + o.val.length + 1) * 10.4 + 8, h = 20;
+    const at = (cx, yy) => { cx = Math.min(Math.max(cx, padL + 2 + w / 2), W - padR - 2 - w / 2); return {x0: cx - w / 2, x1: cx + w / 2, y0: yy - 16, y1: yy + 4, yy, cx}; };
+    const v = (side, k) => at(px, side > 0 ? py + 25 + k * 22 : py - 12 - k * 22);
+    const c = [v(o.dir, 0), at(px + 10 + w / 2, py + 6), at(px - 10 - w / 2, py + 6), v(-o.dir, 0)];
+    for (let k = 1; k < 9; k++) c.push(v(o.dir, k), v(-o.dir, k));
+    const b = c.find(q => inPlot(q) && !hit(q)) || c.find(q => !hit(q)) || c[0];
     P1.push(b);
-    return `<g class="rb-dot" data-rb="${key(o.e)}">${k > 1 ? `<line x1="${cx}" x2="${cx}" y1="${o.dir > 0 ? cy + 5 : cy - 5}" y2="${o.dir > 0 ? b.y0 : b.y1}" stroke="#c3c9d4" stroke-width="1"/>` : ''}
-      <text x="${cx}" y="${b.yy}" text-anchor="middle" font-size="18" font-weight="700" stroke="#fff" stroke-width="5" paint-order="stroke">${o.txt ? `<tspan fill="#6a7488">${o.txt}</tspan><tspan fill="${o.c}" dx="4">${o.val}</tspan>` : `<tspan fill="${o.c}">${o.val}</tspan>`}</text>${tip(o.e, ev.indexOf(o.e))}</g>`; }).join('');
+    const nx = Math.min(Math.max(px, b.x0), b.x1), ny = Math.min(Math.max(py, b.y0), b.y1), far = Math.hypot(nx - px, ny - py) > 16;
+    return `<g class="rb-dot" data-rb="${key(o.e)}">${far ? `<line x1="${px}" y1="${py}" x2="${nx}" y2="${ny}" stroke="#aeb6c3" stroke-width="1"/>` : ''}
+      <text x="${b.cx}" y="${b.yy}" text-anchor="middle" font-size="18" font-weight="700" stroke="#fff" stroke-width="5" paint-order="stroke">${o.txt ? `<tspan fill="#6a7488">${o.txt}</tspan><tspan fill="${o.c}" dx="4">${o.val}</tspan>` : `<tspan fill="${o.c}">${o.val}</tspan>`}</text>${tip(o.e, ev.indexOf(o.e))}</g>`; }).join('');
+  // 3M and 6M as one two-line block over each green band, sitting just above the line inside that band
+  const blk = use.filter(e => e.after.some(Boolean)).map(e => {
+    const j6 = (e.after[1] || e.after[0]).j, rows = e.after.map((a, k) => ({t: RB_H[k] + 'M', v: a ? pct(a.r) : '—', c: rc(a && a.r)}));
+    const w = Math.max(...rows.map(q => (q.t.length + q.v.length + 1) * 10.4)) + 8, h = rows.length * 22;
+    let cx = (x(e.t) + x(j6)) / 2; cx = Math.min(Math.max(cx, padL + 2 + w / 2), W - padR - 2 - w / 2);
+    let top = Infinity, bot = -Infinity; for (let i = 0; i < n; i++){ const X = x(i); if (X < cx - w / 2 - 4 || X > cx + w / 2 + 4) continue; const Y = y1(cum[i]); top = Math.min(top, Y); bot = Math.max(bot, Y); }
+    const box = y0 => ({x0: cx - w / 2, x1: cx + w / 2, y0, y1: y0 + h});
+    let b = null;
+    for (let k = 0; k < 8 && !b; k++){ const q = box(top - 10 - h - k * 22); if (q.y0 >= padT && !hit(q)) b = q; }
+    for (let k = 0; k < 8 && !b; k++){ const q = box(bot + 12 + k * 22); if (q.y1 <= H1 - padB - 2 && !hit(q)) b = q; }
+    if (!b) b = box(Math.max(padT, top - 10 - h));
+    P1.push(b);
+    return `<g class="rb-dot" data-rb="${key(e)}"><text x="${b.x0 + 4}" y="${b.y0 + 17}" font-size="18" font-weight="700" stroke="#fff" stroke-width="5" paint-order="stroke">${rows.map((q, k) => `<tspan x="${b.x0 + 4}" dy="${k ? 22 : 0}" fill="#6a7488">${q.t}</tspan><tspan fill="${q.c}" dx="6">${q.v}</tspan>`).join('')}</text>${tip(e, ev.indexOf(e))}</g>`; }).join('');
   const top1 = Math.min(0, ...P1.map(b => b.y0 - 2)), bot1 = Math.max(H1, ...P1.map(b => b.y1 + padB));
   const medY = y2(med);
   // light bands for every chosen episode: peak -> trough (red), trough -> 6M (green)
@@ -1745,7 +1766,7 @@ function drawRebound(r){
     return `<rect x="${x(e.pk)}" y="${padT}" width="${Math.max(1, x(e.t)-x(e.pk))}" height="${H-padT-padB}" fill="rgba(227,25,27,.11)"/>
       ${green ? `<rect x="${x(e.t)}" y="${padT}" width="${Math.max(1, x(e6)-x(e.t))}" height="${H-padT-padB}" fill="rgba(22,163,74,.13)"/>` : ''}`; }).join('');
   const svg1 = `<svg viewBox="0 ${top1} ${W} ${bot1 - top1}" role="img" aria-label="ผลตอบแทนสะสม" id="rbS1">${bandsAll(H1)}${grid(H1, y1, tk(lo, hi, st), st)}
-    <path d="${path(cum, y1)}" fill="none" stroke="var(--navy)" stroke-width="2.4" stroke-linejoin="round"/>${all1}${lbl1}</svg>`;
+    <path d="${path(cum, y1)}" fill="none" stroke="var(--navy)" stroke-width="2.4" stroke-linejoin="round"/>${all1}${lbl1}${blk}</svg>`;
   const svg2 = `<svg viewBox="0 0 ${W} ${H2b}" role="img" aria-label="Drawdown" id="rbS2">${bandsAll(H2b, false)}${grid(H2b, y2, tk(ddLo, 0, st2), st2)}
     <path d="${path(dd, y2)}L${x(n-1)},${y2(0)}L${x(0)},${y2(0)}Z" fill="rgba(227,25,27,.16)"/>
     <path d="${path(dd, y2)}" fill="none" stroke="var(--neg)" stroke-width="1.3"/>
