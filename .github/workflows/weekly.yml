@@ -4,8 +4,8 @@ name: Weekly charts
 # เปลี่ยนกองที่แนะนำ: แก้ pipelines/weekly/funds.csv แล้วกด Run workflow (หรือรอวันจันทร์)
 on:
   schedule:
-    # ทุกวันจันทร์ 06:15 เวลาไทย (= อาทิตย์ 23:15 UTC)
-    - cron: "15 23 * * 0"
+    # ทุกวันจันทร์ 07:30 เวลาไทย (= 00:30 UTC) หลังรอบ 06:40 ของ atf-compare ที่อัปเดต NAV ทุกกอง
+    - cron: "30 0 * * 1"
   push:
     paths: ["pipelines/weekly/funds.csv"]
   workflow_dispatch:

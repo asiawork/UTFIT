@@ -23,6 +23,8 @@ import pandas as pd  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 NAV_DIR = ROOT / "data" / "nav"
+# NAV ทุกกองของหน้า "Auto Top Funds vs รายกอง" (อัปเดตทุกวันทำการ ย้อนหลังถึง พ.ย. 2021) ใช้เป็นหลัก
+COMPARE_DIR = ROOT.parent.parent / "atf" / "compare" / "data" / "f"
 OUT = ROOT.parent.parent / "funds" / "weekly"   # หน้าเว็บใน UTFIT
 CHARTS = OUT / "charts"
 
@@ -54,7 +56,8 @@ def read_funds():
         except ValueError:
             rec = None
         peers = [p.strip() for p in re.split(r"[;|]", r.get("compare_with") or "") if p.strip()]
-        out.append({"name": name, "rec": rec, "peers": peers})
+        out.append({"name": name, "rec": rec, "peers": peers,
+                    "chart_from": (r.get("chart_from") or "").strip().upper()})
     return out
 
 
@@ -77,11 +80,51 @@ NEW_FUND_DAYS = 30        # แนะนำมาไม่ถึงกี่ว�
 NEW_FUND_LOOKBACK = 92    # กองใหม่แสดงย้อนหลังกี่วัน (ประมาณ 3 เดือน)
 
 
-def load_nav(name):
-    p = NAV_DIR / f"{slug(name)}.csv"
+def chart_from(v, last):
+    if not v:
+        return None
+    m = re.fullmatch(r"(\d+)([MY])", v)
+    if m:
+        return last - pd.DateOffset(months=int(m.group(1)) * (12 if m.group(2) == "Y" else 1))
+    try:
+        return pd.Timestamp(date.fromisoformat(v))
+    except ValueError:
+        print(f"  ! chart_from อ่านไม่ออก: {v}")
+        return None
+
+
+def load_compare_nav(name):
+    """NAV จาก atf/compare/data/f/<กอง>.json (s = วันแรก, dd = ระยะห่างวัน, v = NAV)"""
+    p = COMPARE_DIR / f"{slug(name)}.json"
     if not p.exists():
         return None
-    s = pd.read_csv(p, parse_dates=["date"]).set_index("date")["nav"].sort_index()
+    try:
+        d = json.loads(p.read_text())
+    except ValueError:
+        return None
+    if slug(d.get("name") or "") != slug(name) or not d.get("s") or not d.get("v"):
+        return None
+    days = [pd.Timestamp(d["s"])]
+    for k in d.get("dd") or []:
+        days.append(days[-1] + pd.Timedelta(days=k))
+    return pd.Series(d["v"][:len(days)], index=days[:len(d["v"])], name="nav", dtype=float)
+
+
+def load_nav(name):
+    # ใช้ข้อมูลหน้าเทียบรายกองเป็นหลัก แล้วเติมวันที่ดึงเองจาก SEC (มักใหม่กว่า 1–2 วัน หรือกองที่ไม่อยู่ในรายชื่อนั้น)
+    parts = []
+    c = load_compare_nav(name)
+    if c is not None:
+        parts.append(c)
+    p = NAV_DIR / f"{slug(name)}.csv"
+    if p.exists():
+        own = pd.read_csv(p, parse_dates=["date"]).set_index("date")["nav"]
+        if len(own):
+            parts.append(own)
+    if not parts:
+        return None
+    s = pd.concat(parts)
+    s = s[~s.index.duplicated(keep="last")].sort_index()
     if END_DATE:   # ตัดข้อมูลให้จบที่วันที่เลือกตอนกด Run workflow
         s = s[s.index <= pd.Timestamp(END_DATE)]
     return s if len(s) else None
@@ -335,7 +378,12 @@ def main():
             # เพิ่งแนะนำ (ยังไม่ครบ 1 เดือน) แสดงย้อนหลัง 3 เดือน ให้เห็นทิศทางก่อนวันแนะนำ
             view_from = start
             if f["rec"] and (s0.index[-1] - pd.Timestamp(f["rec"])).days < NEW_FUND_DAYS:
-                view_from = max(start - pd.Timedelta(days=NEW_FUND_LOOKBACK), s0.index[0])
+                view_from = start - pd.Timedelta(days=NEW_FUND_LOOKBACK)
+            # chart_from ใน funds.csv: เลือกช่วงกราฟเอง 3M 6M 1Y 2Y 3Y (นับย้อนจาก NAV ล่าสุด) หรือวันที่ YYYY-MM-DD
+            cf = chart_from(f["chart_from"], s0.index[-1])
+            if cf is not None:
+                view_from = min(start, cf)
+            view_from = max(view_from, s0.index[0])
             img = f"charts/{slug(f['name'])}.png"
             entry["axes"] = draw(f, series, start, OUT / img, view_from)
             shown = s0[s0.index >= view_from]
