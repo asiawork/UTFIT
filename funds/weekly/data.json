@@ -4,7 +4,6 @@
   {
    "name": "KKP TECH-H",
    "recommend_date": "2026-08-11",
-   "end_date": null,
    "peers": [],
    "missing": {},
    "warnings": [],
@@ -52,173 +51,8 @@
    }
   },
   {
-   "name": "K-SEMQ",
-   "recommend_date": "2025-09-09",
-   "end_date": null,
-   "peers": [],
-   "missing": {},
-   "warnings": [],
-   "info": {
-    "proj_id": "M0066_2560",
-    "proj_abbr_name": "K-SEMQ",
-    "fund_class_name": "",
-    "proj_name_th": "กองทุนเปิดเค ซีเล็คทีฟ อีเมอร์จิ้ง มาร์เก็ตส์ หุ้นทุน",
-    "comp_name_th": "บริษัทหลักทรัพย์จัดการกองทุน กสิกรไทย จำกัด",
-    "name": "K-SEMQ",
-    "days": 314,
-    "warning": null
-   },
-   "axes": {
-    "left": 0.015,
-    "right": 0.9,
-    "bottom": 0.1,
-    "top": 0.97,
-    "ymin": -3.17657,
-    "ymax": 62.47259
-   },
-   "base_nav": 12.7987,
-   "base_date": "2025-09-09",
-   "last_nav": 14.5239,
-   "levels": [
-    {
-     "side": "support",
-     "nav": 14.1689,
-     "touches": 1,
-     "last_touch": "2026-03-30",
-     "basis": "swing"
-    },
-    {
-     "side": "resistance",
-     "nav": 16.3296,
-     "touches": 1,
-     "last_touch": "2026-02-25",
-     "basis": "swing"
-    }
-   ],
-   "image": "charts/K-SEMQ.png",
-   "image_ver": "2506311394",
-   "returns": {
-    "as_of": "2026-11-20",
-    "nav": 14.5239,
-    "1W": -11.110091069330208,
-    "1M": -15.965700994601729,
-    "3M": -19.736616690521856,
-    "6M": -18.471469870049674,
-    "1Y": 8.074381641217965,
-    "since_rec": 13.479494011110503
-   }
-  },
-  {
-   "name": "SCBGOLDH",
-   "recommend_date": "2026-08-25",
-   "end_date": null,
-   "peers": [],
-   "missing": {},
-   "warnings": [],
-   "info": {
-    "proj_id": "M0856_2553",
-    "proj_abbr_name": "SCBGOLDHFUND",
-    "fund_class_name": "SCBGOLDH",
-    "proj_name_th": "กองทุนเปิดไทยพาณิชย์โกลด์ THB เฮดจ์",
-    "comp_name_th": "บริษัทหลักทรัพย์จัดการกองทุน ไทยพาณิชย์ จำกัด",
-    "name": "SCBGOLDH",
-    "days": 96,
-    "warning": null
-   },
-   "axes": {
-    "left": 0.015,
-    "right": 0.9,
-    "bottom": 0.1,
-    "top": 0.97,
-    "ymin": -24.79788,
-    "ymax": 4.44045
-   },
-   "base_nav": 20.3386,
-   "base_date": "2026-08-25",
-   "last_nav": 15.5828,
-   "levels": [
-    {
-     "side": "resistance",
-     "nav": 20.3785,
-     "touches": 1,
-     "last_touch": "2026-08-26",
-     "basis": "high"
-    }
-   ],
-   "image": "charts/SCBGOLDH.png",
-   "image_ver": "1095118ece",
-   "returns": {
-    "as_of": "2026-11-20",
-    "nav": 15.5828,
-    "1W": -8.378508684250752,
-    "1M": -13.456775039154046,
-    "3M": -22.833741049232927,
-    "6M": null,
-    "1Y": null,
-    "since_rec": -23.383123715496634
-   }
-  },
-  {
-   "name": "ES-GTECH",
-   "recommend_date": "2025-12-23",
-   "end_date": null,
-   "peers": [],
-   "missing": {},
-   "warnings": [],
-   "info": {
-    "proj_id": "M0692_2562",
-    "proj_abbr_name": "ES-GTECH",
-    "fund_class_name": "",
-    "proj_name_th": "กองทุนเปิดอีสท์สปริง Global Technology",
-    "comp_name_th": "บริษัทหลักทรัพย์จัดการกองทุน อีสท์สปริง (ประเทศไทย) จำกัด",
-    "name": "ES-GTECH",
-    "days": 237,
-    "warning": null
-   },
-   "axes": {
-    "left": 0.015,
-    "right": 0.9,
-    "bottom": 0.1,
-    "top": 0.97,
-    "ymin": -4.6958,
-    "ymax": 84.0896
-   },
-   "base_nav": 24.0661,
-   "base_date": "2025-12-23",
-   "last_nav": 27.3664,
-   "levels": [
-    {
-     "side": "support",
-     "nav": 24.5251,
-     "touches": 1,
-     "last_touch": "2026-03-30",
-     "basis": "swing"
-    },
-    {
-     "side": "resistance",
-     "nav": 27.8962,
-     "touches": 2,
-     "last_touch": "2026-11-05",
-     "basis": "swing"
-    }
-   ],
-   "image": "charts/ES-GTECH.png",
-   "image_ver": "5279c3ab23",
-   "returns": {
-    "as_of": "2026-11-19",
-    "nav": 27.3664,
-    "1W": -8.171681481257787,
-    "1M": -17.184946679094093,
-    "3M": -20.850313082963368,
-    "6M": -26.36354341005592,
-    "1Y": 18.525704881112226,
-    "since_rec": 13.713480788328813
-   }
-  },
-  {
    "name": "SCBNK225",
    "recommend_date": "2025-11-11",
-   "end_date": null,
    "peers": [],
    "missing": {},
    "warnings": [],
@@ -275,7 +109,6 @@
   {
    "name": "KKP GHC-A",
    "recommend_date": "2025-11-11",
-   "end_date": null,
    "peers": [],
    "missing": {},
    "warnings": [],
@@ -332,7 +165,6 @@
   {
    "name": "MPDIVMF",
    "recommend_date": "2026-07-21",
-   "end_date": null,
    "peers": [],
    "missing": {},
    "warnings": [],
@@ -389,7 +221,6 @@
   {
    "name": "B-BHARATA",
    "recommend_date": "2026-11-24",
-   "end_date": null,
    "peers": [],
    "missing": {},
    "warnings": [],
@@ -400,7 +231,7 @@
     "proj_name_th": "กองทุนเปิดบัวหลวงภารตะ",
     "comp_name_th": "บริษัทหลักทรัพย์จัดการกองทุนรวม  บัวหลวง จำกัด",
     "name": "B-BHARATA",
-    "days": 9,
+    "days": 73,
     "warning": null
    },
    "axes": {
@@ -408,21 +239,29 @@
     "right": 0.9,
     "bottom": 0.1,
     "top": 0.97,
-    "ymin": -0.06,
-    "ymax": 0.18
+    "ymin": -12.27875,
+    "ymax": 2.08507
    },
    "base_nav": 15.4812,
    "base_date": "2026-11-20",
    "last_nav": 15.4812,
-   "levels": [],
+   "levels": [
+    {
+     "side": "support",
+     "nav": 13.6879,
+     "touches": 1,
+     "last_touch": "2026-10-26",
+     "basis": "swing"
+    }
+   ],
    "image": "charts/B-BHARATA.png",
-   "image_ver": "7c4b8ac48b",
+   "image_ver": "4aa9de342c",
    "returns": {
     "as_of": "2026-11-20",
     "nav": 15.4812,
     "1W": 2.8131973222824236,
-    "1M": null,
-    "3M": null,
+    "1M": 10.866669531216422,
+    "3M": 5.701137496415454,
     "6M": null,
     "1Y": null,
     "since_rec": 0.0

@@ -1,5 +1,5 @@
 {
- "run_at": "2026-11-24T03:50:06.436734Z",
+ "run_at": "2026-11-24T03:56:37.268522Z",
  "funds": {
   "KKP TECH-H": {
    "proj_id": "M0471_2563",
@@ -9,36 +9,6 @@
    "comp_name_th": "บริษัทหลักทรัพย์จัดการกองทุน เกียรตินาคินภัทร จำกัด",
    "name": "KKP TECH-H",
    "days": 100,
-   "warning": null
-  },
-  "K-SEMQ": {
-   "proj_id": "M0066_2560",
-   "proj_abbr_name": "K-SEMQ",
-   "fund_class_name": "",
-   "proj_name_th": "กองทุนเปิดเค ซีเล็คทีฟ อีเมอร์จิ้ง มาร์เก็ตส์ หุ้นทุน",
-   "comp_name_th": "บริษัทหลักทรัพย์จัดการกองทุน กสิกรไทย จำกัด",
-   "name": "K-SEMQ",
-   "days": 314,
-   "warning": null
-  },
-  "SCBGOLDH": {
-   "proj_id": "M0856_2553",
-   "proj_abbr_name": "SCBGOLDHFUND",
-   "fund_class_name": "SCBGOLDH",
-   "proj_name_th": "กองทุนเปิดไทยพาณิชย์โกลด์ THB เฮดจ์",
-   "comp_name_th": "บริษัทหลักทรัพย์จัดการกองทุน ไทยพาณิชย์ จำกัด",
-   "name": "SCBGOLDH",
-   "days": 96,
-   "warning": null
-  },
-  "ES-GTECH": {
-   "proj_id": "M0692_2562",
-   "proj_abbr_name": "ES-GTECH",
-   "fund_class_name": "",
-   "proj_name_th": "กองทุนเปิดอีสท์สปริง Global Technology",
-   "comp_name_th": "บริษัทหลักทรัพย์จัดการกองทุน อีสท์สปริง (ประเทศไทย) จำกัด",
-   "name": "ES-GTECH",
-   "days": 237,
    "warning": null
   },
   "SCBNK225": {
@@ -78,7 +48,7 @@
    "proj_name_th": "กองทุนเปิดบัวหลวงภารตะ",
    "comp_name_th": "บริษัทหลักทรัพย์จัดการกองทุนรวม  บัวหลวง จำกัด",
    "name": "B-BHARATA",
-   "days": 9,
+   "days": 73,
    "warning": null
   }
  },
