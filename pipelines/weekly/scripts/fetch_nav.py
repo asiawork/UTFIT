@@ -274,8 +274,7 @@ def read_funds():
             continue
         rec = (r.get("recommend_date") or "").strip()
         peers = [p.strip() for p in re.split(r"[;|]", r.get("compare_with") or "") if p.strip()]
-        funds.append({"name": name, "recommend_date": rec, "peers": peers,
-                      "end_date": (r.get("end_date") or "").strip()})
+        funds.append({"name": name, "recommend_date": rec, "peers": peers})
     return funds
 
 
@@ -343,18 +342,13 @@ def main():
             start = rec_dates[f["name"]] - timedelta(days=14)
         else:
             start = today - timedelta(days=LOOKBACK_DAYS)
-        # กองที่เลิกแนะนำแล้ว ดึงถึงวันเลิกแนะนำพอ (ข้อมูลเก่าเก็บไว้ในไฟล์ NAV เหมือนเดิม)
-        try:
-            stop = min(today, date.fromisoformat(f["end_date"]))
-        except ValueError:
-            stop = today
         for n in [f["name"], *f["peers"]]:
             if n not in resolved or n in report["funds"]:
                 continue
             info = resolved[n]
             print(f"NAV {n} ({info['proj_id']} {info['fund_class_name'] or 'main'}) ...")
             try:
-                count, warn = fetch_series(info, start, stop)
+                count, warn = fetch_series(info, start, today)
                 report["funds"][n] = {**info, "days": count, "warning": warn}
                 print(f"  ok {count} วัน {warn or ''}")
             except Exception as e:  # noqa: BLE001

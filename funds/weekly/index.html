@@ -39,8 +39,6 @@
   /* ปุ่มกองกว้างเท่ากันทุกปุ่ม · ขึ้นแถวใหม่เองเมื่อจอแคบ */
   .chips { display: grid; grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)); gap: 8px; margin: 20px 0 16px; }
   .chips .chip { width: 100%; height: 100%; white-space: nowrap; }
-  .chips .sep { grid-column: 1 / -1; font-size: 13px; font-weight: 600; color: var(--muted, #5b6578); margin-top: 6px; }
-  .chip.ended:not([aria-pressed="true"]) { background: #f4f6fa; }
   /* ชื่อกองในปุ่ม = BLS Bold (เครื่องที่ไม่มีใช้ IBM Plex ตัวหนา) */
   .chip .nm { font-family: var(--f-head); font-weight: 600; font-synthesis: none; }
   .chip { border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 999px;
@@ -196,8 +194,6 @@
 const $ = (id) => document.getElementById(id);
 const COLS = [["1W","1W"],["1M","1M"],["3M","3M"],["6M","6M"],["1Y","1Y"],["since_rec","ตั้งแต่แนะนำ"]];
 let DATA = null, current = null;
-/* กองที่ใส่ end_date ใน funds.csv = เลิกแนะนำแล้ว ไม่อยู่ในตารางสรุปและไฟล์ PowerPoint */
-const activeFunds = () => DATA.funds.filter(f => !f.end_date);
 
 const fmt = (v) => v == null ? "–" : (v > 0 ? "+" : "") + v.toFixed(2) + "%";
 const cls = (v) => v == null ? "" : v >= 0 ? "pos" : "neg";
@@ -226,7 +222,7 @@ function select(name) {
   $("panel").hidden = false;
   $("title").textContent = f.name;
   const peers = f.peers.length ? " · เทียบกับ " + f.peers.join(", ") : "";
-  $("sub").textContent = `แนะนำเมื่อ ${thDate(f.recommend_date)}` + (f.end_date ? ` ถึง ${thDate(f.end_date)} (เลิกแนะนำแล้ว)` : "") + startNavText(f) + peers;
+  $("sub").textContent = `แนะนำเมื่อ ${thDate(f.recommend_date)}` + startNavText(f) + peers;
 
   if (f.image) {
     const src = UTFIT_SRC.weekly + f.image + "?v=" + (f.image_ver || DATA.updated);
@@ -559,7 +555,7 @@ async function downloadPptx() {
     try { await Promise.all([document.fonts.load(LV_FONT), document.fonts.load(NAME_FONT)]); } catch (e) {}
     const pptx = new PptxGenJS(); pptx.layout = "LAYOUT_WIDE";   // 13.333 x 7.5 นิ้ว
     const NV = "0F1A3C";
-    for (const f of activeFunds()) {
+    for (const f of DATA.funds) {
       if (!f.image) continue;
       const s = pptx.addSlide();
       current = f;
@@ -579,7 +575,7 @@ async function downloadPptx() {
 
 function renderTable() {
   const head = "<tr><th>กองทุน</th><th>วันแนะนำ</th>" + COLS.map(c => `<th>${c[1]}</th>`).join("") + "<th>NAV วันเริ่มต้น</th><th>NAV ล่าสุด</th></tr>";
-  const rows = activeFunds().map(f => {
+  const rows = DATA.funds.map(f => {
     const r = f.returns || {};
     return `<tr><td><b>${f.name}</b></td><td>${thDate(f.recommend_date)}</td>` +
       COLS.map(([k]) => `<td class="${cls(r[k])}">${fmt(r[k])}</td>`).join("") +
@@ -593,7 +589,7 @@ async function copyTable() {
   // เรียงคอลัมน์ตามหน้าสรุปที่ส่งลูกค้า: กองทุน 1W 1M 3M ตั้งแต่แนะนำ วันแนะนำ
   const keys = ["1W", "1M", "3M", "since_rec"];
   const lines = [["กองทุน", "1W", "1M", "3M", "ตั้งแต่แนะนำ", "วันแนะนำ"].join("\t")];
-  activeFunds().forEach(f => {
+  DATA.funds.forEach(f => {
     const r = f.returns || {};
     lines.push([f.name, ...keys.map(k => fmt(r[k])), `(${thDate(f.recommend_date)})`].join("\t"));
   });
@@ -614,16 +610,13 @@ async function init() {
   const asof = DATA.funds.map(f => f.returns && f.returns.as_of).filter(Boolean).sort().pop();
   $("asof").textContent = `NAV ณ ${thDate(asof)} · อัปเดต ${thDate(DATA.updated)}`;
 
-  const chip = (f) => {
+  $("chips").innerHTML = DATA.funds.map(f => {
     const warn = Object.keys(f.missing || {}).length || (f.warnings || []).length;
     const r = f.returns && f.returns.since_rec;
     const ret = (r == null || !isFinite(r)) ? "" :
       `<span class="ret ${r >= 0 ? "pos" : "neg"}" title="ผลตอบแทนตั้งแต่แนะนำ">${r >= 0 ? "+" : ""}${r.toFixed(2)}%</span>`;
-    return `<button class="chip${f.end_date ? " ended" : ""}" data-name="${f.name}" aria-pressed="false"><span class="nm">${f.name}${warn ? '<span class="dot" title="มีจุดต้องเช็ค"></span>' : ""}</span>${ret}</button>`;
-  };
-  const ended = DATA.funds.filter(f => f.end_date);
-  $("chips").innerHTML = activeFunds().map(chip).join("") +
-    (ended.length ? '<div class="sep">เลิกแนะนำแล้ว</div>' + ended.map(chip).join("") : "");
+    return `<button class="chip" data-name="${f.name}" aria-pressed="false"><span class="nm">${f.name}${warn ? '<span class="dot" title="มีจุดต้องเช็ค"></span>' : ""}</span>${ret}</button>`;
+  }).join("");
   $("chips").addEventListener("click", e => { const b = e.target.closest(".chip"); if (b) select(b.dataset.name); });
 
   renderTable();
