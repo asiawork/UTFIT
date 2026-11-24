@@ -1711,7 +1711,7 @@ function drawRebound(r){
     return `<g class="rb-dot" data-rb="${key(e)}">${on ? `<polyline points="${pts}" fill="none" stroke="#8b93a3" stroke-width="1.2" stroke-dasharray="3 2"/>
       ${e.after.map(a => a ? `<circle cx="${x(a.j)}" cy="${y1(cum[a.j])}" r="3" fill="${rc(a.r)}"/>` : '').join('')}` : ''}
       <circle cx="${x(e.t)}" cy="${ty}" r="4" fill="${on ? 'var(--neg)' : '#fff'}" stroke="${on ? 'var(--neg)' : '#c3c9d4'}" stroke-width="1.6"/>
-      <text x="${x(e.t)}" y="${ty + 15}" text-anchor="middle" font-size="10.5" font-weight="600" fill="${on ? '#6a7488' : '#c3c9d4'}" stroke="#fff" stroke-width="3" paint-order="stroke">${q + 1}</text>
+      ${on ? '' : `<text x="${x(e.t)}" y="${ty + 15}" text-anchor="middle" font-size="10.5" font-weight="600" fill="#c3c9d4" stroke="#fff" stroke-width="3" paint-order="stroke">${q + 1}</text>`}
       <circle cx="${x(e.t)}" cy="${ty}" r="10" fill="transparent"/>${tip(e, q)}</g>`; }).join('');
   // drawdown labels under each trough ("#  -5.8%"), pushed down a row at a time until they do not overlap
   const placed = [], fits = (b) => !placed.some(o => b.x0 < o.x1 && b.x1 > o.x0 && b.y0 < o.y1 && b.y1 > o.y0);
@@ -1723,26 +1723,27 @@ function drawRebound(r){
       ${yy - cy > 22 ? `<line x1="${cx}" x2="${cx}" y1="${cy + 5}" y2="${yy - 10}" stroke="#c3c9d4" stroke-width="1"/>` : ''}
       <text x="${cx}" y="${yy}" text-anchor="middle" font-size="10.5" font-weight="600" stroke="#fff" stroke-width="3" paint-order="stroke"><tspan fill="${on ? '#6a7488' : '#c3c9d4'}">${q + 1}</tspan>${on ? `<tspan fill="var(--neg)" dx="4">${pct(e.dd)}</tspan>` : ''}</text>
       <circle cx="${cx}" cy="${cy}" r="11" fill="transparent"/>${tip(e, q)}</g>`).join('');
-  // 3M / 6M tags in a strip above the equity chart, one per chosen episode, stacked in rows so none overlap
-  const TW = 84, lanes = [];
-  const tags = use.map(e => { const a6 = e.after[1], a3 = e.after[0]; if (!a3 && !a6) return null;
-    let cx = (x(e.t) + x(a6 ? a6.j : a3.j)) / 2; cx = Math.min(Math.max(cx, padL + TW / 2), W - padR - TW / 2);
-    let l = lanes.findIndex(end => end + 4 <= cx - TW / 2); if (l < 0){ l = lanes.length; lanes.push(0); } lanes[l] = cx + TW / 2;
-    return {e, cx, l}; }).filter(Boolean);
-  const LH = 30, S = lanes.length ? lanes.length * LH + 8 : 0;
-  const tagSvg = tags.map(({e, cx, l}) => { const ty = 4 + (lanes.length - 1 - l) * LH;
-    return `<g class="rb-dot" data-rb="${key(e)}"><line x1="${cx}" x2="${cx}" y1="${ty + 26}" y2="${S + padT}" stroke="#c9d8c9" stroke-width="1" stroke-dasharray="2 2"/>
-      <rect x="${cx - TW / 2}" y="${ty}" width="${TW}" height="26" rx="4" fill="#fff" stroke="#d6dbe4"/>
-      <text x="${cx - TW / 2 + 6}" y="${ty + 17}" font-size="11.5" font-weight="700" fill="var(--navy)">${ev.indexOf(e) + 1}</text>
-      ${e.after.map((a, k) => `<text x="${cx + TW / 2 - 5}" y="${ty + 11 + k * 11}" text-anchor="end" font-size="10" font-weight="600" fill="${rc(a && a.r)}"><tspan fill="#6a7488">${RB_H[k]}M</tspan> ${a ? pct(a.r) : '—'}</text>`).join('')}
-      ${tip(e, ev.indexOf(e))}</g>`; }).join('');
+  // labels on the equity curve itself: "n -x%" under each chosen trough, "3M +x%" / "6M +x%" above their points;
+  // each label moves one row further away from its point until it no longer overlaps anything already placed
+  const P1 = [], hit = b => P1.some(o => b.x0 < o.x1 && b.x1 > o.x0 && b.y0 < o.y1 && b.y1 > o.y0);
+  use.forEach(e => P1.push({x0: x(e.t) - 5, x1: x(e.t) + 5, y0: y1(cum[e.t]) - 5, y1: y1(cum[e.t]) + 5}));
+  const items = [];
+  use.forEach(e => items.push({e, pri: 0, i: e.t, dir: 1, txt: `${ev.indexOf(e) + 1}`, val: pct(e.dd), c: 'var(--neg)'}));
+  use.forEach(e => e.after.forEach((a, k) => { if (a) items.push({e, pri: 2 - k, i: a.j, dir: -1, txt: RB_H[k] + 'M', val: pct(a.r), c: rc(a.r)}); }));
+  items.sort((p, q) => p.pri - q.pri || p.i - q.i);
+  const lbl1 = items.map(o => { const cx = x(o.i), cy = y1(cum[o.i]), w = (o.txt.length + o.val.length + 1) * 6.3 + 4;
+    let k = 0, b; do { const yy = o.dir > 0 ? cy + 16 + k * 13 : cy - 9 - k * 13; b = {x0: cx - w / 2, x1: cx + w / 2, y0: yy - 10, y1: yy + 2, yy}; k++; } while (hit(b) && k < 14);
+    P1.push(b);
+    return `<g class="rb-dot" data-rb="${key(o.e)}">${k > 1 ? `<line x1="${cx}" x2="${cx}" y1="${o.dir > 0 ? cy + 5 : cy - 5}" y2="${o.dir > 0 ? b.y0 : b.y1}" stroke="#c3c9d4" stroke-width="1"/>` : ''}
+      <text x="${cx}" y="${b.yy}" text-anchor="middle" font-size="10.5" font-weight="600" stroke="#fff" stroke-width="3" paint-order="stroke"><tspan fill="${o.pri ? '#6a7488' : 'var(--navy)'}">${o.txt}</tspan><tspan fill="${o.c}" dx="3">${o.val}</tspan></text>${tip(o.e, ev.indexOf(o.e))}</g>`; }).join('');
+  const top1 = Math.min(0, ...P1.map(b => b.y0 - 2)), bot1 = Math.max(H1, ...P1.map(b => b.y1 + padB));
   const medY = y2(med);
   // light bands for every chosen episode: peak -> trough (red), trough -> 6M (green)
   const bandsAll = H => use.map(e => { const e6 = e.after[1] ? e.after[1].j : n - 1;
     return `<rect x="${x(e.pk)}" y="${padT}" width="${Math.max(1, x(e.t)-x(e.pk))}" height="${H-padT-padB}" fill="rgba(227,25,27,.11)"/>
       <rect x="${x(e.t)}" y="${padT}" width="${Math.max(1, x(e6)-x(e.t))}" height="${H-padT-padB}" fill="rgba(22,163,74,.13)"/>`; }).join('');
-  const svg1 = `<svg viewBox="0 0 ${W} ${H1 + S}" role="img" aria-label="ผลตอบแทนสะสม" id="rbS1"><g transform="translate(0,${S})">${bandsAll(H1)}${grid(H1, y1, tk(lo, hi, st), st)}
-    <path d="${path(cum, y1)}" fill="none" stroke="var(--navy)" stroke-width="2.4" stroke-linejoin="round"/>${all1}</g>${tagSvg}</svg>`;
+  const svg1 = `<svg viewBox="0 ${top1} ${W} ${bot1 - top1}" role="img" aria-label="ผลตอบแทนสะสม" id="rbS1">${bandsAll(H1)}${grid(H1, y1, tk(lo, hi, st), st)}
+    <path d="${path(cum, y1)}" fill="none" stroke="var(--navy)" stroke-width="2.4" stroke-linejoin="round"/>${all1}${lbl1}</svg>`;
   const svg2 = `<svg viewBox="0 0 ${W} ${H2b}" role="img" aria-label="Drawdown" id="rbS2">${bandsAll(H2b)}${grid(H2b, y2, tk(ddLo, 0, st2), st2)}
     <path d="${path(dd, y2)}L${x(n-1)},${y2(0)}L${x(0)},${y2(0)}Z" fill="rgba(227,25,27,.16)"/>
     <path d="${path(dd, y2)}" fill="none" stroke="var(--neg)" stroke-width="1.3"/>
