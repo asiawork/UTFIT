@@ -1707,6 +1707,15 @@ function drawRebound(r){
     o2 += `<rect x="${x(sel.pk)}" y="${padT}" width="${Math.max(2, x(sel.t)-x(sel.pk))}" height="${H2-padT-padB}" fill="rgba(227,25,27,.08)"/>
       <rect x="${x(sel.t)}" y="${padT}" width="${Math.max(2, x(end6)-x(sel.t))}" height="${H2-padT-padB}" fill="rgba(22,163,74,.09)"/>`;
   }
+  // every episode at once: trough (numbered) -> 3M -> 6M, small and light; the selected one is drawn in full below
+  let all1 = '';
+  ev.forEach((e, q) => { if (e === sel) return; const ty = y1(cum[e.t]), d = pf.dates[e.t];
+    let pts = `${x(e.t)},${ty}`; e.after.forEach(a => { if (a) pts += ` ${x(a.j)},${y1(cum[a.j])}`; });
+    all1 += `<g class="rb-dot" data-rb="${d}"><polyline points="${pts}" fill="none" stroke="#8b93a3" stroke-width="1.2" stroke-dasharray="3 2"/>
+      ${e.after.map(a => a ? `<circle cx="${x(a.j)}" cy="${y1(cum[a.j])}" r="3" fill="${rc(a.r)}"/>` : '').join('')}
+      <circle cx="${x(e.t)}" cy="${ty}" r="3.5" fill="#fff" stroke="var(--neg)" stroke-width="1.6"/>
+      <text x="${x(e.t)}" y="${ty + 15}" text-anchor="middle" font-size="10.5" font-weight="600" fill="#6a7488" stroke="#fff" stroke-width="3" paint-order="stroke">${q + 1}</text>
+      <circle cx="${x(e.t)}" cy="${ty}" r="10" fill="transparent"/><title>#${q + 1} ${thDate(d)}: ${pct(e.dd)}${e.after.map((a, k) => a ? ` ${RB_H[k]}M ${pct(a.r)}` : '').join('')}</title></g>`; });
   let m1 = '';
   if (sel){
     const ty = y1(cum[sel.t]);
@@ -1719,10 +1728,11 @@ function drawRebound(r){
         <circle cx="${x(a.j)}" cy="${ay}" r="5" fill="${rc(a.r)}"/>${lbl(x(a.j) + (q ? 8 : -8), ay - 12 - q * 2, a.h + 'M ' + pct(a.r), rc(a.r), q ? 'start' : 'end')}`; });
   }
   const dots2 = ev.map((e, q) => `<g class="rb-dot" data-rb="${pf.dates[e.t]}"><circle cx="${x(e.t)}" cy="${y2(e.dd)}" r="${e === sel ? 6.5 : 4.5}" fill="${e === sel ? 'var(--accent)' : '#fff'}" stroke="var(--accent)" stroke-width="2"/>
+      <text x="${x(e.t)}" y="${y2(e.dd) + 18}" text-anchor="middle" font-size="10.5" font-weight="600" fill="${e === sel ? 'var(--accent)' : '#6a7488'}" stroke="#fff" stroke-width="3" paint-order="stroke">${q + 1}</text>
       <circle cx="${x(e.t)}" cy="${y2(e.dd)}" r="11" fill="transparent"/><title>${thDate(pf.dates[e.t])}: ${pct(e.dd)}</title></g>`).join('');
   const medY = y2(med);
   const svg1 = `<svg viewBox="0 0 ${W} ${H1}" role="img" aria-label="ผลตอบแทนสะสม">${o1}${grid(H1, y1, tk(lo, hi, st), st)}
-    <path d="${path(cum, y1)}" fill="none" stroke="var(--navy)" stroke-width="2.4" stroke-linejoin="round"/>${m1}</svg>`;
+    <path d="${path(cum, y1)}" fill="none" stroke="var(--navy)" stroke-width="2.4" stroke-linejoin="round"/>${all1}${m1}</svg>`;
   const svg2 = `<svg viewBox="0 0 ${W} ${H2}" role="img" aria-label="Drawdown" id="rbDD">${o2}${grid(H2, y2, tk(ddLo, 0, st2), st2)}
     <path d="${path(dd, y2)}L${x(n-1)},${y2(0)}L${x(0)},${y2(0)}Z" fill="rgba(227,25,27,.16)"/>
     <path d="${path(dd, y2)}" fill="none" stroke="var(--neg)" stroke-width="1.3"/>
@@ -1731,6 +1741,34 @@ function drawRebound(r){
     <text x="${W-padR-75}" y="${medY-8}" text-anchor="middle" font-size="12" font-weight="600" fill="#fff">Median ${pct(med)}</text>
     ${dots2}</svg>`;
 
+  // all episodes lined up at their trough: x = months after the trough (0..6), y = return from the trough
+  let svg3 = '';
+  if (ev.length){
+    const H3 = 260, M = RB_H[RB_H.length - 1], pr = 70;
+    const paths = ev.map(e => { const t0 = pf.dates[e.t], end = WP.edate(t0, M), pts = [];
+      for (let j = e.t; j < n && pf.dates[j] <= end; j++) pts.push([WP.daysBetween(t0, pf.dates[j]) / WP.daysBetween(t0, end) * M, pf.nav[j] / pf.nav[e.t] - 1]);
+      return {e, pts}; });
+    const avgAt = [...Array(M + 1).keys()].map(m => { const vs = ev.map(e => { const tg = WP.edate(pf.dates[e.t], m); if (tg > pf.dates[n - 1]) return null;
+        let j = e.t; while (j + 1 < n && pf.dates[j + 1] <= tg) j++; return pf.nav[j] / pf.nav[e.t] - 1; }).filter(v => v != null);
+      return vs.length ? vs.reduce((a, b) => a + b, 0) / vs.length : null; });
+    const ys = paths.flatMap(p => p.pts.map(q => q[1]));
+    let lo3 = Math.min(0, ...ys), hi3 = Math.max(0, ...ys); const s3 = niceStep(hi3 - lo3 || 0.01, 5); lo3 = Math.floor(lo3 / s3) * s3; hi3 = Math.ceil(hi3 / s3) * s3;
+    const X = m => padL + (W - padL - padR - pr) * m / M, Y = v => padT + (H3 - padT - padB) * (hi3 - v) / (hi3 - lo3);
+    const g3 = tk(lo3, hi3, s3).map(v => `<line x1="${padL}" x2="${W-padR-pr}" y1="${Y(v)}" y2="${Y(v)}" stroke="${Math.abs(v) < 1e-12 ? '#8b93a3' : '#e6e9ef'}"/><text x="${padL-8}" y="${Y(v)+4}" text-anchor="end" font-size="11.5" fill="#6a7488">${(v > 0 ? '+' : '') + (v*100).toFixed(dp(s3))}%</text>`).join('')
+      + [...Array(M + 1).keys()].map(m => `<line x1="${X(m)}" x2="${X(m)}" y1="${padT}" y2="${H3-padB}" stroke="${RB_H.includes(m) ? '#8b93a3' : '#eef0f4'}" ${RB_H.includes(m) ? 'stroke-dasharray="3 3"' : ''}/><text x="${X(m)}" y="${H3-8}" text-anchor="middle" font-size="11.5" fill="${RB_H.includes(m) ? 'var(--navy)' : '#6a7488'}" font-weight="${RB_H.includes(m) ? 600 : 400}">${m ? m + 'M' : 'จุดต่ำสุด'}</text>`).join('');
+    const pl = pts => pts.map((q, i) => (i ? 'L' : 'M') + X(q[0]).toFixed(1) + ',' + Y(q[1]).toFixed(1)).join('');
+    const lines = paths.filter(p => p.e !== sel).map(p => `<g class="rb-dot" data-rb="${pf.dates[p.e.t]}"><path d="${pl(p.pts)}" fill="none" stroke="#b9c1cf" stroke-width="1.3"/>
+      <path d="${pl(p.pts)}" fill="none" stroke="transparent" stroke-width="8"/><title>#${ev.indexOf(p.e) + 1} ${thDate(pf.dates[p.e.t])}</title></g>`).join('');
+    const sp = paths.find(p => p.e === sel);
+    const avgPts = avgAt.map((v, m) => v == null ? null : [m, v]).filter(Boolean);
+    const endLbl = (pts, c, t, dy) => { const q = pts[pts.length - 1]; return q ? lbl(X(q[0]) + 8, Y(q[1]) + 4 + dy, t, c, 'start') : ''; };
+    const aL = avgPts[avgPts.length - 1], sL = sp && sp.pts[sp.pts.length - 1], clash = aL && sL && Math.abs(Y(aL[1]) - Y(sL[1])) < 16 ? (Y(sL[1]) < Y(aL[1]) ? [-8, 8] : [8, -8]) : [0, 0];
+    svg3 = `<svg viewBox="0 0 ${W} ${H3}" role="img" aria-label="ผลตอบแทนนับจากจุดต่ำสุด ทุกช่วง">${g3}${lines}
+      <path d="${pl(avgPts)}" fill="none" stroke="var(--accent)" stroke-width="3" stroke-dasharray="8 4"/>
+      ${avgPts.filter(q => RB_H.includes(q[0])).map(q => `<circle cx="${X(q[0])}" cy="${Y(q[1])}" r="4" fill="var(--accent)"/>${lbl(X(q[0]) - 6, Y(q[1]) - 9, pct(q[1]), 'var(--accent)', 'end')}`).join('')}
+      ${endLbl(avgPts, 'var(--accent)', 'เฉลี่ย', clash[1])}
+      ${sp ? `<path d="${pl(sp.pts)}" fill="none" stroke="var(--navy)" stroke-width="2.6"/>${endLbl(sp.pts, 'var(--navy)', '#' + (si + 1), clash[0])}` : ''}</svg>`;
+  }
   const avg = a => a.length ? a.reduce((s, v) => s + v, 0) / a.length : null;
   const col = q => ev.map(e => e.after[q]).filter(Boolean).map(a => a.r);
   const kpi = sel ? `<div class="rb-kpi">
@@ -1754,6 +1792,8 @@ function drawRebound(r){
     ${kpi}
     <div class="eq-sub">ผลตอบแทนสะสม</div>${svg1}
     <div class="eq-sub">Drawdown</div>${svg2}
+    ${svg3 ? `<div class="eq-sub" style="margin-top:14px">ผลตอบแทนนับจากจุดต่ำสุด ทุกช่วงเทียบกัน</div>
+    <div class="eq-legend"><span><i class="thin" style="border-color:#b9c1cf"></i>แต่ละช่วง</span><span><i style="border-color:var(--navy)"></i>ช่วงที่ ${si + 1}</span><span><i style="border-color:var(--accent);border-top-style:dashed"></i>เฉลี่ยทุกช่วง</span></div>${svg3}` : ''}
     ${tbl}`;
   const pick = d => { EQ.rb = d; drawRebound(r); };
   box.querySelectorAll('[data-rb]').forEach(el => el.onclick = () => pick(el.dataset.rb));
