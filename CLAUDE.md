@@ -12,6 +12,7 @@
 - `atf/` หมวด Auto Top Funds: อัปโหลดไฟล์ Model Performance ครั้งเดียวใช้ทุกเครื่องมือในหมวด (`shared/atf-store.js`, IndexedDB)
   - `atf/wealthplan/` Wealth Solution Plan
   - `atf/wealthplan/monthly/` รายงานประจำเดือน (ใช้คนเดียว ห้ามใส่ลิงก์จากหน้าอื่น) ใช้โค้ดของ wealthplan ผ่าน `window.WPAPI` ใน iframe
+  - `atf/wealthplan/rebound/` Rebound after Drawdown (แผน 1-5 และ 8 โมเดล) ใช้ `WPAPI.reboundPage` ใน iframe โค้ดวาดอยู่ที่ `reboundInto` ใน wealthplan ใช้ร่วมกับ section ท้ายหน้าผลลัพธ์
   - `atf/compare/` Auto Top Funds vs รายกอง
 - `funds/` หมวดรายกองทุน (ข้อมูล SEC): `funds/weekly/` กราฟ Weekly, `funds/masterfund/` ค้นหาด้วย Master Fund
 - `shared/` nav, สไตล์ร่วม (`utfit.css`, `tool-theme.css`), ไอคอน (`ui.js`), รูปตัวอย่าง (`previews/`)
